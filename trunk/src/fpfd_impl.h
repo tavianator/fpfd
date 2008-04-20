@@ -75,22 +75,8 @@ typedef struct {
  * the result is always exact. Otherwise, the functions return a remainder equal
  * to the truncated portion of the result. In general, this value is rounded
  * down, but a value of 0 or 5 means that the remainder was exactly 0 or 5, so
- * 0.01 rounds to 1, and 5.01 rounds to 6. This value, called R, should be
- * treated thusly (where S is the resultant sign and T is the returned ternary
- * value):
- *
- *   R == 0:     T = 0
- *
- * rnd == FPFD_RNDN || rnd == FPFD_RNDNA:
- *   0 < R < 5:  T = -1
- *   R == 5:     (rnd == FPFD_RNDN) ? T = -1 : T = 1, increment significand
- *   5 < R <= 9: T = 1, increment significand
- *
- * (S == +1 && rnd == FPFD_RNDU) || (S == -1 && rnd == FPFD_RNDD):
- *   R > 0:      T = 1, increment significand
- *
- * (S == +1 && rnd == FPFD_RNDD) || (S == -1 && rnd == FPFD_RNDU):
- *   R > 0:      T = -1
+ * 0.01 rounds to 1, and 5.01 rounds to 6. The fpfdX_*_ternN functions convert
+ * these values to correct ternary values, and round the result correctly.
  */
 
 /* Simple routines */
@@ -119,7 +105,7 @@ uint32_t fpfd32_bcd_normalize(fpfd32_bcd_t *dest);
 /* Expensive routines */
 
 void fpfd32_bcd_to_bin(fpfd32_bin_t *dest, const fpfd32_bcd_t *src);
-uint32_t fpfd32_bin_to_bcd(fpfd32_bcd_t *dest, const fpfd32_bin_t *src);
+void fpfd32_bin_to_bcd(fpfd32_bcd_t *dest, const fpfd32_bin_t *src);
 
 uint32_t fpfd32_bin_add(fpfd32_bin_t *dest,
                         const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
@@ -138,14 +124,17 @@ uint32_t fpfd32_bin_normalize(fpfd32_bin_t *dest);
 int fpfd32_bcd_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd);
 int fpfd32_bcd_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd);
-int fpfd32_bcd_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
-                     uint32_t rem3, fpfd_rnd_t rnd);
 
 int fpfd32_bin_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd);
 int fpfd32_bin_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd);
-int fpfd32_bin_tern2(fpfd32_bin_t *dest, uint32_t rem1, uint32_t rem2,
-                     uint32_t rem3, fpfd_rnd_t rnd);
+
+/* Expand many inputs into the fastest encodings */
+
+fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
+                              fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
+                              fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
+                              fpfd_enc_t enc);
 
 #ifdef __cplusplus
 // }

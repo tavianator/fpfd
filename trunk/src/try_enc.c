@@ -19,43 +19,44 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-#include <string.h>
 
-int fpfd32_set32(fpfd32_ptr dest, fpfd32_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc) {
-  fpfd32_bcd_t bcd;
-  fpfd32_bin_t bin;
+fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
+                              fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
+                              fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
+                              fpfd_enc_t enc) {
+  fpfd_enc_t enc_used;
 
-  if (src->enc == enc) {
-    memcpy(dest, src, sizeof(fpfd32_struct_t));
-  } else if (src->enc == FPFD_ENCD) {
-    fpfd32_to_bcd(&bcd, src);
-    fpfd32_bcd_to_bin(&bin, &bcd);
-    fpfd32_from_bin(dest, &bin);
+  if (arg1->enc == arg2->enc) {
+    enc_used = arg1->enc;
+
+    if (arg1->enc == FPFD_ENCD) {
+      fpfd32_to_bcd(bcd1, arg1);
+      fpfd32_to_bcd(bcd2, arg2);
+    } else {
+      fpfd32_to_bin(bin1, arg1);
+      fpfd32_to_bin(bin2, arg2);
+    }
   } else {
-    fpfd32_to_bin(&bin, src);
-    fpfd32_bin_to_bcd(&bcd, &bin);
-    fpfd32_from_bcd(dest, &bcd);
+    enc_used = enc;
+
+    if (arg1->enc == FPFD_ENCD) {
+      fpfd32_to_bcd(bcd1, arg1);
+      fpfd32_to_bin(bin2, arg2);
+
+      if (enc_used == FPFD_ENCB)
+        fpfd32_bcd_to_bin(bin1, bcd1);
+      else
+        fpfd32_bin_to_bcd(bcd2, bin2);
+    } else {
+      fpfd32_to_bin(bin1, arg1);
+      fpfd32_to_bcd(bcd2, arg2);
+
+      if (enc_used == FPFD_ENCD)
+        fpfd32_bin_to_bcd(bcd1, bin1);
+      else
+        fpfd32_bcd_to_bin(bin2, bcd2);
+    }
   }
 
-  return 0;
+  return enc_used;
 }
-
-int fpfd32_set64(fpfd32_ptr dest, fpfd64_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd32_set128(fpfd32_ptr dest, fpfd128_srcptr src,
-                  fpfd_rnd_t rnd, fpfd_enc_t enc);
-
-int fpfd64_set32(fpfd64_ptr dest, fpfd32_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd64_set64(fpfd64_ptr dest, fpfd64_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd64_set128(fpfd64_ptr dest, fpfd128_srcptr src,
-                  fpfd_rnd_t rnd, fpfd_enc_t enc);
-
-int fpfd128_set32(fpfd128_ptr dest, fpfd32_srcptr src,
-                  fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd128_set64(fpfd128_ptr dest, fpfd64_srcptr src,
-                  fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd128_set128(fpfd128_ptr dest, fpfd128_srcptr src,
-                   fpfd_rnd_t rnd, fpfd_enc_t enc);
