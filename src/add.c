@@ -26,17 +26,28 @@ int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
   uint32_t rem1, rem2;
   fpfd32_bcd_t bcd, bcd1, bcd2;
   fpfd32_bin_t bin, bin1, bin2;
+  fpfd_enc_t enc_used;
 
-  if (lhs->enc == rhs->enc) {
-    if (lhs->enc == FPFD_ENCD) {
-      fpfd32_to_bcd(&bcd1, lhs);
-      fpfd32_to_bcd(&bcd2, rhs);
+  enc_used = fpfd_try_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
 
-      rem1 = fpfd32_bcd_add(&bcd, &bcd1, &bcd2);
-      rem2 = fpfd32_bcd_normalize(&bcd);
-    } else {
-    }
+  if (enc_used == FPFD_ENCD) {
+    rem1 = fpfd32_bcd_add(&bcd, &bcd1, &bcd2);
+    rem2 = fpfd32_bcd_normalize(&bcd);
+    tern = fpfd32_bcd_tern2(&bcd, rem1, rem2, rnd);
   } else {
+    rem1 = fpfd32_bin_add(&bin, &bin1, &bin2);
+    rem2 = fpfd32_bin_normalize(&bin);
+    tern = fpfd32_bin_tern2(&bin, rem1, rem2, rnd);
+  }
+
+  if (enc == FPFD_ENCD) {
+    if (enc_used == FPFD_ENCB)
+      fpfd32_bin_to_bcd(&bcd, &bin);
+    fpfd32_from_bcd(dest, &bcd);
+  } else {
+    if (enc_used == FPFD_ENCD)
+      fpfd32_bcd_to_bin(&bin, &bcd);
+    fpfd32_from_bcd(dest, &bin);
   }
 
   return tern;

@@ -68,12 +68,6 @@ int fpfd32_bcd_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
   return fpfd32_bcd_tern(dest, rem2, rnd);
 }
 
-int fpfd32_bcd_tern3(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
-                     fpfd_rnd_t rnd) {
-  if ((rem3 == 0 || rem3 == 5) && (rem1 != 0 || rem2 != 0)) ++rem2;
-  return fpfd32_bcd_tern(dest, rem3, rnd);
-}
-
 int fpfd32_bin_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd) {
   int tern = fpfd_tern(dest->sign, rem, rnd);
   if (tern & 0x10) fpfd32_bin_inc(dest);
@@ -84,10 +78,4 @@ int fpfd32_bin_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd) {
   if ((rem2 == 0 || rem2 == 5) && rem1 != 0) ++rem2;
   return fpfd32_bin_tern(dest, rem2, rnd);
-}
-
-int fpfd32_bin_tern3(fpfd32_bin_t *dest, uint32_t rem1, uint32_t rem2,
-                     fpfd_rnd_t rnd) {
-  if ((rem3 == 0 || rem3 == 5) && (rem1 != 0 || rem2 != 0)) ++rem2;
-  return fpfd32_bin_tern(dest, rem3, rnd);
 }

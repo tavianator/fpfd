@@ -1,6 +1,6 @@
 FPFD_VERSION = 0:0:0
 
-C_SOURCES = set.c
+C_SOURCES = set.c add.c tern.c try_expand.c
 S_SOURCES = dpdtable.s
 H_SOURCES = fpfd.h fpfd_impl.h
 
