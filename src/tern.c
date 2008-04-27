@@ -44,6 +44,8 @@ static int fpfd_tern(int32_t sign, uint32_t rem, fpfd_rnd_t rnd) {
         tern = (1 - sign) | 0x10;
       }
       break;
+    case FPFD_RNDZ:
+      tern = 1 + sign;
     case FPFD_RNDU:
       tern = 1 - sign;
       if (sign > 0) tern |= 0x10;
@@ -68,13 +70,13 @@ int fpfd32_bcd_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
   return fpfd32_bcd_tern(dest, rem2, rnd);
 }
 
-int fpfd32_bin_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd) {
+int fpfd32_bin_tern(fpfd32_bin_t *dest, uint32_t rem, fpfd_rnd_t rnd) {
   int tern = fpfd_tern(dest->sign, rem, rnd);
   if (tern & 0x10) fpfd32_bin_inc(dest);
   return (tern & 0xF) - 1;
 }
 
-int fpfd32_bin_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
+int fpfd32_bin_tern2(fpfd32_bin_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd) {
   if ((rem2 == 0 || rem2 == 5) && rem1 != 0) ++rem2;
   return fpfd32_bin_tern(dest, rem2, rnd);

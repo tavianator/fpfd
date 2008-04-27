@@ -12,6 +12,17 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
+# Find out which assembler files to compile
+AC_CANONICAL_HOST
+
+case $host_cpu in
+     *86)
+        path="x86"
+        ;;
+esac
+
+AC_SUBST(path)
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
 AC_OUTPUT
