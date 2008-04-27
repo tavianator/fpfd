@@ -28,7 +28,7 @@ int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
   fpfd32_bin_t bin, bin1, bin2;
   fpfd_enc_t enc_used;
 
-  enc_used = fpfd_try_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
+  enc_used = fpfd32_try_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
 
   if (enc_used == FPFD_ENCD) {
     rem1 = fpfd32_bcd_add(&bcd, &bcd1, &bcd2);
@@ -47,7 +47,7 @@ int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
   } else {
     if (enc_used == FPFD_ENCD)
       fpfd32_bcd_to_bin(&bin, &bcd);
-    fpfd32_from_bcd(dest, &bin);
+    fpfd32_from_bin(dest, &bin);
   }
 
   return tern;

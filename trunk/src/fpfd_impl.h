@@ -125,8 +125,8 @@ int fpfd32_bcd_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd);
 int fpfd32_bcd_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd);
 
-int fpfd32_bin_tern(fpfd32_bcd_t *dest, uint32_t rem, fpfd_rnd_t rnd);
-int fpfd32_bin_tern2(fpfd32_bcd_t *dest, uint32_t rem1, uint32_t rem2,
+int fpfd32_bin_tern(fpfd32_bin_t *dest, uint32_t rem, fpfd_rnd_t rnd);
+int fpfd32_bin_tern2(fpfd32_bin_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd);
 
 /* Expand many inputs into the fastest encodings */
