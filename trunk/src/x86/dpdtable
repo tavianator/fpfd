@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 #########################################################################
 # Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               #
@@ -78,7 +78,6 @@ function dpd2bcd() {
     q=$((dpd & 0x1))
     dpd=$((dpd >> 1))
     p=$((dpd & 0x1))
-    dpd=$((dpd >> 1))
 
     a=$(((v & w) & (~s | t | ~x)))
     b=$((p & (~v | ~w | (s & ~t & x))))
@@ -103,7 +102,7 @@ do
     bcd2dpd $num
 done
 
-echo -ne ".globl fpfd_dpd2bcd\nfpfd_dpd2bcd:\n"
+echo -ne "\n.globl fpfd_dpd2bcd\nfpfd_dpd2bcd:\n"
 
 for ((num=0x000; num<=0x3FF; ++num))
 do
