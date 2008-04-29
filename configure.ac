@@ -18,6 +18,7 @@ AC_CANONICAL_HOST
 case $host_cpu in
      *86)
         path="x86"
+        src/x86/dpdtable > src/x86/dpdtable.s
         ;;
 esac
 
