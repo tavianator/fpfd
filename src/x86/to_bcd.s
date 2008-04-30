@@ -18,13 +18,13 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_to_bin(fpfd32_bin_t *dest, fpfd32_srcptr src);
+# void fpfd32_to_bcd(fpfd32_bcd_t *dest, fpfd32_srcptr src);
 #
-# Converts the compact binary representation in src to the expanded form
-# dest.
+# Converts the densely-packed-decimal representation in src to the binary-
+# coded-decimal form in dest.
 
-.globl fpfd32_to_bin
-fpfd32_to_bin:
+.globl fpfd32_to_bcd
+fpfd32_to_bcd:
         movl 4(%esp), %eax
         movl 8(%esp), %ebx
         movl (%ebx), %ecx
@@ -35,25 +35,47 @@ fpfd32_to_bin:
         incl %edx
         movl %edx, 12(%eax)     # Map the sign bit from (1, 0) to (-1, +1)
         movl %ecx, %edx
+        andl $0x3FF, %edx
+        movl fpfd_dpd2bcd(,%edx,4), %edx
+        movl %ecx, %ebx
+        shrl $10, %ebx
+        andl $0x3FF, %ebx
+        movl fpfd_dpd2bcd(,%ebx,4), %ebx
+        shll $12, %ebx
+        orl %edx, %ebx
+        movl %ecx, %edx         # Convert the trailing significand digits from
+                                # DPD to BCD
         shrl $20, %edx
         andl $0x7FF, %edx       # Get the combination field
+        movl %edx, %ecx
         testl $0x600, %edx
-        jnz L2ii                # If the combination field begins with 11,
-                                # follow 754r DRAFT 1.5.0, S3.5, p19, 2.ii
+        jnz L1i                 # If the combination field begins with 11,
+                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        andl $0x1C0, %edx
+        shll $19, %edx
+        orl %edx, %ebx
+        movl %ebx, (%eax)       # Get the leading significand digit
+        movl %ecx, %edx
+        andl $0x3F, %ecx
+        andl $0x600, %edx
         shrl $3, %edx
+        orl %ecx, %edx
         subl $101, %edx
-        movl %edx, 8(%eax)      # Subtract bias and store exponent
-        andl $0x007FFFFF, %ecx
-        movl %ecx, (%eax)       # Return concatenated significand
+        movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         jmp Ldone
-L2ii:
+L1i:
+        andl $0x040, %edx
+        orl $0x200, %edx
+        shll $19, %edx
+        orl %edx, %ebx
+        movl %ebx, (%eax)       # Get the leading significand digit
+        movl %ecx, %edx
+        andl $0x3F, %ecx
+        andl $0x180, %edx
         shrl %edx
-        andl $0xFF, %edx
+        orl %ecx, %edx
         subl $101, %edx
-        movl %edx, 8(%eax)      # Subtract bias and store exponent
-        andl $0x001FFFFF, %ecx
-        orl $0x00400000, %ecx
-        movl %ecx, (%eax)       # Return concatenated significand
+        movl %edx, 8(%eax)      # Subtract the bias and store the exponent
 Ldone:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         ret

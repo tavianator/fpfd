@@ -1,7 +1,7 @@
 FPFD_VERSION = 0:0:0
 
 C_SOURCES = set.c add.c tern.c try_expand.c
-S_SOURCES = @path@/dpdtable.s
+S_SOURCES = @path@/dpdtable.s @path@/to_bin.s @path@/to_bcd.s
 H_SOURCES = fpfd.h fpfd_impl.h
 
 nobase_include_HEADERS = fpfd.h
