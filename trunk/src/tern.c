@@ -30,13 +30,6 @@ static int fpfd_tern(int32_t sign, uint32_t rem, fpfd_rnd_t rnd) {
     tern = 0x1;
   } else {
     switch (rnd) {
-    case FPFD_RNDN:
-      if (rem <= 5) {
-        tern = 1 + sign;
-      } else {
-        tern = (1 - sign) | 0x10;
-      }
-      break;
     case FPFD_RNDNA:
       if (rem < 5) {
         tern = 1 + sign;
@@ -46,12 +39,23 @@ static int fpfd_tern(int32_t sign, uint32_t rem, fpfd_rnd_t rnd) {
       break;
     case FPFD_RNDZ:
       tern = 1 + sign;
+      break;
     case FPFD_RNDU:
       tern = 1 - sign;
       if (sign > 0) tern |= 0x10;
+      break;
     case FPFD_RNDD:
       tern = 1 + sign;
       if (sign > 0) tern |= 0x10;
+      break;
+    case FPFD_RNDN:
+    default:
+      if (rem <= 5) {
+        tern = 1 + sign;
+      } else {
+        tern = (1 - sign) | 0x10;
+      }
+      break;
     }
   }
 
