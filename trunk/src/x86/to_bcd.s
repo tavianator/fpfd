@@ -42,15 +42,17 @@ fpfd32_to_bcd:
         andl $0x3FF, %ebx
         movl fpfd_dpd2bcd(,%ebx,4), %ebx
         shll $12, %ebx
-        orl %edx, %ebx
-        movl %ecx, %edx         # Convert the trailing significand digits from
+        orl %edx, %ebx          # Convert the trailing significand digits from
                                 # DPD to BCD
+        movl %ecx, %edx
         shrl $20, %edx
-        andl $0x7FF, %edx       # Get the combination field
-        movl %edx, %ecx
-        testl $0x600, %edx
-        jnz L1i                 # If the combination field begins with 11,
+        andl $0x600, %edx
+        xorl $0x600, %edx
+        jz L1i                  # If the combination field begins with 11,
                                 # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        shrl $20, %ecx
+        andl $0x7FF, %ecx
+        movl %ecx, %edx         # Get the combination field
         andl $0x1C0, %edx
         shll $19, %edx
         orl %edx, %ebx
@@ -64,6 +66,9 @@ fpfd32_to_bcd:
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         jmp Ldone
 L1i:
+        shrl $20, %ecx
+        andl $0x7FF, %ecx
+        movl %ecx, %edx         # Get the combination field
         andl $0x040, %edx
         orl $0x200, %edx
         shll $19, %edx
