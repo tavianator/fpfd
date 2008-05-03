@@ -27,15 +27,13 @@ fpfd32_bin_inc:
         movl 4(%esp), %eax
         movl (%eax), %edx
         andl $0xFFFFFF, %edx
-        incl %edx
+        addl $1,  %edx
         cmpl $10000000, %edx
-        je Loverflow
+        je Lrollover
         movl %edx, (%eax)
         ret
-.p2align 4,,7
-.p2align 3
-Loverflow:
-        incl 8(%eax)
+Lrollover:
+        addl $1,  8(%eax)
         movl $1000000, (%eax)
         ret
         

@@ -64,7 +64,8 @@ fpfd32_to_bcd:
         orl %ecx, %edx
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
-        jmp Ldone
+        movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        ret
 L1i:
         shrl $20, %ecx
         andl $0x7FF, %ecx
@@ -81,6 +82,5 @@ L1i:
         orl %ecx, %edx
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
-Ldone:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         ret
