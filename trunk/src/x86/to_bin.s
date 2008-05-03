@@ -47,7 +47,8 @@ fpfd32_to_bin:
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x007FFFFF, %ecx
         movl %ecx, (%eax)       # Return concatenated significand
-        jmp Ldone
+        movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        ret
 L2ii:
         shrl %edx
         andl $0xFF, %edx
@@ -56,6 +57,5 @@ L2ii:
         andl $0x001FFFFF, %ecx
         orl $0x00400000, %ecx
         movl %ecx, (%eax)       # Return concatenated significand
-Ldone:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         ret
