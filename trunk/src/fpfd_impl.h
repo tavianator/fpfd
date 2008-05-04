@@ -28,6 +28,10 @@
 // extern "C" {
 #endif // __cplusplus
 
+typedef enum {
+  FPFD_NUMBER, FPFD_SNAN, FPFD_QNAN, FPFD_INF
+} fpfd_special_t;
+
 /* These structs represent expanded versions of the coresponding fpfdX_t.
  * Each actually has room for a mantissa twice the length needed to represent a
  * fpfdX_t, so that multiplication can be done exactly. fpfdX_bcd_t stores a
@@ -39,36 +43,42 @@ typedef struct {
   unsigned char mant[8];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd32_bcd_t;
 
 typedef struct {
   unsigned char mant[8];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd32_bin_t;
 
 typedef struct {
   unsigned char mant[16];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd64_bcd_t;
 
 typedef struct {
   unsigned char mant[16];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd64_bin_t;
 
 typedef struct {
   unsigned char mant[32];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd128_bcd_t;
 
 typedef struct {
   unsigned char mant[32];
   int32_t exp;
   int32_t sign;
+  fpfd_special_t special;
 } fpfd128_bin_t;
 
 /* These routines work on expanded fpfdX_t's. A void return type signifies that
