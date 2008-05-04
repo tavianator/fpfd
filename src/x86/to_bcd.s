@@ -36,11 +36,11 @@ fpfd32_to_bcd:
         movl %edx, 12(%eax)     # Map the sign bit from (1, 0) to (-1, +1)
         movl %ecx, %edx
         andl $0x3FF, %edx
-        movl fpfd_dpd2bcd(,%edx,4), %edx
+        movw fpfd_dpd2bcd(,%edx,2), %dx
         movl %ecx, %ebx
         shrl $10, %ebx
         andl $0x3FF, %ebx
-        movl fpfd_dpd2bcd(,%ebx,4), %ebx
+        movw fpfd_dpd2bcd(,%ebx,2), %bx
         shll $12, %ebx
         orl %edx, %ebx          # Convert the trailing significand digits from
                                 # DPD to BCD
