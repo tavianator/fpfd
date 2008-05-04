@@ -64,29 +64,28 @@ L2ii:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x001FFFFF, %ecx
-        orl $0x00400000, %ecx
+        orl $0x00800000, %ecx
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
 LsNaN:
-        movl $0, (%eax)
+        andl $0x000FFFFF, %ecx
+        movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $1, 16(%eax)
         ret
-LqNan:
-        movl $0, (%eax)
+LqNaN:
+        andl $0x000FFFFF, %ecx
+        movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $2, 16(%eax)
         ret
 Linf:
         movl $0, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $3, 16(%eax)
         ret
