@@ -44,15 +44,14 @@ fpfd32_to_bcd:
         shll $12, %ebx
         orl %edx, %ebx          # Convert the trailing significand digits from
                                 # DPD to BCD
-        movl %ecx, %edx
-        shrl $20, %edx
-        andl $0x600, %edx
-        xorl $0x600, %edx
-        jz L1i                  # If the combination field begins with 11,
-                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
         shrl $20, %ecx
         andl $0x7FF, %ecx
-        movl %ecx, %edx         # Get the combination field
+        movl %ecx, %edx
+        andl $0x600, %edx
+        cmpl $0x600, %edx
+        je L1i                  # If the combination field begins with 11,
+                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        movl %ecx, %edx
         andl $0x1C0, %edx
         shll $19, %edx
         orl %edx, %ebx
@@ -67,9 +66,16 @@ fpfd32_to_bcd:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         ret
 L1i:
-        shrl $20, %ecx
-        andl $0x7FF, %ecx
-        movl %ecx, %edx         # Get the combination field
+        movl %ecx, %edx
+        andl $0x7E0, %edx
+        cmpl $0x7E0, %edx
+        je LsNaN
+        cmpl $0x7C0, %edx
+        je LqNaN
+        andl $0x7C0, %edx
+        cmpl $0x780, %edx
+        je Linf
+        movl %ecx, %edx
         andl $0x040, %edx
         orl $0x200, %edx
         shll $19, %edx
@@ -83,4 +89,25 @@ L1i:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        ret
+LsNaN:
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
+        movl $0, 12(%eax)
+        movl $1, 16(%eax)
+        ret
+LqNan:
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
+        movl $0, 12(%eax)
+        movl $2, 16(%eax)
+        ret
+Linf:
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
+        movl $0, 12(%eax)
+        movl $3, 16(%eax)
         ret
