@@ -64,6 +64,7 @@ fpfd32_to_bcd:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
 L1i:
         movl %ecx, %edx
@@ -78,7 +79,7 @@ L1i:
         movl %ecx, %edx
         andl $0x040, %edx
         orl $0x200, %edx
-        shll $19, %edx
+        shll $18, %edx
         orl %edx, %ebx
         movl %ebx, (%eax)       # Get the leading significand digit
         movl %ecx, %edx
@@ -89,25 +90,23 @@ L1i:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
 LsNaN:
-        movl $0, (%eax)
+        movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $1, 16(%eax)
         ret
-LqNan:
-        movl $0, (%eax)
+LqNaN:
+        movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $2, 16(%eax)
         ret
 Linf:
         movl $0, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 12(%eax)
         movl $3, 16(%eax)
         ret
