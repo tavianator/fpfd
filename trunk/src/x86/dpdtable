@@ -54,7 +54,7 @@ function bcd2dpd() {
     x=$((e | (a & i) | (~a & k)))
     y=$((m))
 
-    echo "        .long 0b000000$p$q$r$s$t$u$v$w$x$y"
+    echo "        .value 0b000000$p$q$r$s$t$u$v$w$x$y"
 }
 
 function dpd2bcd() {
@@ -92,7 +92,7 @@ function dpd2bcd() {
     k=$(((~v & x) | (t & ~w & x) | (q & v & w & (~x | (~s & ~t)))))
     m=$((y))
 
-    echo "        .long 0b0000$a$b$c$d$e$f$g$h$i$j$k$m"
+    echo "        .value 0b0000$a$b$c$d$e$f$g$h$i$j$k$m"
 }
 
 echo -ne ".globl fpfd_bcd2dpd\nfpfd_bcd2dpd:\n"
