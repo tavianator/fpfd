@@ -84,7 +84,8 @@ LqNaN:
         movl $2, 16(%eax)
         ret
 Linf:
-        movl $0, (%eax)
+        andl $0x000FFFFF, %ecx
+        movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $3, 16(%eax)
