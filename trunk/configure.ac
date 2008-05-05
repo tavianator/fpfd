@@ -17,7 +17,7 @@ AC_CANONICAL_HOST
 
 case $host_cpu in
      *86)
-        path="x86"
+        AM_CONDITIONAL([X86], [true])
         src/x86/dpdtable > src/x86/dpdtable.s
         ;;
 esac
