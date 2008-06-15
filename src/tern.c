@@ -28,6 +28,8 @@ static int fpfd_tern(int32_t sign, uint32_t rem, fpfd_rnd_t rnd) {
 
   if (rem == 0) {
     tern = 0x1;
+  } else if (rem == 10) {
+    tern = 1 - sign;
   } else {
     switch (rnd) {
     case FPFD_RNDNA:

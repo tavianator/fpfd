@@ -85,8 +85,9 @@ typedef struct {
  * the result is always exact. Otherwise, the functions return a remainder equal
  * to the truncated portion of the result. In general, this value is rounded
  * down, but a value of 0 or 5 means that the remainder was exactly 0 or 5, so
- * 0.01 rounds to 1, and 5.01 rounds to 6. The fpfdX_*_ternN functions convert
- * these values to correct ternary values, and round the result correctly.
+ * 0.01 rounds to 1, and 5.01 rounds to 6. A value of 10 signifies that an
+ * infinity was returned. The fpfdX_*_ternN functions convert these values to
+ * correct ternary values, and round the result correctly.
  */
 
 /* Simple routines */
