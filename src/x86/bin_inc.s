@@ -20,7 +20,7 @@
 
 # void fpfd32_bin_inc(fpfd32_bin_t *dest);
 #
-# Increment the mantissa, in orter to round. dest must be normalized.
+# Increment the mantissa, in order to round. dest must be normalized.
 
 .globl fpfd32_bin_inc
 fpfd32_bin_inc:

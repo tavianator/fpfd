@@ -3,7 +3,7 @@ FPFD_VERSION = 0:0:0
 C_SOURCES = set.c add.c tern.c try_expand.c
 
 if X86
-S_SOURCES = x86/dpdtable.s x86/to_bcd.s x86/to_bin.s x86/from_bcd.s x86/from_bin.s x86/bcd_inc.s x86/bin_inc.s x86/bcd_normalize.s
+S_SOURCES = x86/dpdtable.s x86/to_bcd.s x86/to_bin.s x86/from_bcd.s x86/from_bin.s x86/bcd_inc.s x86/bin_inc.s x86/bcd_normalize.s x86/bin_mul.s
 endif
 
 H_SOURCES = fpfd.h fpfd_impl.h
