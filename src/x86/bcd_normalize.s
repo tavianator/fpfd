@@ -22,13 +22,15 @@
 #
 # Normalize the value in dest.
 
+        .text
 .globl fpfd32_bcd_normalize
+        .type fpfd32_bcd_normalize, @function
 fpfd32_bcd_normalize:
         movl 4(%esp), %ebx      # Put dest in ebx
         movl (%ebx), %eax
         movl 4(%ebx), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ecx         # Find the leading non-zero bit
-        jz LzeroMSW
+        jz .LzeroMSW
         addl $4, %ecx
         andl $0xC, %ecx         # Add one and round up to a multiple of 4
         subl $32, %ecx
@@ -40,11 +42,11 @@ fpfd32_bcd_normalize:
         negl %ecx
         addl 8(%ebx), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
         cmpl $90, %ecx
-        jg Loflow
+        jg .Loflow
         cmpl $-107, %ecx
-        jl LuflowMSW
+        jl .LuflowMSW
         cmpl $-101, %ecx
-        jl LsubnormMSW
+        jl .LsubnormMSW
         movl %ecx, 8(%ebx)      # Set dest->exp to the adjusted exponent
         movl $0, %ecx
         shrdl $4, %eax, %ecx
@@ -56,11 +58,11 @@ fpfd32_bcd_normalize:
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
         cmpl $0, %eax
-        je LspecialMSW
+        je .LspecialMSW
         cmpl $5, %eax
-        je LspecialMSW
+        je .LspecialMSW
         ret
-LsubnormMSW:
+.LsubnormMSW:
         negl %ecx
         subl $101, %ecx
         shll $2, %ecx
@@ -78,31 +80,31 @@ LsubnormMSW:
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
         cmpl $0, %eax
-        je LspecialMSW
+        je .LspecialMSW
         cmpl $5, %eax
-        je LspecialMSW
+        je .LspecialMSW
         ret
-LuflowMSW:
+.LuflowMSW:
         movl $0, (%ebx)
         movl $0, 4(%ebx)
         movl $0, 8(%ebx)
         movl %eax, %ecx
         movl %edx, %ebx
         movl $0, %eax
-LspecialMSW:
+.LspecialMSW:
         cmpl $0, %ebx
-        je LspecialMSW2
+        je .LspecialMSW2
         addl $1, %eax
         ret
-LspecialMSW2:
+.LspecialMSW2:
         cmpl $0, %ecx
-        je LspecialMSW3
+        je .LspecialMSW3
         addl $1, %eax
-LspecialMSW3:
+.LspecialMSW3:
         ret
-LzeroMSW:
+.LzeroMSW:
         bsrl %eax, %ecx
-        jz Lzero
+        jz .Lzero
         addl $4, %ecx
         andl $0xC, %ecx         # Add one and round up to a multiple of 4
         subl $32, %ecx
@@ -113,11 +115,11 @@ LzeroMSW:
         negl %ecx
         addl 8(%ebx), %ecx      # Add (4 - ecx)/4 to the exponent
         cmpl $90, %ecx
-        jg Loflow
+        jg .Loflow
         cmpl $-107, %ecx
-        jl LuflowLSW
+        jl .LuflowLSW
         cmpl $-101, %ecx
-        jl LsubnormLSW
+        jl .LsubnormLSW
         movl %ecx, 8(%ebx)      # Set dest->exp to the adjusted exponent
         shrdl $4, %eax, %edx
         shrl $4, %eax           # Shift eax.edx to the 28th bit
@@ -126,7 +128,7 @@ LzeroMSW:
         movl %edx, %eax
         shrl $28, %eax
         ret
-LsubnormLSW:
+.LsubnormLSW:
         negl %ecx
         subl $101, %ecx
         shll $2, %ecx
@@ -140,29 +142,30 @@ LsubnormLSW:
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax
         cmpl $0, %eax
-        je LspecialLSW
+        je .LspecialLSW
         cmpl $5, %eax
-        je LspecialLSW
+        je .LspecialLSW
         ret
-LuflowLSW:
+.LuflowLSW:
         movl $0, (%ebx)
         movl $0, 4(%ebx)
         movl $0, 8(%ebx)
         movl %eax, %edx
         movl $0, %eax
-LspecialLSW:
+.LspecialLSW:
         cmpl $0, %edx
-        je LspecialLSW2
+        je .LspecialLSW2
         addl $1, %eax
-LspecialLSW2:
+.LspecialLSW2:
         ret
-Loflow:
+.Loflow:
         movl $3, 16(%ebx)       # Set the special flag to FPFD_INF
         movl $10, %eax          # Return the special 10 value
         ret
-Lzero:
+.Lzero:
         movl $0, (%ebx)
         movl $0, 4(%ebx)
         movl $0, 8(%ebx)
         movl $0, %eax
         ret
+        .size fpfd32_bcd_normalize, .-fpfd32_bcd_normalize

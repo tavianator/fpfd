@@ -95,14 +95,25 @@ function dpd2bcd() {
     echo "        .value 0b0000$a$b$c$d$e$f$g$h$i$j$k$m"
 }
 
-echo -ne ".globl fpfd_bcd2dpd\nfpfd_bcd2dpd:\n"
+echo ".globl fpfd_bcd2dpd"
+echo "        .data"
+echo "        .align 32"
+echo "        .type fpfd_bcd2dpd, @object"
+echo "        .size fpfd_bcd2dpd, 4914"
+echo "fpfd_bcd2dpd:"
 
 for ((num=0x000; num<=0x999; ++num))
 do
     bcd2dpd $num
 done
 
-echo -ne "\n.globl fpfd_dpd2bcd\nfpfd_dpd2bcd:\n"
+echo ""
+echo ".globl fpfd_dpd2bcd"
+echo "        .data"
+echo "        .align 32"
+echo "        .type fpfd_dpd2dbcd, @object"
+echo "        .size fpfd_dpd2dbcd, 2046"
+echo "fpfd_dpd2bcd:"
 
 for ((num=0x000; num<=0x3FF; ++num))
 do
