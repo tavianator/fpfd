@@ -23,7 +23,9 @@
 # Converts the compact binary representation in src to the expanded form
 # dest.
 
+        .text
 .globl fpfd32_to_bin
+        .type fpfd32_to_bin, @function
 fpfd32_to_bin:
         movl 4(%esp), %eax
         movl 8(%esp), %ebx
@@ -40,7 +42,7 @@ fpfd32_to_bin:
         movl %edx, %ebx
         andl $0x600, %ebx
         cmpl $0x600, %ebx
-        je L2ii                 # If the combination field begins with 11,
+        je .L2ii                # If the combination field begins with 11,
                                 # follow 754r DRAFT 1.5.0, S3.5, p19, 2.ii
         shrl $3, %edx
         subl $101, %edx
@@ -49,16 +51,16 @@ fpfd32_to_bin:
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         ret
-L2ii:
+.L2ii:
         movl %edx, %ebx
         andl $0x7E0, %ebx
         cmpl $0x7E0, %ebx
-        je LsNaN
+        je .LsNaN
         cmpl $0x7C0, %ebx
-        je LqNaN
+        je .LqNaN
         andl $0x7C0, %ebx
         cmpl $0x780, %ebx
-        je Linf
+        je .Linf
         shrl %edx
         andl $0xFF, %edx
         subl $101, %edx
@@ -69,24 +71,25 @@ L2ii:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
-LsNaN:
+.LsNaN:
         andl $0x000FFFFF, %ecx
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $1, 16(%eax)
         ret
-LqNaN:
+.LqNaN:
         andl $0x000FFFFF, %ecx
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $2, 16(%eax)
         ret
-Linf:
+.Linf:
         andl $0x000FFFFF, %ecx
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $3, 16(%eax)
         ret
+        .size fpfd32_to_bin, .-fpfd32_to_bin

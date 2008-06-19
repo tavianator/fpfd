@@ -27,7 +27,9 @@
 # 0x6 to M, and check for a carry in the second digit by (M & 0xA0) == 0xA0,
 # if so add 0x60, etc.
 
+        .text
 .globl fpfd32_bcd_inc
+        .type fpfd32_bcd_inc, @function
 fpfd32_bcd_inc:
         movl 4(%esp), %ecx
         movl (%ecx), %eax
@@ -36,23 +38,24 @@ fpfd32_bcd_inc:
         movl %eax, %edx
         andl $0xA, %edx
         cmpl $0xA, %edx         # Test for overflow (LSD == 10)
-        je Lcarry
+        je .Lcarry
         movl %eax, (%ecx)
         ret
-Lcarry:
+.Lcarry:
         addl %ebx, %eax
         movl %eax, %ecx
         shll $4, %edx
         shll $4, %ebx
-        jz Lrollover            # If we carry past 32-bits, we've rolled over
+        jz .Lrollover           # If we carry past 32-bits, we've rolled over
         andl %edx, %ecx
         cmpl %edx, %ecx
-        je Lcarry
+        je .Lcarry
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
-Lrollover:
+.Lrollover:
         movl 4(%esp), %ecx      
         addl $1, 8(%ecx)        # Increment the exponent
         movl $0x01000000, (%ecx)
         ret
+        .size fpfd32_bcd_inc, .-fpfd32_bcd_inc

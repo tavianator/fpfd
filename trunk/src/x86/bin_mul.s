@@ -23,7 +23,9 @@
 #
 # Multiply lhs and rhs, and put the result in dest.
 
+        .text
 .globl fpfd32_bin_mul
+        .type fpfd32_bin_mul, @function
 fpfd32_bin_mul:
         movl 8(%esp), %ebx
         movl 12(%esp), %ecx
@@ -44,3 +46,4 @@ fpfd32_bin_mul:
         addl $1, %edx           # Add one to go from (-2, 0) to (-1, 1)
         movl %edx, 16(%ecx)     # Store the sign
         ret
+        .size fpfd32_bin_mul, .-fpfd32_bin_mul

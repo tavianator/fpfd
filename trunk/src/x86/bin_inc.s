@@ -22,18 +22,20 @@
 #
 # Increment the mantissa, in order to round. dest must be normalized.
 
+        .text
 .globl fpfd32_bin_inc
+        .type fpfd32_bin_inc, @function
 fpfd32_bin_inc:
         movl 4(%esp), %eax
         movl (%eax), %edx
         andl $0xFFFFFF, %edx
         addl $1,  %edx
         cmpl $10000000, %edx
-        je Lrollover
+        je .Lrollover
         movl %edx, (%eax)
         ret
-Lrollover:
+.Lrollover:
         addl $1,  8(%eax)
         movl $1000000, (%eax)
         ret
-        
+        .size fpfd32_bin_inc, .-fpfd32_bin_inc

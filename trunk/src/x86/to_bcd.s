@@ -23,7 +23,9 @@
 # Converts the densely-packed-decimal representation in src to the binary-
 # coded-decimal form in dest.
 
+        .text
 .globl fpfd32_to_bcd
+        .type fpfd32_to_bcd, @function
 fpfd32_to_bcd:
         movl 4(%esp), %eax
         movl 8(%esp), %ebx
@@ -49,7 +51,7 @@ fpfd32_to_bcd:
         movl %ecx, %edx
         andl $0x600, %edx
         cmpl $0x600, %edx
-        je L1i                  # If the combination field begins with 11,
+        je .L1i                 # If the combination field begins with 11,
                                 # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
         movl %ecx, %edx
         andl $0x1C0, %edx
@@ -66,16 +68,16 @@ fpfd32_to_bcd:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
-L1i:
+.L1i:
         movl %ecx, %edx
         andl $0x7E0, %edx
         cmpl $0x7E0, %edx
-        je LsNaN
+        je .LsNaN
         cmpl $0x7C0, %edx
-        je LqNaN
+        je .LqNaN
         andl $0x7C0, %edx
         cmpl $0x780, %edx
-        je Linf
+        je .Linf
         movl %ecx, %edx
         andl $0x040, %edx
         orl $0x200, %edx
@@ -92,21 +94,22 @@ L1i:
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
         ret
-LsNaN:
+.LsNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $1, 16(%eax)
         ret
-LqNaN:
+.LqNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $2, 16(%eax)
         ret
-Linf:
+.Linf:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $3, 16(%eax)
         ret
+        .size fpfd32_to_bcd, .-fpfd32_to_bcd

@@ -23,6 +23,7 @@
 # Shrinks the expanded encoding in src to the compact encoding in dest. Src
 # must be normalized.
 
+        .text
 .globl fpfd32_from_bcd
         .type fpfd32_from_bcd, @function
 fpfd32_from_bcd:
@@ -47,15 +48,15 @@ fpfd32_from_bcd:
                                 # shift it to the MSB
         movl 16(%ecx), %edx     # Handle sNaN, qNaN, and infinities
         cmpl $1, %edx
-        je LsNaN
+        je .LsNaN
         cmpl $2, %edx
-        je LqNaN
+        je .LqNaN
         cmpl $3, %edx
-        je Linf
+        je .Linf
         movl 8(%ecx), %edx
         addl $101, %edx         # Get the biased exponent
         testl $0x20000000, %eax
-        jnz L1i
+        jnz .L1i
         movl %edx, %ecx
         andl $0xC0, %ecx
         andl $0x3F, %edx
@@ -67,7 +68,7 @@ fpfd32_from_bcd:
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
-L1i:
+.L1i:
         andl $0xFFFFFFF, %eax
         movl %edx, %ecx
         andl $0xC0, %ecx
@@ -81,19 +82,19 @@ L1i:
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
-LsNaN:
+.LsNaN:
         orl $0x7E000000, %eax
         orl %ebx, %eax
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
-LqNaN:
+.LqNaN:
         orl $0x7C000000, %eax
         orl %ebx, %eax
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
-Linf:   
+.Linf:   
         movl $0x78000000, %eax
         orl %ebx, %eax
         movl 4(%esp), %ecx
