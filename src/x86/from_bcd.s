@@ -24,6 +24,7 @@
 # must be normalized.
 
 .globl fpfd32_from_bcd
+        .type fpfd32_from_bcd, @function
 fpfd32_from_bcd:
         movl 8(%esp), %ecx
         movl (%ecx), %eax
@@ -98,3 +99,4 @@ Linf:
         movl 4(%esp), %ecx
         movl %eax, (%ecx)
         ret
+        .size fpfd32_from_bcd, .-fpfd32_from_bcd
