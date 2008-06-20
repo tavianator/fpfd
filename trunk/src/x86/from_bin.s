@@ -27,7 +27,8 @@
 .globl fpfd32_from_bin
         .type fpfd32_from_bin, @function
 fpfd32_from_bin:
-        movl 8(%esp), %ecx
+        pushl %ebx
+        movl 12(%esp), %ecx
         movl (%ecx), %eax       # Get the coefficient
         movl 12(%ecx), %ebx
         subl $1, %ebx
@@ -48,8 +49,9 @@ fpfd32_from_bin:
         shll $23, %edx
         orl %edx, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .L2ii:
         andl $0x1FFFFF, %eax
@@ -57,25 +59,29 @@ fpfd32_from_bin:
         orl %edx, %eax
         orl $0x60000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .LsNaN:
         orl $0x7E000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .LqNaN:
         orl $0x7C000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .Linf:   
         movl $0x78000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
         .size fpfd32_from_bin, .-fpfd32_from_bin

@@ -27,8 +27,9 @@
 .globl fpfd32_to_bin
         .type fpfd32_to_bin, @function
 fpfd32_to_bin:
-        movl 4(%esp), %eax
-        movl 8(%esp), %ebx
+        pushl %ebx
+        movl 8(%esp), %eax
+        movl 12(%esp), %ebx
         movl (%ebx), %ecx
         movl %ecx, %edx
         shrl $30, %edx
@@ -50,6 +51,7 @@ fpfd32_to_bin:
         andl $0x007FFFFF, %ecx
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        popl %ebx
         ret
 .L2ii:
         movl %edx, %ebx
@@ -70,6 +72,7 @@ fpfd32_to_bin:
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        popl %ebx
         ret
 .LsNaN:
         andl $0x000FFFFF, %ecx
@@ -77,6 +80,7 @@ fpfd32_to_bin:
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $1, 16(%eax)
+        popl %ebx
         ret
 .LqNaN:
         andl $0x000FFFFF, %ecx
@@ -84,6 +88,7 @@ fpfd32_to_bin:
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $2, 16(%eax)
+        popl %ebx
         ret
 .Linf:
         andl $0x000FFFFF, %ecx
@@ -91,5 +96,6 @@ fpfd32_to_bin:
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $3, 16(%eax)
+        popl %ebx
         ret
         .size fpfd32_to_bin, .-fpfd32_to_bin

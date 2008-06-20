@@ -26,9 +26,11 @@
 .globl fpfd32_bcd_normalize
         .type fpfd32_bcd_normalize, @function
 fpfd32_bcd_normalize:
-        movl 4(%esp), %ebx      # Put dest in ebx
-        movl (%ebx), %eax
-        movl 4(%ebx), %edx      # Put dest->mant in edx:eax
+        pushl %ebs
+        pushl %esi
+        movl 4(%esp), %esi      # Put dest in esi
+        movl (%esi), %eax
+        movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ecx         # Find the leading non-zero bit
         jz .LzeroMSW
         addl $4, %ecx
@@ -40,20 +42,20 @@ fpfd32_bcd_normalize:
         shrl $2, %ecx
         subl $9, %ecx
         negl %ecx
-        addl 8(%ebx), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
+        addl 8(%esi), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
         cmpl $-107, %ecx
         jl .LuflowMSW
         cmpl $-101, %ecx
         jl .LsubnormMSW
-        movl %ecx, 8(%ebx)      # Set dest->exp to the adjusted exponent
+        movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         movl $0, %ecx
         shrdl $4, %eax, %ecx
         shrdl $4, %edx, %eax
         shrl $4, %edx           # Shift edx:eax.ecx to the 28th bit
-        movl %edx, (%ebx)
-        movl $0, 4(%ebx)        # Set dest->mant to the normalized mantissa
+        movl %edx, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to the normalized mantissa
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -61,6 +63,8 @@ fpfd32_bcd_normalize:
         je .LspecialMSW
         cmpl $5, %eax
         je .LspecialMSW
+        popl %esi
+        popl %ebx
         ret
 .LsubnormMSW:
         negl %ecx
@@ -72,10 +76,9 @@ fpfd32_bcd_normalize:
         shrdl %cl, %edx, %eax
         shrl %cl, %edx          # Shift edx:eax.ebx to the correct bit
         movl %ebx, %ecx
-        movl 4(%esp), %ebx      # Put dest in ebx
-        movl %edx, (%ebx)
-        movl $0, 4(%ebx)        # Set dest->mant to the subnormalized mantissa
-        movl $-101, 8(%ebx)     # Set the exponent to the sumnormal exponent
+        movl %edx, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to the subnormalized mantissa
+        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -83,11 +86,13 @@ fpfd32_bcd_normalize:
         je .LspecialMSW
         cmpl $5, %eax
         je .LspecialMSW
+        popl %esi
+        popl %ebx
         ret
 .LuflowMSW:
-        movl $0, (%ebx)
-        movl $0, 4(%ebx)
-        movl $0, 8(%ebx)
+        movl $0, (%esi)
+        movl $0, 4(%esi)
+        movl $0, 8(%esi)
         movl %eax, %ecx
         movl %edx, %ebx
         movl $0, %eax
@@ -95,12 +100,16 @@ fpfd32_bcd_normalize:
         cmpl $0, %ebx
         je .LspecialMSW2
         addl $1, %eax
+        popl %esi
+        popl %ebx
         ret
 .LspecialMSW2:
         cmpl $0, %ecx
         je .LspecialMSW3
         addl $1, %eax
 .LspecialMSW3:
+        popl %esi
+        popl %ebx
         ret
 .LzeroMSW:
         bsrl %eax, %ecx
@@ -113,20 +122,22 @@ fpfd32_bcd_normalize:
         shrl $2, %ecx
         subl $1, %ecx
         negl %ecx
-        addl 8(%ebx), %ecx      # Add (4 - ecx)/4 to the exponent
+        addl 8(%esi), %ecx      # Add (4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
         cmpl $-107, %ecx
         jl .LuflowLSW
         cmpl $-101, %ecx
         jl .LsubnormLSW
-        movl %ecx, 8(%ebx)      # Set dest->exp to the adjusted exponent
+        movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         shrdl $4, %eax, %edx
         shrl $4, %eax           # Shift eax.edx to the 28th bit
-        movl %eax, (%ebx)
-        movl $0, 4(%ebx)        # Set dest->mant to the normalized mantissa
+        movl %eax, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to the normalized mantissa
         movl %edx, %eax
         shrl $28, %eax
+        popl %esi
+        popl %ebx
         ret
 .LsubnormLSW:
         negl %ecx
@@ -135,9 +146,9 @@ fpfd32_bcd_normalize:
         addl $4, %ecx
         shrdl %cl, %eax, %edx
         shrl %cl, %eax          # Shift eax.edx to the correct bit
-        movl %eax, (%ebx)
-        movl $0, 4(%ebx)        # Set dest->mant to the subnormalized mantissa
-        movl $-101, 8(%ebx)     # Set the exponent to the sumnormal exponent
+        movl %eax, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to the subnormalized mantissa
+        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
         movl %edx, %eax
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax
@@ -145,11 +156,13 @@ fpfd32_bcd_normalize:
         je .LspecialLSW
         cmpl $5, %eax
         je .LspecialLSW
+        popl %esi
+        popl %ebx
         ret
 .LuflowLSW:
-        movl $0, (%ebx)
-        movl $0, 4(%ebx)
-        movl $0, 8(%ebx)
+        movl $0, (%esi)
+        movl $0, 4(%esi)
+        movl $0, 8(%esi)
         movl %eax, %edx
         movl $0, %eax
 .LspecialLSW:
@@ -157,15 +170,21 @@ fpfd32_bcd_normalize:
         je .LspecialLSW2
         addl $1, %eax
 .LspecialLSW2:
+        popl %esi
+        popl %ebx
         ret
 .Loflow:
-        movl $3, 16(%ebx)       # Set the special flag to FPFD_INF
+        movl $3, 16(%esi)       # Set the special flag to FPFD_INF
         movl $10, %eax          # Return the special 10 value
+        popl %esi
+        popl %ebx
         ret
 .Lzero:
-        movl $0, (%ebx)
-        movl $0, 4(%ebx)
-        movl $0, 8(%ebx)
+        movl $0, (%esi)
+        movl $0, 4(%esi)
+        movl $0, 8(%esi)
         movl $0, %eax
+        popl %esi
+        popl %ebx
         ret
         .size fpfd32_bcd_normalize, .-fpfd32_bcd_normalize

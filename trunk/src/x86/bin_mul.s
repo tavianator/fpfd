@@ -27,23 +27,28 @@
 .globl fpfd32_bin_mul
         .type fpfd32_bin_mul, @function
 fpfd32_bin_mul:
-        movl 8(%esp), %ebx
-        movl 12(%esp), %ecx
-        movl (%ebx), %eax
-        movl (%ecx), %edx
+        pushl %ebx
+        pushl %esi
+        pushl %edi              # Callee-save registers
+        movl 20(%esp), %esi
+        movl 24(%esp), %edi
+        movl (%esi), %eax
+        movl (%edi), %edx
         mull %edx               # Multiply the mantissas
-        movl 8(%ebx), %ebx
-        addl 8(%ecx), %ebx      # Add the exponents
-        movl 4(%esp), %ecx
-        movl %eax, (%ecx)
-        movl %edx, 4(%ecx)
-        movl %ebx, 8(%ecx)      # Store the new mantissa and exponents
-        movl 8(%esp), %eax
-        movl 12(%esp), %ebx
-        movl 12(%eax), %edx
-        xorl 12(%ebx), %edx     # XOR the signs: 1 (...0001) xor -1 (...1111)
+        movl 8(%esi), %ebx
+        addl 8(%edi), %ebx      # Add the exponents
+        movl 12(%esi), %ecx
+        xorl 12(%edi), %ecx     # XOR the signs: 1 (...0001) xor -1 (...1111)
                                 # gives -2 (...1110), X xor X gives 0
-        addl $1, %edx           # Add one to go from (-2, 0) to (-1, 1)
-        movl %edx, 16(%ecx)     # Store the sign
+        addl $1, %ecx           # Add one to go from (-2, 0) to (-1, 1)
+        movl 16(%esp), %esi
+        movl %eax, (%esi)
+        movl %edx, 4(%esi)      # Store the mantissa
+        movl %ebx, 8(%esi)      # Store the exponent
+        movl %ecx, 12(%esi)     # Store the sign
+        movl $0, 16(%ecx)       # Set the special flag to FPFD_NUMBER
+        popl %edi
+        popl %esi
+        popl %ebx
         ret
         .size fpfd32_bin_mul, .-fpfd32_bin_mul
