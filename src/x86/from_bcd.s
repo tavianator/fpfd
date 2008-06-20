@@ -27,7 +27,8 @@
 .globl fpfd32_from_bcd
         .type fpfd32_from_bcd, @function
 fpfd32_from_bcd:
-        movl 8(%esp), %ecx
+        pushl %ebx
+        movl 12(%esp), %ecx
         movl (%ecx), %eax
         movl %eax, %edx
         andl $0xFFF, %edx
@@ -65,8 +66,9 @@ fpfd32_from_bcd:
         orl %edx, %eax
         orl %ecx, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .L1i:
         andl $0xFFFFFFF, %eax
@@ -79,25 +81,29 @@ fpfd32_from_bcd:
         orl %ecx, %eax
         orl $0x60000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .LsNaN:
         orl $0x7E000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .LqNaN:
         orl $0x7C000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
 .Linf:   
         movl $0x78000000, %eax
         orl %ebx, %eax
-        movl 4(%esp), %ecx
+        movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        popl %ebx
         ret
         .size fpfd32_from_bcd, .-fpfd32_from_bcd

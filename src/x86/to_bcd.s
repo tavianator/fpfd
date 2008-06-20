@@ -27,8 +27,9 @@
 .globl fpfd32_to_bcd
         .type fpfd32_to_bcd, @function
 fpfd32_to_bcd:
-        movl 4(%esp), %eax
-        movl 8(%esp), %ebx
+        pushl %ebx
+        movl 8(%esp), %eax
+        movl 12(%esp), %ebx
         movl (%ebx), %ecx
         movl %ecx, %edx
         shrl $30, %edx
@@ -67,6 +68,7 @@ fpfd32_to_bcd:
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        popl %ebx
         ret
 .L1i:
         movl %ecx, %edx
@@ -93,23 +95,27 @@ fpfd32_to_bcd:
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        popl %ebx
         ret
 .LsNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $1, 16(%eax)
+        popl %ebx
         ret
 .LqNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $2, 16(%eax)
+        popl %ebx
         ret
 .Linf:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
         movl $3, 16(%eax)
+        popl %ebx
         ret
         .size fpfd32_to_bcd, .-fpfd32_to_bcd

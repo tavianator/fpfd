@@ -33,29 +33,44 @@
 fpfd32_bcd_inc:
         movl 4(%esp), %ecx
         movl (%ecx), %eax
-        movl $6, %ebx           # For decimal carries
         addl $1, %eax           # Increment the mantissa
         movl %eax, %edx
         andl $0xA, %edx
         cmpl $0xA, %edx         # Test for overflow (LSD == 10)
-        je .Lcarry
+        je .Lcarryinit
         movl %eax, (%ecx)
         ret
+.Lcarryinit:
+        pushl %ebx
+        pushl %esi              # Callee-save registers
+        movl $6, %ebx           # For decimal carries
 .Lcarry:
         addl %ebx, %eax
-        movl %eax, %ecx
+        movl %eax, %esi
         shll $4, %edx
         shll $4, %ebx
-        jz .Lrollover           # If we carry past 32-bits, we've rolled over
-        andl %edx, %ecx
-        cmpl %edx, %ecx
+        cmpl $0x60000000, %ebx
+        je .Lrollover           # If we carry past 28 bits, we've rolled over
+        andl %edx, %esi
+        cmpl %edx, %esi
         je .Lcarry
-        movl 4(%esp), %ecx
         movl %eax, (%ecx)
+        popl %esi
+        popl %ebx
         ret
 .Lrollover:
-        movl 4(%esp), %ecx      
-        addl $1, 8(%ecx)        # Increment the exponent
+        movl 8(%ecx), %eax
+        addl $1, %eax           # Increment the exponent
+        cmpl $90, %eax
+        jg .Loflow              # Test for overflow
+        movl %eax, 8(%ecx)
         movl $0x01000000, (%ecx)
+        popl %esi
+        popl %ebx
+        ret
+.Loflow:
+        movl $3, 16(%ecx)       # Set the special flag to FPFD_INF
+        popl %esi
+        popl %ebx
         ret
         .size fpfd32_bcd_inc, .-fpfd32_bcd_inc
