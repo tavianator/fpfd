@@ -26,7 +26,7 @@
 .globl fpfd32_bcd_normalize
         .type fpfd32_bcd_normalize, @function
 fpfd32_bcd_normalize:
-        pushl %ebs
+        pushl %ebx
         pushl %esi
         movl 4(%esp), %esi      # Put dest in esi
         movl (%esi), %eax
