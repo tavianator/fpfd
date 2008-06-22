@@ -29,12 +29,18 @@ fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
   if (arg1->enc == arg2->enc) {
     enc_used = arg1->enc;
 
-    if (arg1->enc == FPFD_ENCD) {
+    switch (arg1->enc) {
+    case FPFD_ENCD:
       fpfd32_to_bcd(bcd1, arg1);
       fpfd32_to_bcd(bcd2, arg2);
-    } else {
+      break;
+    case FPFD_ENCB:
       fpfd32_to_bin(bin1, arg1);
       fpfd32_to_bin(bin2, arg2);
+      break;
+    default:
+      fpfd_panic("fpfd32_try_expand2(): arg1->enc has unacceptable value");
+      break;
     }
   } else {
     enc_used = enc;

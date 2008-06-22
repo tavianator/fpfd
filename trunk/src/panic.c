@@ -19,36 +19,23 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-               fpfd_rnd_t rnd, fpfd_enc_t enc) {
-  int tern;
-  uint32_t rem1, rem2;
-  fpfd32_bcd_t bcd, bcd1, bcd2;
-  fpfd32_bin_t bin, bin1, bin2;
-  fpfd_enc_t enc_used;
+#ifdef __GNUC__
+#include <execinfo.h>
+#define BTBUFSIZE 100
+#endif /* __GNUC__ */
 
-  enc_used = fpfd32_try_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
+void fpfd_panic(const char *error) {
+#ifdef __GNUC__
+  void *buffer[BTBUFSIZE];
+  int nptrs;
 
-  if (enc_used == FPFD_ENCD) {
-    rem1 = fpfd32_bcd_add(&bcd, &bcd1, &bcd2);
-    rem2 = fpfd32_bcd_normalize(&bcd);
-    tern = fpfd32_bcd_tern2(&bcd, rem1, rem2, rnd);
-  } else {
-    rem1 = fpfd32_bin_add(&bin, &bin1, &bin2);
-    rem2 = fpfd32_bin_normalize(&bin);
-    tern = fpfd32_bin_tern2(&bin, rem1, rem2, rnd);
-  }
+  nptrs = backtrace(buffer, BTBUFSIZE);
+  backtrace_symbols_fd(buffer, nptrs, fileno(stderr));
+#endif /* __GNUC__ */
 
-  if (enc == FPFD_ENCD) {
-    if (enc_used == FPFD_ENCB)
-      fpfd32_bin_to_bcd(&bcd, &bin);
-    fpfd32_from_bcd(dest, &bcd);
-  } else {
-    if (enc_used == FPFD_ENCD)
-      fpfd32_bcd_to_bin(&bin, &bcd);
-    fpfd32_from_bin(dest, &bin);
-  }
-
-  return tern;
+  fprintf(stderr, "\n%s\n\n", error);
+  exit(EXIT_FAILURE);
 }

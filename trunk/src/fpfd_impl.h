@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-// extern "C" {
+extern "C" {
 #endif // __cplusplus
 
 typedef enum {
@@ -101,10 +101,8 @@ void fpfd32_from_bin(fpfd32_ptr dest, const fpfd32_bin_t *src);
 void fpfd32_bcd_inc(fpfd32_bcd_t *dest);
 void fpfd32_bin_inc(fpfd32_bin_t *dest);
 
-uint32_t fpfd32_bcd_add(fpfd32_bcd_t *dest,
-                        const fpfd32_bcd_t *lhs, const fpfd32_bcd_t *rhs);
-uint32_t fpfd32_bcd_sub(fpfd32_bcd_t *dest,
-                        const fpfd32_bcd_t *lhs, const fpfd32_bcd_t *rhs);
+uint32_t fpfd32_bcd_addsub(fpfd32_bcd_t *dest, int32_t sign,
+                           const fpfd32_bcd_t *lhs, const fpfd32_bcd_t *rhs);
 
 void fpfd32_bin_mul(fpfd32_bin_t *dest,
                     const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
@@ -118,10 +116,8 @@ uint32_t fpfd32_bcd_normalize(fpfd32_bcd_t *dest);
 void fpfd32_bcd_to_bin(fpfd32_bin_t *dest, const fpfd32_bcd_t *src);
 void fpfd32_bin_to_bcd(fpfd32_bcd_t *dest, const fpfd32_bin_t *src);
 
-uint32_t fpfd32_bin_add(fpfd32_bin_t *dest,
-                        const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
-uint32_t fpfd32_bin_sub(fpfd32_bin_t *dest,
-                        const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
+uint32_t fpfd32_bin_addsub(fpfd32_bin_t *dest, int32_t sign,
+                           const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
 
 void fpfd32_bcd_mul(fpfd32_bcd_t *dest,
                     const fpfd32_bcd_t *lhs, const fpfd32_bcd_t *rhs);
@@ -147,8 +143,11 @@ fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
                               fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
                               fpfd_enc_t enc);
 
+/* Error out of bad situations. This function doesn't return. */
+void fpfd_panic(const char *error);
+
 #ifdef __cplusplus
-// }
+}
 #endif // __cplusplus
 
 #endif // FPFD_IMPL_H
