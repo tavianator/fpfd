@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.62)
 AC_INIT(The FPFD Library, 0.0, tavianator@gmail.com, fpfd)
 AM_INIT_AUTOMAKE(fpfd, 0.0)
 
@@ -12,6 +12,13 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
+# Checks for header files.
+AC_CHECK_HEADERS([stdint.h string.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_INT32_T
+AC_TYPE_UINT32_T
+
 # Find out which assembler files to compile
 AC_CANONICAL_HOST
 
@@ -22,8 +29,7 @@ case $host_cpu in
         ;;
 esac
 
-AC_SUBST(path)
-
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
 AC_OUTPUT

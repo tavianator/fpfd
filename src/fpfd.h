@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-// extern "C" {
+extern "C" {
 #endif // __cplusplus
 
 typedef enum {
@@ -63,8 +63,7 @@ typedef const fpfd128_struct_t *fpfd128_srcptr;
 
 // Assignment
 
-int fpfd32_set32(fpfd32_ptr dest, fpfd32_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc);
+void fpfd32_set32(fpfd32_ptr dest, fpfd32_srcptr src, fpfd_enc_t enc);
 int fpfd32_set64(fpfd32_ptr dest, fpfd64_srcptr src,
                  fpfd_rnd_t rnd, fpfd_enc_t enc);
 int fpfd32_set128(fpfd32_ptr dest, fpfd128_srcptr src,
@@ -72,8 +71,7 @@ int fpfd32_set128(fpfd32_ptr dest, fpfd128_srcptr src,
 
 int fpfd64_set32(fpfd64_ptr dest, fpfd32_srcptr src,
                  fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd64_set64(fpfd64_ptr dest, fpfd64_srcptr src,
-                 fpfd_rnd_t rnd, fpfd_enc_t enc);
+void fpfd64_set64(fpfd64_ptr dest, fpfd64_srcptr src, fpfd_enc_t enc);
 int fpfd64_set128(fpfd64_ptr dest, fpfd128_srcptr src,
                   fpfd_rnd_t rnd, fpfd_enc_t enc);
 
@@ -81,8 +79,7 @@ int fpfd128_set32(fpfd128_ptr dest, fpfd32_srcptr src,
                   fpfd_rnd_t rnd, fpfd_enc_t enc);
 int fpfd128_set64(fpfd128_ptr dest, fpfd64_srcptr src,
                   fpfd_rnd_t rnd, fpfd_enc_t enc);
-int fpfd128_set128(fpfd128_ptr dest, fpfd128_srcptr src,
-                   fpfd_rnd_t rnd, fpfd_enc_t enc);
+void fpfd128_set128(fpfd128_ptr dest, fpfd128_srcptr src, fpfd_enc_t enc);
 
 int fpfd32_set_ui(fpfd32_ptr dest, uint32_t src,
                   fpfd_rnd_t rnd, fpfd_enc_t enc);
@@ -108,8 +105,35 @@ int fpfd64_add(fpfd64_ptr dest, fpfd64_srcptr lhs, fpfd64_srcptr rhs,
 int fpfd128_add(fpfd128_ptr dest, fpfd128_srcptr lhs, fpfd128_srcptr rhs,
                 fpfd_rnd_t rnd, fpfd_enc_t enc);
 
+// Subtraction
+
+int fpfd32_sub(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd64_sub(fpfd64_ptr dest, fpfd64_srcptr lhs, fpfd64_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd128_sub(fpfd128_ptr dest, fpfd128_srcptr lhs, fpfd128_srcptr rhs,
+                fpfd_rnd_t rnd, fpfd_enc_t enc);
+
+// Multiplication
+
+int fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd64_mul(fpfd64_ptr dest, fpfd64_srcptr lhs, fpfd64_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd128_mul(fpfd128_ptr dest, fpfd128_srcptr lhs, fpfd128_srcptr rhs,
+                fpfd_rnd_t rnd, fpfd_enc_t enc);
+
+// Division
+
+int fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd64_div(fpfd64_ptr dest, fpfd64_srcptr lhs, fpfd64_srcptr rhs,
+               fpfd_rnd_t rnd, fpfd_enc_t enc);
+int fpfd128_div(fpfd128_ptr dest, fpfd128_srcptr lhs, fpfd128_srcptr rhs,
+                fpfd_rnd_t rnd, fpfd_enc_t enc);
+
 #ifdef __cplusplus
-// }
+}
 #endif // __cplusplus
 
 #endif // FPFD_H
