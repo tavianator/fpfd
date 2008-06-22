@@ -68,6 +68,7 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .L1i:
@@ -83,6 +84,7 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .LsNaN:
@@ -90,6 +92,7 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .LqNaN:
@@ -97,6 +100,7 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .Linf:   
@@ -104,6 +108,7 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
+        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
         .size fpfd32_from_bcd, .-fpfd32_from_bcd

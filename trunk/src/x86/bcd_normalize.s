@@ -28,7 +28,7 @@
 fpfd32_bcd_normalize:
         pushl %ebx
         pushl %esi
-        movl 4(%esp), %esi      # Put dest in esi
+        movl 12(%esp), %esi      # Put dest in esi
         movl (%esi), %eax
         movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ecx         # Find the leading non-zero bit
