@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE(fpfd, 0.0)
 
 # Programs
 AC_PROG_CC
+AM_PROG_CC_C_O
 AM_PROG_AS
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -13,11 +14,15 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdint.h string.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h stddef.h stdint.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_INT32_T
 AC_TYPE_UINT32_T
+AC_TYPE_INT32_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
+AC_TYPE_SIZE_T
 
 # Find out which assembler files to compile
 AC_CANONICAL_HOST
@@ -31,5 +36,6 @@ esac
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+		 bench/Makefile])
 AC_OUTPUT
