@@ -20,49 +20,69 @@
 
 #include "fpfd_impl.h"
 
-fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
-                              fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
-                              fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
-                              fpfd_enc_t enc) {
-  fpfd_enc_t enc_used;
-
-  if (arg1->enc == arg2->enc) {
-    enc_used = arg1->enc;
-
-    switch (arg1->enc) {
+void fpfd32_expand2(fpfd32_srcptr fp1, fpfd32_srcptr fp2,
+                    fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
+                    fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
+                    fpfd_enc_t enc) {
+  switch (enc) {
+  case FPFD_ENCD:
+    switch (fp1->enc) {
     case FPFD_ENCD:
-      fpfd32_to_bcd(bcd1, arg1);
-      fpfd32_to_bcd(bcd2, arg2);
+      fpfd32_to_bcd(bcd1, fp1);
       break;
     case FPFD_ENCB:
-      fpfd32_to_bin(bin1, arg1);
-      fpfd32_to_bin(bin2, arg2);
+      fpfd32_to_bin(bin1, fp1);
+      fpfd32_bin_to_bcd(bcd1, bin1);
       break;
     default:
-      fpfd_panic("fpfd32_try_expand2(): arg1->enc has unacceptable value");
+      fpfd_panic("fpfd32_expand2(): fp1->enc has unacceptable value");
       break;
     }
-  } else {
-    enc_used = enc;
 
-    if (arg1->enc == FPFD_ENCD) {
-      fpfd32_to_bcd(bcd1, arg1);
-      fpfd32_to_bin(bin2, arg2);
-
-      if (enc_used == FPFD_ENCB)
-        fpfd32_bcd_to_bin(bin1, bcd1);
-      else
-        fpfd32_bin_to_bcd(bcd2, bin2);
-    } else {
-      fpfd32_to_bin(bin1, arg1);
-      fpfd32_to_bcd(bcd2, arg2);
-
-      if (enc_used == FPFD_ENCD)
-        fpfd32_bin_to_bcd(bcd1, bin1);
-      else
-        fpfd32_bcd_to_bin(bin2, bcd2);
+    switch (fp2->enc) {
+    case FPFD_ENCD:
+      fpfd32_to_bcd(bcd2, fp2);
+      break;
+    case FPFD_ENCB:
+      fpfd32_to_bin(bin2, fp2);
+      fpfd32_bin_to_bcd(bcd2, bin2);
+      break;
+    default:
+      fpfd_panic("fpfd32_expand2(): fp2->enc has unacceptable value");
+      break;
     }
-  }
 
-  return enc_used;
+    break;
+  case FPFD_ENCB:
+    switch (fp1->enc) {
+    case FPFD_ENCD:
+      fpfd32_to_bcd(bcd1, fp1);
+      fpfd32_bcd_to_bin(bin1, bcd1);
+      break;
+    case FPFD_ENCB:
+      fpfd32_to_bin(bin1, fp1);
+      break;
+    default:
+      fpfd_panic("fpfd32_expand2(): fp1->enc has unacceptable value");
+      break;
+    }
+
+    switch (fp2->enc) {
+    case FPFD_ENCD:
+      fpfd32_to_bcd(bcd2, fp2);
+      fpfd32_bcd_to_bin(bin2, bcd2);
+      break;
+    case FPFD_ENCB:
+      fpfd32_to_bin(bin2, fp2);
+      break;
+    default:
+      fpfd_panic("fpfd32_expand2(): fp2->enc has unacceptable value");
+      break;
+    }
+
+    break;
+  default:
+    fpfd_panic("fpfd32_expand2(): enc has unacceptable value");
+    break;
+  }
 }
