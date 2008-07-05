@@ -22,44 +22,92 @@
 
 int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd, fpfd_enc_t enc) {
-  int tern;
+  int tern = 0;
   uint32_t rem1, rem2;
   fpfd32_bcd_t bcd, bcd1, bcd2;
   fpfd32_bin_t bin, bin1, bin2;
-  fpfd_enc_t enc_used;
 
-  enc_used = fpfd32_try_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
-
-  switch (enc_used) {
-  case FPFD_ENCD:
-    rem1 = fpfd32_bcd_addsub(&bcd, 1, &bcd1, &bcd2);
-    rem2 = fpfd32_bcd_normalize(&bcd);
-    tern = fpfd32_bcd_tern2(&bcd, rem1, rem2, rnd);
-    break;
-  case FPFD_ENCB:
-    rem1 = fpfd32_bin_addsub(&bin, 1, &bin1, &bin2);
-    rem2 = fpfd32_bin_normalize(&bin);
-    tern = fpfd32_bin_tern2(&bin, rem1, rem2, rnd);
-    break;
-  default:
-    fpfd_panic("fpfd32_add(): enc_used has unacceptable value");
-    break;
-  }
+  fpfd32_expand2(lhs, rhs, &bcd1, &bcd2, &bin1, &bin2, enc);
 
   switch (enc) {
   case FPFD_ENCD:
-    if (enc_used == FPFD_ENCB)
-      fpfd32_bin_to_bcd(&bcd, &bin);
+    if (fpfd32_bcd_nanprop(&bcd, &bcd1, &bcd2) == 0) {
+      if (bcd1.special == bcd2.special) {
+        switch (bcd1.special) {
+        case FPFD_NUMBER:
+          rem1 = fpfd32_bcd_addsub(&bcd, 1, &bcd1, &bcd2);
+          rem2 = fpfd32_bcd_normalize(&bcd);
+          tern = fpfd32_bcd_tern2(&bcd, rem1, rem2, rnd);
+          break;
+        case FPFD_INF:
+          if (bcd1.sign == bcd2.sign) {
+            bcd.sign = bcd1.sign;
+            bcd.special = FPFD_INF;
+          } else {
+            bcd.special = FPFD_QNAN;
+          }
+          tern = 0;
+          break;
+        default:
+          fpfd_panic("fpfd32_add(): Wrong bcd*.special value");
+        }
+      } else {
+        if (bcd1.special == FPFD_INF) {
+          bcd.sign = bcd1.sign;
+          bcd.special = FPFD_INF;
+        } else if (bcd2.special == FPFD_INF) {
+          bcd.sign = bcd2.sign;
+          bcd.special = FPFD_INF;
+        } else {
+          fpfd_panic("fpfd32_add(): One of bcd1.special or bcd2.special "
+                     "should be FPFD_INF");
+        }
+        tern = 0;
+      }
+    }
+
     fpfd32_from_bcd(dest, &bcd);
     break;
   case FPFD_ENCB:
-    if (enc_used == FPFD_ENCD)
-      fpfd32_bcd_to_bin(&bin, &bcd);
+    if (tern = fpfd32_bin_nanprop(&bin, &bin1, &bin2) == 0) {
+      if (bin1.special == bin2.special) {
+        switch (bin1.special) {
+        case FPFD_NUMBER:
+          rem1 = fpfd32_bin_addsub(&bin, 1, &bin1, &bin2);
+          rem2 = fpfd32_bin_normalize(&bin);
+          tern = fpfd32_bin_tern2(&bin, rem1, rem2, rnd);
+          break;
+        case FPFD_INF:
+          if (bin1.sign == bin2.sign) {
+            bin.sign = bin1.sign;
+            bin.special = FPFD_INF;
+          } else {
+            bin.special = FPFD_QNAN;
+          }
+          tern = 0;
+          break;
+        default:
+          fpfd_panic("fpfd32_add(): Wrong bin*.special value");
+        }
+      } else {
+        if (bin1.special == FPFD_INF) {
+          bin.sign = bin1.sign;
+          bin.special = FPFD_INF;
+        } else if (bin2.special == FPFD_INF) {
+          bin.sign = bin2.sign;
+          bin.special = FPFD_INF;
+        } else {
+          fpfd_panic("fpfd32_add(): One of bin1.special or bin2.special "
+                     "should be FPFD_INF");
+        }
+        tern = 0;
+      }
+    }
+
     fpfd32_from_bin(dest, &bin);
     break;
   default:
-    fpfd_panic("fpfd32_add(): enc has unacceptable value");
-    break;
+    fpfd_panic("fpfd32_add(): Wrong enc value");
   }
 
   return tern;

@@ -136,14 +136,19 @@ int fpfd32_bin_tern(fpfd32_bin_t *dest, uint32_t rem, fpfd_rnd_t rnd);
 int fpfd32_bin_tern2(fpfd32_bin_t *dest, uint32_t rem1, uint32_t rem2,
                      fpfd_rnd_t rnd);
 
-/* Expand many inputs into the fastest encodings */
+/* Expand more than one input into the same format */
+void fpfd32_expand2(fpfd32_srcptr fp1, fpfd32_srcptr fp2,
+                    fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
+                    fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
+                    fpfd_enc_t enc);
 
-fpfd_enc_t fpfd32_try_expand2(fpfd32_srcptr arg1, fpfd32_srcptr arg2,
-                              fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2,
-                              fpfd32_bin_t *bin1, fpfd32_bin_t *bin2,
-                              fpfd_enc_t enc);
+/* Propagate NANs if one or more operands is NAN */
+int fpfd32_bcd_nanprop(fpfd32_bcd_t *bcd,
+                       fpfd32_bcd_t *bcd1, fpfd32_bcd_t *bcd2);
+int fpfd32_bin_nanprop(fpfd32_bin_t *bin,
+                       fpfd32_bin_t *bin1, fpfd32_bin_t *bin2);
 
-/* Error out of bad situations. This function doesn't return. */
+/* Bail out of bad situations. This function doesn't return. */
 void fpfd_panic(const char *error);
 
 #ifdef __cplusplus
