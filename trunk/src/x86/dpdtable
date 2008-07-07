@@ -111,8 +111,8 @@ echo ""
 echo ".globl fpfd_dpd2bcd"
 echo "        .data"
 echo "        .align 32"
-echo "        .type fpfd_dpd2dbcd, @object"
-echo "        .size fpfd_dpd2dbcd, 2046"
+echo "        .type fpfd_dpd2bcd, @object"
+echo "        .size fpfd_dpd2bcd, 2046"
 echo "fpfd_dpd2bcd:"
 
 for ((num=0x000; num<=0x3FF; ++num))

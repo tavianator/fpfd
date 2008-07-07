@@ -49,7 +49,5 @@ double fpfd_ticks(const char *fn);
 /* Benchmark the arithmetic operations, and separately their micro-ops. trials
  * is the number of times to run the benchmark for a particular operation.
  */
-void fpfd32_bench_add(unsigned int trials, int rngfd, int rngsave);
-void fpfd32_bench_sub(unsigned int trials, int rngfd, int rngsave);
-void fpfd32_bench_mul(unsigned int trials, int rngfd, int rngsave);
-void fpfd32_bench_div(unsigned int trials, int rngfd, int rngsave);
+void fpfd32_bench(unsigned int trials, int rngfd, int rngsave);
+

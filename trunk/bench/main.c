@@ -48,10 +48,7 @@ int main(int argc, char **argv) {
    */
   const unsigned int trials = 100;
 
-  fpfd32_bench_add(trials, rngfd, rngsave);
-  fpfd32_bench_sub(trials, rngfd, rngsave);
-  fpfd32_bench_mul(trials, rngfd, rngsave);
-  fpfd32_bench_div(trials, rngfd, rngsave);
+  fpfd32_bench(trials, rngfd, rngsave);
 
   close(rngsave);
   close(rngfd);
