@@ -20,10 +20,10 @@
 #include "../src/fpfd_impl.h"
 #include <search.h> // For hsearch, etc.
 #include <stddef.h> // For size_t
-#include <sys/times.h> // For clock_t
+#include <stdint.h> // For uint64_t
 
 typedef struct {
-  clock_t ticks;
+  uint64_t ticks;
   unsigned int trials;
 } tickinfo;
 
@@ -39,11 +39,11 @@ void fpfd32_set_rand(fpfd32_ptr dest, fpfd_enc_t enc, int rngfd, int rngsave);
 
 /* Gets the number of clock ticks spent executing the current process
  */
-clock_t uticks();
+uint64_t rdtsc();
 
 /* Functions which deal with the hash table.
  */
-void fpfd_store_ticks(const char *fn, clock_t ticks);
+void fpfd_store_ticks(const char *fn, uint64_t ticks);
 double fpfd_ticks(const char *fn);
 
 /* Benchmark the arithmetic operations, and separately their micro-ops. trials
