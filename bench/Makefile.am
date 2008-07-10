@@ -1,5 +1,9 @@
 C_SOURCES = bench.c htable.c main.c random.c uticks.c
 
+if X86
+S_SOURCES = x86/rdtsc.s
+endif
+
 H_SOURCES = bench.h
 
 EXTRA_PROGRAMS    = benchmark

@@ -21,10 +21,10 @@
 #include "../src/fpfd_impl.h" // For fpfd_panic
 #include <search.h> // For hsearch
 #include <stdlib.h> // For malloc
-#include <sys/times.h> // For clock_t
 
-void fpfd_store_ticks(const char *fn, clock_t ticks) {
+void fpfd_store_ticks(const char *fn, uint64_t ticks) {
   ENTRY e, *ep;
+  uint64_t tsc1, tsc2;
 
   e.key = fn;
   ep = hsearch(e, FIND);
@@ -45,6 +45,11 @@ void fpfd_store_ticks(const char *fn, clock_t ticks) {
       fpfd_panic("store_ticks(): hsearch failed");
     }
   }
+
+  tsc1 = rdtsc();
+  tsc2 = rdtsc();
+
+  ticks -= tsc2 - tsc1;
 
   tickinfo *t = ep->data;
   t->ticks += ticks;
