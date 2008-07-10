@@ -19,9 +19,10 @@
 
 #include "bench.h"
 #include "../src/fpfd_impl.h" // For fpfd_panic
+#include <stdint.h> // For uint64_t, ...
 
 void fpfd32_bench(unsigned int trials, int rngfd, int rngsave) {
-  clock_t tsc1, tsc2;
+  uint64_t tsc1, tsc2;
   fpfd32_t fp, fp1, fp2;
   fpfd32_bcd_t bcd, bcd1, bcd2;
   fpfd32_bin_t bin, bin1, bin2;
