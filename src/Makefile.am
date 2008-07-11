@@ -1,6 +1,6 @@
 FPFD_VERSION = 0:0:0
 
-C_SOURCES = expand.c nan.c ops.c panic.c set.c tern.c
+C_SOURCES = ops.c panic.c set.c tern.c
 
 if X86
 S_SOURCES = x86/dpdtable.s x86/to_bcd.s x86/to_bin.s x86/from_bcd.s x86/from_bin.s x86/bcd_inc.s x86/bin_inc.s x86/bcd_normalize.s x86/bin_normalize.s x86/bin_mul.s
