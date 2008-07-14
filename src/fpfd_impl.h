@@ -22,15 +22,25 @@
 #define FPFD_IMPL_H
 
 #include "fpfd.h"
-#include <stdint.h>
+#include <stdint.h> /* For uint8_t */
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
 typedef enum {
   FPFD_ZERO, FPFD_NUMBER, FPFD_SNAN, FPFD_QNAN, FPFD_INF
 } fpfd_special_t;
+
+/* Factor out elements common to all fpfdX_expanded_t into a separate struct,
+ * to allow helper functions to work with the sign and special flag
+ * independantly of operand size.
+ */
+typedef struct {
+  int exp;
+  int sign;
+  fpfd_special_t special;
+} fpfd_expanded_t;
 
 /* These structs represent expanded versions of the coresponding fpfdX_t.
  * Each actually has room for a mantissa twice the length needed to represent a
@@ -38,10 +48,8 @@ typedef enum {
  */
 
 typedef struct {
-  unsigned char mant[8];
-  int32_t exp;
-  int32_t sign;
-  fpfd_special_t special;
+  uint8_t mant[8];
+  fpfd_expanded_t fields;
 } fpfd32_expanded_t;
 
 /* These routines work on expanded fpfdX_t's. A void return type signifies that
@@ -53,36 +61,41 @@ typedef struct {
  * correct ternary values, and round the result correctly.
  */
 
-void fpfd32_expand(fpfd32_expanded_t *dest, fpfd32_srcptr src);
-void fpfd32_contract(fpfd32_ptr dest, const fpfd32_expanded_t *src);
+void fpfd32_impl_expand(fpfd32_expanded_t *dest, fpfd32_srcptr src);
+void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_expanded_t *src);
 
 void fpfd32_impl_inc(fpfd32_expanded_t *dest);
 
-uint32_t fpfd32_impl_addsub(fpfd32_expanded_t *dest, int32_t sign,
-                            const fpfd32_expanded_t *lhs,
-                            const fpfd32_expanded_t *rhs);
+int fpfd32_impl_addsub(fpfd32_expanded_t *dest, int sign,
+                       const fpfd32_expanded_t *lhs,
+                       const fpfd32_expanded_t *rhs);
 
 void fpfd32_impl_mul(fpfd32_expanded_t *dest,
                      const fpfd32_expanded_t *lhs,
                      const fpfd32_expanded_t *rhs);
 
-uint32_t fpfd32_impl_div(fpfd32_expanded_t *dest,
-                         const fpfd32_expanded_t *lhs,
-                         const fpfd32_expanded_t *rhs);
+int fpfd32_impl_div(fpfd32_expanded_t *dest,
+                    const fpfd32_expanded_t *lhs,
+                    const fpfd32_expanded_t *rhs);
 
-uint32_t fpfd32_impl_normalize(fpfd32_expanded_t *dest);
+int fpfd32_impl_normalize(fpfd32_expanded_t *dest);
 
 /* Help with correct rounding */
 
-int fpfd32_impl_tern(fpfd32_expanded_t *dest, uint32_t rem, fpfd_rnd_t rnd);
-int fpfd32_impl_tern2(fpfd32_expanded_t *dest, uint32_t rem1, uint32_t rem2,
+int fpfd32_impl_tern(fpfd32_expanded_t *dest, int rem, fpfd_rnd_t rnd);
+int fpfd32_impl_tern2(fpfd32_expanded_t *dest, int rem1, int rem2,
                       fpfd_rnd_t rnd);
 
-/* Bail out of bad situations. This function doesn't return. */
-void fpfd_panic(const char *error);
+/* Propogate NaNs correctly.
+ * Returns 0 if neither lhs nor rhs is NaN (either sNaN or qNaN), 1 if lhs is
+ * NaN, or 2 if rhs is NaN. If a NaN is detected, it is propogated to dest.
+ */
+int fpfd32_impl_nanprop(fpfd32_expanded_t *dest,
+                        const fpfd32_expanded_t *lhs,
+                        const fpfd32_expanded_t *rhs);
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /* __cplusplus */
 
-#endif // FPFD_IMPL_H
+#endif /* FPFD_IMPL_H */

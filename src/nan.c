@@ -19,23 +19,18 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include <string.h>
 
-#ifdef __GNUC__
-#include <execinfo.h>
-#define BTBUFSIZE 100
-#endif /* __GNUC__ */
+int fpfd32_impl_nanprop(fpfd32_expanded_t *dest,
+                        const fpfd32_expanded_t *lhs,
+                        const fpfd32_expanded_t *rhs) {
+  if (lhs->special == FPFD_SNAN || lhs->special == FPFD_QNAN) {
+    memcpy(dest, lhs, sizeof(fpfd32_expanded_t));
+    return 1;
+  } else if (rhs->special == FPFD_SNAN || rhs->special == FPFD_QNAN) {
+    memcpy(dest, rhs, sizeof(fpfd32_expanded_t));
+    return 2;
+  }
 
-void fpfd_panic(const char *error) {
-#ifdef __GNUC__
-  void *buffer[BTBUFSIZE];
-  int nptrs;
-
-  nptrs = backtrace(buffer, BTBUFSIZE);
-  backtrace_symbols_fd(buffer, nptrs, fileno(stderr));
-#endif /* __GNUC__ */
-
-  fprintf(stderr, "\n%s\n\n", error);
-  exit(EXIT_FAILURE);
+  return 0;
 }

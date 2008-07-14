@@ -20,57 +20,27 @@
 
 #include "fpfd_impl.h"
 
-/* Returns the ternary value + 1, with the 0x10 bit set if an increment call is
- * needed.
- */
-static int fpfd_tern(int sign, int rem, fpfd_rnd_t rnd) {
-  int tern;
+int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+               fpfd_rnd_t rnd) {
+  int tern = 0;
+  int rem1, rem2;
+  fpfd32_expanded_t rop, op1, op2;
 
-  if (rem == 0) {
-    tern = 0x1;
-  } else if (rem == 10) {
-    tern = 1 - sign;
+  fpfd32_impl_expand(&op1, lhs);
+  fpfd32_impl_expand(&op2, rhs);
+
+  if (op1.fields.special == FPFD_NUMBER && op2.fields.special == FPFD_NUMBER) {
+    rem1 = fpfd32_impl_addsub(&rop, 1, &op1, &op2);
+    rem2 = fpfd32_impl_normalize(&rop);
+    tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
   } else {
-    switch (rnd) {
-    case FPFD_RNDNA:
-      if (rem < 5) {
-        tern = 1 + sign;
-      } else {
-        tern = (1 - sign) | 0x10;
-      }
-      break;
-    case FPFD_RNDZ:
-      tern = 1 + sign;
-      break;
-    case FPFD_RNDU:
-      tern = 1 - sign;
-      if (sign > 0) tern |= 0x10;
-      break;
-    case FPFD_RNDD:
-      tern = 1 + sign;
-      if (sign > 0) tern |= 0x10;
-      break;
-    case FPFD_RNDN:
-      if (rem <= 5) {
-        tern = 1 + sign;
-      } else {
-        tern = (1 - sign) | 0x10;
-      }
-      break;
+    if (fpfd32_impl_nanprop(&rop, &op1, &op2) == 0) {
+      fpfd_add_zeros(&rop.fields, &op1.fields, &op2.fields);
+      fpfd_
     }
   }
 
+  fpfd32_impl_contract(dest, &rop);
+
   return tern;
-}
-
-int fpfd32_impl_tern(fpfd32_expanded_t *dest, int rem, fpfd_rnd_t rnd) {
-  int tern = fpfd_tern(dest->sign, rem, rnd);
-  if (tern & 0x10) fpfd32_impl_inc(dest);
-  return (tern & 0xF) - 1;
-}
-
-int fpfd32_impl_tern2(fpfd32_expanded_t *dest, int rem1, int rem2,
-                      fpfd_rnd_t rnd) {
-  if ((rem2 == 0 || rem2 == 5) && rem1 != 0) ++rem2;
-  return fpfd32_impl_tern(dest, rem2, rnd);
 }
