@@ -33,8 +33,8 @@ typedef enum {
 
 typedef uint8_t fpfd32_t[4];
 
-typedef       uint_8 *fpfd32_ptr;
-typedef const uint_8 *fpfd32_srcptr;
+typedef       uint8_t *fpfd32_ptr;
+typedef const uint8_t *fpfd32_srcptr;
 
 /* Assignment */
 

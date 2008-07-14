@@ -24,18 +24,37 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
 AC_TYPE_SIZE_T
 
-# Find out which assembler files to compile
+# Decimal or binary encoding?
+AC_ARG_WITH([dpd],
+            [AS_HELP_STRING([--with-dpd],
+                            [use the densely-packed-decimal encoding])],
+            [],
+            [with_dpd=no])
+
+AC_ARG_WITH([bin],
+            [AS_HELP_STRING([--with-bin],
+                            [use the binary encoding])],
+            [],
+            [with_bin=no])
+
+AM_CONDITIONAL([DPD], [test "x$with_dpd" != xno])
+AM_CONDITIONAL([BIN], [test "x$with_bin" != xno])
+
+# Find out which assembly files to compile
 AC_CANONICAL_HOST
 
 case $host_cpu in
      *86)
         AM_CONDITIONAL([X86], [true])
-        src/x86/dpdtable > src/x86/dpdtable.s
+        test "x$with_dpd" != xno &&
+            src/dpd/x86/dpdtable > src/dpd/x86/dpdtable.s
         ;;
 esac
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/dpd/Makefile
+                 src/bin/Makefile
 		 bench/Makefile])
 AC_OUTPUT

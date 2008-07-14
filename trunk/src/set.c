@@ -21,19 +21,9 @@
 #include "fpfd_impl.h"
 #include <string.h>
 
-void fpfd32_set32(fpfd32_ptr dest, fpfd32_srcptr src, fpfd_enc_t enc) {
-  fpfd32_bcd_t bcd;
-  fpfd32_bin_t bin;
-
-  if (src->enc == enc) {
-    memcpy(dest, src, sizeof(fpfd32_struct_t));
-  } else if (src->enc == FPFD_ENCD) {
-    fpfd32_to_bcd(&bcd, src);
-    fpfd32_bcd_to_bin(&bin, &bcd);
-    fpfd32_from_bin(dest, &bin);
-  } else {
-    fpfd32_to_bin(&bin, src);
-    fpfd32_bin_to_bcd(&bcd, &bin);
-    fpfd32_from_bcd(dest, &bcd);
-  }
+void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src) {
+  /* Don't just memcpy, because we should canonicalize non-canonical inputs */
+  fpfd32_expanded_t rop;
+  fpfd32_expand(&rop, src);
+  fpfd32_contract(dest, &rop);
 }
