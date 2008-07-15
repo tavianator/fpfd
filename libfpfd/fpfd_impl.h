@@ -32,16 +32,6 @@ typedef enum {
   FPFD_ZERO, FPFD_NUMBER, FPFD_SNAN, FPFD_QNAN, FPFD_INF
 } fpfd_special_t;
 
-/* Factor out elements common to all fpfdX_expanded_t into a separate struct,
- * to allow helper functions to work with the sign and special flag
- * independantly of operand size.
- */
-typedef struct {
-  int exp;
-  int sign;
-  fpfd_special_t special;
-} fpfd_expanded_t;
-
 /* These structs represent expanded versions of the coresponding fpfdX_t.
  * Each actually has room for a mantissa twice the length needed to represent a
  * fpfdX_t, so that multiplication can be done exactly.
@@ -49,7 +39,9 @@ typedef struct {
 
 typedef struct {
   uint8_t mant[8];
-  fpfd_expanded_t fields;
+  int exp;
+  int sign;
+  fpfd_special_t special;
 } fpfd32_expanded_t;
 
 /* These routines work on expanded fpfdX_t's. A void return type signifies that
