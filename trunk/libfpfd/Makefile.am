@@ -2,8 +2,8 @@ if DPD
   SUBDIRS = dpd
 endif
 
-if BIN
-  SUBDIRS = bin
+if BID
+  SUBDIRS = bid
 endif
 
 FPFD_VERSION = 0:0:0
@@ -23,5 +23,5 @@ if DPD
 endif
 
 if BIN
-  libfpfd_la_LIBADD  = bin/libbin.la
+  libfpfd_la_LIBADD  = bin/libbid.la
 endif
