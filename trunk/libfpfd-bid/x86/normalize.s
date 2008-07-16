@@ -18,13 +18,13 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# uint32_t fpfd32_bin_normalize(fpfd32_bin_t *dest);
+# int fpfd32_impl_normalize(fpfd32_impl_t *dest);
 #
 # Normalize the value in dest.
 
         .text
-.globl fpfd32_bin_normalize
-        .type fpfd32_bin_normalize, @function
-fpfd32_bin_normalize:
+.globl fpfd32_impl_normalize
+        .type fpfd32_impl_normalize, @function
+fpfd32_impl_normalize:
         ret
-        .size fpfd32_bin_normalize, .-fpfd32_bin_normalize
+        .size fpfd32_impl_normalize, .-fpfd32_impl_normalize

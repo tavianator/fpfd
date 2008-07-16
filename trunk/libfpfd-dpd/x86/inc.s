@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_bcd_inc(fpfd32_bcd_t *dest);
+# void fpfd32_impl_inc(fpfd32_impl_t *dest);
 #
 # Increment the mantissa, in case we need to round. dest must be normalized.
 # To increment the mantissa, we add one to the BCD value, then check for
@@ -28,9 +28,9 @@
 # if so add 0x60, etc.
 
         .text
-.globl fpfd32_bcd_inc
-        .type fpfd32_bcd_inc, @function
-fpfd32_bcd_inc:
+.globl fpfd32_impl_inc
+        .type fpfd32_impl_inc, @function
+fpfd32_impl_inc:
         movl 4(%esp), %ecx
         movl (%ecx), %eax
         addl $1, %eax           # Increment the mantissa
@@ -73,4 +73,4 @@ fpfd32_bcd_inc:
         popl %esi
         popl %ebx
         ret
-        .size fpfd32_bcd_inc, .-fpfd32_bcd_inc
+        .size fpfd32_impl_inc, .-fpfd32_impl_inc

@@ -21,14 +21,13 @@
 #include "fpfd_impl.h"
 #include <string.h>
 
-int fpfd32_impl_nanprop(fpfd32_expanded_t *dest,
-                        const fpfd32_expanded_t *lhs,
-                        const fpfd32_expanded_t *rhs) {
+int fpfd32_impl_nanprop(fpfd32_impl_t *dest,
+                        const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs) {
   if (lhs->special == FPFD_SNAN || lhs->special == FPFD_QNAN) {
-    memcpy(dest, lhs, sizeof(fpfd32_expanded_t));
+    memcpy(dest, lhs, sizeof(fpfd32_impl_t));
     return 1;
   } else if (rhs->special == FPFD_SNAN || rhs->special == FPFD_QNAN) {
-    memcpy(dest, rhs, sizeof(fpfd32_expanded_t));
+    memcpy(dest, rhs, sizeof(fpfd32_impl_t));
     return 2;
   }
 

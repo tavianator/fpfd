@@ -1,10 +1,21 @@
-if DPD
-  SUBDIRS = dpd
-endif
-
-if BID
-  SUBDIRS = bid
-endif
+#########################################################################
+# Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               #
+#                                                                       #
+# This file is part of The FPFD Library Build Suite                     #
+#                                                                       #
+# The FPFD Library Build Suite is free software; you can redistribute   #
+# it and/or modify it under the terms of the GNU General Public License #
+# as published by the Free Software Foundation; either version 3 of the #
+# License, or (at your option) any later version.                       #
+#                                                                       #
+# The FPFD Library Build Suite is distributed in the hope that it will  #
+# be useful, but WITHOUT ANY WARRANTY; without even the implied         #
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See #
+# the GNU General Public License for more details.                      #
+#                                                                       #
+# You should have received a copy of the GNU General Public License     #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>. #
+#########################################################################
 
 FPFD_VERSION = 0:0:0
 
@@ -18,10 +29,10 @@ libfpfd_la_SOURCES = $(C_SOURCES) $(H_SOURCES)
 libfpfd_la_LDFLAGS = -version-info $(FPFD_VERSION)
 libfpfd_la_CFLAGS  = -W -Wall -Wextra -std=gnu99
 
-if DPD
-  libfpfd_la_LIBADD  = dpd/libdpd.la
+if STATIC_DPD
+  libfpfd_la_LIBADD  = ../libfpfd-dpd/libfpfd-dpd.la
 endif
 
-if BIN
-  libfpfd_la_LIBADD  = bin/libbid.la
+if STATIC_BID
+  libfpfd_la_LIBADD  = ../libfpfd-bid/libfpfd-bid.la
 endif

@@ -23,7 +23,7 @@
 
 void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src) {
   /* Don't just memcpy, because we should canonicalize non-canonical inputs */
-  fpfd32_expanded_t rop;
-  fpfd32_expand(&rop, src);
-  fpfd32_contract(dest, &rop);
+  fpfd32_impl_t rop;
+  fpfd32_impl_expand(&rop, src);
+  fpfd32_impl_contract(dest, &rop);
 }

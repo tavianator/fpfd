@@ -18,15 +18,15 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_from_bin(fpfd32_ptr dest, const fpfd32_bin_t *src);
+# void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_impl_t *src);
 #
 # Shrinks the expanded encoding in src to the compact encoding in dest. Src
 # must be normalized.
 
         .text
-.globl fpfd32_from_bcd
-        .type fpfd32_from_bcd, @function
-fpfd32_from_bcd:
+.globl fpfd32_impl_contract
+        .type fpfd32_impl_contract, @function
+fpfd32_impl_contract:
         pushl %ebx
         movl 12(%esp), %ecx
         movl (%ecx), %eax
@@ -47,12 +47,14 @@ fpfd32_from_bcd:
         negl %ebx
         shll $30, %ebx          # Map the sign bit from (-1, +1) to (1, 0), and
                                 # shift it to the MSB
-        movl 16(%ecx), %edx     # Handle sNaN, qNaN, and infinities
-        cmpl $1, %edx
-        je .LsNaN
+        movl 16(%ecx), %edx     # Handle zeros, sNaN, qNaN, and infinities
+        cmpl $0, %edx
+        je .Lzero
         cmpl $2, %edx
-        je .LqNaN
+        je .LsNaN
         cmpl $3, %edx
+        je .LqNaN
+        cmpl $4, %edx
         je .Linf
         movl 8(%ecx), %edx
         addl $101, %edx         # Get the biased exponent
@@ -68,7 +70,6 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
-        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .L1i:
@@ -84,7 +85,13 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
-        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
+        popl %ebx
+        ret
+.Lzero:
+        movl $0x22500000, %eax
+        orl %ebx, %eax
+        movl 8(%esp), %ecx
+        movl %eax, (%ecx)
         popl %ebx
         ret
 .LsNaN:
@@ -92,7 +99,6 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
-        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .LqNaN:
@@ -100,7 +106,6 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
-        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
 .Linf:   
@@ -108,7 +113,6 @@ fpfd32_from_bcd:
         orl %ebx, %eax
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
-        movl $0, 4(%ecx)        # Set dest->enc to FPFD_ENCD
         popl %ebx
         ret
-        .size fpfd32_from_bcd, .-fpfd32_from_bcd
+        .size fpfd32_impl_contract, .-fpfd32_impl_contract

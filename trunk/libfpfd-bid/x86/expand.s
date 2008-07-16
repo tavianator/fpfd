@@ -18,15 +18,15 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_to_bin(fpfd32_bin_t *dest, fpfd32_srcptr src);
+# void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
 #
 # Converts the compact binary representation in src to the expanded form
 # dest.
 
         .text
-.globl fpfd32_to_bin
-        .type fpfd32_to_bin, @function
-fpfd32_to_bin:
+.globl fpfd32_impl_expand
+        .type fpfd32_impl_expand, @function
+fpfd32_impl_expand:
         pushl %ebx
         movl 8(%esp), %eax
         movl 12(%esp), %ebx
@@ -98,4 +98,4 @@ fpfd32_to_bin:
         movl $3, 16(%eax)
         popl %ebx
         ret
-        .size fpfd32_to_bin, .-fpfd32_to_bin
+        .size fpfd32_impl_expand, .-fpfd32_impl_expand
