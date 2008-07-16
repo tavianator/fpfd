@@ -18,7 +18,7 @@
 #########################################################################
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = libfpfd-dpd libfpfd-bid libfpfd bench
+SUBDIRS = libfpfd-dpd libfpfd-bid libfpfd check bench
 
 bench: all-recursive
 	cd bench && $(MAKE) $(AM_MAKEFLAGS) bench
