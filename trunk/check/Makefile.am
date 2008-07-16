@@ -17,24 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-C_SOURCES = bench.c htable.c main.c random.c
+check_PROGRAMS = signedzero-dpd signedzero-bid
+TESTS          = $(check_PROGRAMS)
 
-if X86
-S_SOURCES = x86/rdtsc.s
-endif
-
-H_SOURCES = bench.h
-
-EXTRA_PROGRAMS        = benchmark-dpd benchmark-bid
-benchmark_dpd_SOURCES = $(C_SOURCES) $(S_SOURCES) $(H_SOURCES)
-benchmark_dpd_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-dpd/libfpfd-dpd.la
-benchmark_dpd_CFLAGS  = -W -Wall -Wextra -std=gnu99
-benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
-benchmark_bid_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-bid/libfpfd-bid.la
-benchmark_bid_CFLAGS  = $(benchmark_bid_CFLAGS)
-
-bench: benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
-	echo DPD Encoding results:
-	./benchmark-dpd$(EXEEXT) /dev/urandom ./rngsave
-	echo BID Encoding results:
-	./benchmark-bid$(EXEEXT) /dev/urandom ./rngsave
+signedzero_dpd_SOURCES = signedzero.c
+signedzero_dpd_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-dpd/libfpfd-dpd.la
+signedzero_dpd_CFLAGS  = -W -Wall -Wextra -std=gnu99
+signedzero_bid_SOURCES = $(signedzero_dpd_SOURCES)
+signedzero_bid_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-bid/libfpfd-bid.la
+signedzero_bid_CFLAGS  = $(signedzero_dpd_CFLAGS)
