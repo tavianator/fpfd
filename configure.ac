@@ -64,7 +64,7 @@ AM_CONDITIONAL([X86], [echo $host_cpu | grep '.*86$' > /dev/null])
 
 case $host_cpu in
     *86)
-        src/dpd/x86/dpdtable > src/dpd/x86/dpdtable.s
+        libfpfd-dpd/x86/dpdtable > libfpfd-dpd/x86/dpdtable.s
         ;;
 esac
 

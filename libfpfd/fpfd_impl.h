@@ -42,7 +42,7 @@ typedef struct {
   int exp;
   int sign;
   fpfd_special_t special;
-} fpfd32_expanded_t;
+} fpfd32_impl_t;
 
 /* These routines work on expanded fpfdX_t's. A void return type signifies that
  * the result is always exact. Otherwise, the functions return a remainder equal
@@ -53,38 +53,32 @@ typedef struct {
  * correct ternary values, and round the result correctly.
  */
 
-void fpfd32_impl_expand(fpfd32_expanded_t *dest, fpfd32_srcptr src);
-void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_expanded_t *src);
+void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
+void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_impl_t *src);
 
-void fpfd32_impl_inc(fpfd32_expanded_t *dest);
+void fpfd32_impl_inc(fpfd32_impl_t *dest);
 
-int fpfd32_impl_addsub(fpfd32_expanded_t *dest, int sign,
-                       const fpfd32_expanded_t *lhs,
-                       const fpfd32_expanded_t *rhs);
+int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
+                       const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+void fpfd32_impl_mul(fpfd32_impl_t *dest,
+                     const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+int fpfd32_impl_div(fpfd32_impl_t *dest,
+                    const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
 
-void fpfd32_impl_mul(fpfd32_expanded_t *dest,
-                     const fpfd32_expanded_t *lhs,
-                     const fpfd32_expanded_t *rhs);
-
-int fpfd32_impl_div(fpfd32_expanded_t *dest,
-                    const fpfd32_expanded_t *lhs,
-                    const fpfd32_expanded_t *rhs);
-
-int fpfd32_impl_normalize(fpfd32_expanded_t *dest);
+int fpfd32_impl_normalize(fpfd32_impl_t *dest);
 
 /* Help with correct rounding */
 
-int fpfd32_impl_tern(fpfd32_expanded_t *dest, int rem, fpfd_rnd_t rnd);
-int fpfd32_impl_tern2(fpfd32_expanded_t *dest, int rem1, int rem2,
+int fpfd32_impl_tern(fpfd32_impl_t *dest, int rem, fpfd_rnd_t rnd);
+int fpfd32_impl_tern2(fpfd32_impl_t *dest, int rem1, int rem2,
                       fpfd_rnd_t rnd);
 
 /* Propogate NaNs correctly.
  * Returns 0 if neither lhs nor rhs is NaN (either sNaN or qNaN), 1 if lhs is
  * NaN, or 2 if rhs is NaN. If a NaN is detected, it is propogated to dest.
  */
-int fpfd32_impl_nanprop(fpfd32_expanded_t *dest,
-                        const fpfd32_expanded_t *lhs,
-                        const fpfd32_expanded_t *rhs);
+int fpfd32_impl_nanprop(fpfd32_impl_t *dest,
+                        const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
 
 #ifdef __cplusplus
 }

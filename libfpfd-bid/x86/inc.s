@@ -18,14 +18,14 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_bin_inc(fpfd32_bin_t *dest);
+# void fpfd32_impl_inc(fpfd32_impl_t *dest);
 #
 # Increment the mantissa, in order to round. dest must be normalized.
 
         .text
-.globl fpfd32_bin_inc
-        .type fpfd32_bin_inc, @function
-fpfd32_bin_inc:
+.globl fpfd32_impl_inc
+        .type fpfd32_impl_inc, @function
+fpfd32_impl_inc:
         movl 4(%esp), %eax
         movl (%eax), %edx
         andl $0xFFFFFF, %edx
@@ -38,4 +38,4 @@ fpfd32_bin_inc:
         addl $1,  8(%eax)
         movl $1000000, (%eax)
         ret
-        .size fpfd32_bin_inc, .-fpfd32_bin_inc
+        .size fpfd32_impl_inc, .-fpfd32_impl_inc

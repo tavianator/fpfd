@@ -18,15 +18,15 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_bin_mul(fpfd32_bin_t *dest,
-#                     const fpfd32_bin_t *lhs, const fpfd32_bin_t *rhs);
+# void fpfd32_impl_mul(fpfd32_impl_t *dest,
+#                      const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
 #
 # Multiply lhs and rhs, and put the result in dest.
 
         .text
-.globl fpfd32_bin_mul
-        .type fpfd32_bin_mul, @function
-fpfd32_bin_mul:
+.globl fpfd32_impl_mul
+        .type fpfd32_impl_mul, @function
+fpfd32_impl_mul:
         pushl %ebx
         pushl %esi
         pushl %edi              # Callee-save registers
@@ -51,4 +51,4 @@ fpfd32_bin_mul:
         popl %esi
         popl %ebx
         ret
-        .size fpfd32_bin_mul, .-fpfd32_bin_mul
+        .size fpfd32_impl_mul, .-fpfd32_impl_mul

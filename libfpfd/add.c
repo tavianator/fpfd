@@ -19,30 +19,13 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-
-static int fpfd_add_zeros(int lhs, int rhs, fpfd_rnd_t rnd) {
-  int sign;
-
-  switch (rnd) {
-  case FPFD_RNDN:
-    break;
-  case FPFD_RNDNA:
-    break;
-  case FPFD_RNDZ:
-    break;
-  case FPFD_RNDU:
-    break;
-  case FPFD_RNDD:
-    break;
-  }
-
-  return sign;
-}
+#include <string.h> // For memcpy
 
 int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd) {
   int tern = 0;
-  fpfd32_expanded_t rop, op1, op2;
+  int rem1, rem2;
+  fpfd32_impl_t rop, op1, op2;
 
   fpfd32_impl_expand(&op1, lhs);
   fpfd32_impl_expand(&op2, rhs);
@@ -52,12 +35,18 @@ int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     case FPFD_ZERO:
       switch (op2.special) {
       case FPFD_ZERO:
-        rop.sign = fpfd_add_zeros(op1.sign, op2.sign, rnd);
+        if (op1.sign == op2.sign) {
+          rop.sign = op1.sign;
+        } else if (rnd == FPFD_RNDD) {
+          rop.sign = -1;
+        } else {
+          rop.sign = 1;
+        }
         rop.special = FPFD_ZERO;
         break;
       case FPFD_NUMBER:
       case FPFD_INF:
-        memcpy(&rop, &op2, sizeof(fpfd32_expanded_t));
+        memcpy(&rop, &op2, sizeof(fpfd32_impl_t));
         break;
       }
       break;
@@ -65,20 +54,33 @@ int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     case FPFD_NUMBER:
       switch (op2.special) {
       case FPFD_ZERO:
-        memcpy(&rop, &op2, sizeof(fpfd32_expanded_t));
+        memcpy(&rop, &op2, sizeof(fpfd32_impl_t));
         break;
       case FPFD_NUMBER:
-        int rem1 = fpfd32_impl_addsub(&rop, 1, &op1, &op2);
-        int rem2 = fpfd32_impl_normalize(&rop);
+        rem1 = fpfd32_impl_addsub(&rop, 1, &op1, &op2);
+        rem2 = fpfd32_impl_normalize(&rop);
         tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
+        break;
       case FPFD_INF:
-        memcpy(&rop, &op2, sizeof(fpfd32_expanded_t));
+        memcpy(&rop, &op2, sizeof(fpfd32_impl_t));
         break;
       }
       break;
 
     case FPFD_INF:
-      memcpy(&rop, &op21, sizeof(fpfd32_expanded_t));
+      switch (op2.special) {
+      case FPFD_ZERO:
+      case FPFD_NUMBER:
+        memcpy(&rop, &op1, sizeof(fpfd32_impl_t));
+        break;
+      case FPFD_INF:
+        if (op1.sign == op2.sign) {
+          memcpy(&rop, &op1, sizeof(fpfd32_impl_t));
+        } else {
+          rop.special = FPFD_QNAN;
+        }
+        break;
+      }
       break;
     }
   }

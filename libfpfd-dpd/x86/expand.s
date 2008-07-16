@@ -18,15 +18,15 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_to_bcd(fpfd32_bcd_t *dest, fpfd32_srcptr src);
+# void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
 #
 # Converts the densely-packed-decimal representation in src to the binary-
 # coded-decimal form in dest.
 
         .text
-.globl fpfd32_to_bcd
-        .type fpfd32_to_bcd, @function
-fpfd32_to_bcd:
+.globl fpfd32_impl_expand
+        .type fpfd32_impl_expand, @function
+fpfd32_impl_expand:
         pushl %ebx
         movl 8(%esp), %eax
         movl 12(%esp), %ebx
@@ -58,6 +58,7 @@ fpfd32_to_bcd:
         andl $0x1C0, %edx
         shll $19, %edx
         orl %edx, %ebx
+        jz .Lzero
         movl %ebx, (%eax)       # Get the leading significand digit
         movl %ecx, %edx
         andl $0x3F, %ecx
@@ -67,7 +68,7 @@ fpfd32_to_bcd:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
-        movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
         popl %ebx
         ret
 .L1i:
@@ -94,28 +95,35 @@ fpfd32_to_bcd:
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
-        movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        popl %ebx
+        ret
+.Lzero:
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
+        movl $0, 16(%eax)
         popl %ebx
         ret
 .LsNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $1, 16(%eax)
+        movl $2, 16(%eax)
         popl %ebx
         ret
 .LqNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $2, 16(%eax)
+        movl $3, 16(%eax)
         popl %ebx
         ret
 .Linf:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $3, 16(%eax)
+        movl $4, 16(%eax)
         popl %ebx
         ret
-        .size fpfd32_to_bcd, .-fpfd32_to_bcd
+        .size fpfd32_impl_expand, .-fpfd32_impl_expand

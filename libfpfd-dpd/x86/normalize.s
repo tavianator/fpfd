@@ -18,17 +18,17 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# uint32_t fpfd32_bcd_normalize(fpfd32_bcd_t *dest);
+# int fpfd32_impl_normalize(fpfd32_impl_t *dest);
 #
 # Normalize the value in dest.
 
         .text
-.globl fpfd32_bcd_normalize
-        .type fpfd32_bcd_normalize, @function
-fpfd32_bcd_normalize:
+.globl fpfd32_impl_normalize
+        .type fpfd32_impl_normalize, @function
+fpfd32_impl_normalize:
         pushl %ebx
         pushl %esi
-        movl 12(%esp), %esi      # Put dest in esi
+        movl 12(%esp), %esi     # Put dest in esi
         movl (%esi), %eax
         movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ecx         # Find the leading non-zero bit
@@ -187,4 +187,4 @@ fpfd32_bcd_normalize:
         popl %esi
         popl %ebx
         ret
-        .size fpfd32_bcd_normalize, .-fpfd32_bcd_normalize
+        .size fpfd32_impl_normalize, .-fpfd32_impl_normalize
