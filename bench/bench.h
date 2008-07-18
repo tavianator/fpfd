@@ -17,27 +17,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "../src/fpfd_impl.h"
-#include <search.h> // For hsearch, etc.
-#include <stddef.h> // For size_t
-#include <stdint.h> // For uint64_t
+#include "../libfpfd/fpfd_impl.h"
+#include <search.h> /* For hsearch, etc. */
+#include <stddef.h> /* For size_t */
+#include <stdint.h> /* For uint64_t */
+#include <stdio.h> /* For FILE */
 
 typedef struct {
   uint64_t ticks;
   unsigned int trials;
 } tickinfo;
 
-/* Reads count bytes from rngfd in an endian-independant way, and writes them
+/* Reads count bytes from rng in an endian-independant way, and writes them
  * back into rngsave for reproducability
  */
-void rngread(int rngfd, int rngsave, void *buf, size_t count);
+void rngread(FILE *rng, FILE *rngsave, void *buf, size_t count);
 
-/* Set dest to a random number, read from rngfd (usually /dev/urandom), and
+/* Set dest to a random number, read from rng (usually /dev/urandom), and
  * saves the read bytes back in rngsave
  */
-void fpfd32_set_rand(fpfd32_ptr dest, fpfd_enc_t enc, int rngfd, int rngsave);
+void fpfd32_set_rand(fpfd32_ptr dest, FILE *rng, FILE *rngsave);
 
-/* Gets the number of clock ticks spent executing the current process
+/* Gets the number of clock ticks since some time
  */
 uint64_t rdtsc();
 
@@ -47,7 +48,7 @@ void fpfd_store_ticks(const char *fn, uint64_t ticks);
 double fpfd_ticks(const char *fn);
 
 /* Benchmark the arithmetic operations, and separately their micro-ops. trials
- * is the number of times to run the benchmark for a particular operation.
+ * is the number of times to run the benchmark for each operation.
  */
-void fpfd32_bench(unsigned int trials, int rngfd, int rngsave);
+void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave);
 

@@ -19,7 +19,7 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-#include <string.h> // For memcpy
+#include <string.h> /* For memcpy */
 
 int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd) {

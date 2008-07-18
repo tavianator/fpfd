@@ -18,9 +18,9 @@
  *************************************************************************/
 
 #include "bench.h"
-#include "../src/fpfd_impl.h" // For fpfd_panic
-#include <search.h> // For hsearch
-#include <stdlib.h> // For malloc
+#include <search.h> /* For hsearch */
+#include <stdlib.h> /* For malloc, exit */
+#include <stdio.h> /* For perror */
 
 void fpfd_store_ticks(const char *fn, uint64_t ticks) {
   ENTRY e, *ep;
@@ -36,13 +36,15 @@ void fpfd_store_ticks(const char *fn, uint64_t ticks) {
     e.data = t;
 
     if (!e.data) {
-      fpfd_panic("store_ticks(): malloc failed");
+      perror("malloc");
+      exit(EXIT_FAILURE);
     }
 
     ep = hsearch(e, ENTER);
 
     if (!ep) {
-      fpfd_panic("store_ticks(): hsearch failed");
+      perror("hsearch");
+      exit(EXIT_FAILURE);
     }
   }
 
