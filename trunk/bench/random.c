@@ -18,116 +18,49 @@
  *************************************************************************/
 
 #include "bench.h"
-#include "../src/fpfd_impl.h" // For fpfd32_from_bin
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 
-void rngread(int rngfd, int rngsave, void *buf, size_t count) {
+void rngread(FILE *rng, FILE *rngsave, void *buf, size_t count) {
   uint32_t n32;
   uint16_t n16;
   uint8_t n8;
 
-  while (count >= 4) {
-    read(rngfd, &n32, 4);
+  while (count >= sizeof(uint32_t)) {
+    fread(&n32, sizeof(uint32_t), 1, rng);
     n32 = ntohl(n32);
-    memcpy(buf, &n32, 4);
+    memcpy(buf, &n32, sizeof(uint32_t));
     n32 = htonl(n32);
-    write(rngsave, &n32, 4);
-    buf = (uint8_t *)buf + 4;
-    count -= 4;
+    fwrite(&n32, sizeof(uint32_t), 1, rngsave);
+    buf = (uint8_t *)buf + sizeof(uint32_t);
+    count -= sizeof(uint32_t);
   }
 
   if (count) {
-    read(rngfd, &n16, 2);
+    fread(&n16, sizeof(uint16_t), 1, rng);
     n16 = ntohs(n16);
-    memcpy(buf, &n16, 2);
+    memcpy(buf, &n16, sizeof(uint16_t));
     n16 = htons(n16);
-    write(rngsave, &n16, 2);
-    buf = (uint8_t *)buf + 2;
-    count -= 2;
+    fwrite(&n16, sizeof(uint16_t), 1, rngsave);
+    buf = (uint8_t *)buf + sizeof(uint16_t);
+    count -= sizeof(uint16_t);
   }
 
   if (count) {
-    read(rngfd, &n8, 1);
-    memcpy(buf, &n8, 1);
-    write(rngsave, &n8, 1);
+    fread(&n8, sizeof(uint8_t), 1, rng);
+    memcpy(buf, &n8, sizeof(uint8_t));
+    fwrite(&n8, sizeof(uint8_t), 1, rngsave);
   }
 }
 
-void fpfd32_set_rand(fpfd32_ptr dest, fpfd_enc_t enc, int rngfd, int rngsave) {
-  uint32_t exp, sign;
-  fpfd32_bin_t bin; /* HACK! fpfd32_from_bin keeps the mantissa intact, even
-                       if it's really meant to be a decimal-encoded number */
+void fpfd32_set_rand(fpfd32_ptr dest, FILE *rng, FILE *rngsave) {
+  fpfd32_impl_t rop;
 
-  memset(bin.mant, 0, 8);
-
-  rngread(rngfd, rngsave, bin.mant, 4);
-  rngread(rngfd, rngsave, &exp, 4);
-  rngread(rngfd, rngsave, &sign, 4);
-
-  uint32_t *mant = (uint32_t *)(&bin.mant[0]);
-  *mant &= 0x000FFFFF;
-
-  exp %= 192;
-  sign %= 2;
-  sign <<= 1;
-
-  bin.exp = exp - 101;
-  bin.sign = sign - 1;
-  bin.special = FPFD_NUMBER;
-
-  fpfd32_from_bin(dest, &bin);
-  dest->enc = enc;
-}
-
-void fpfd32_bcd_rand(fpfd32_bcd_t *dest, int rngfd, int rngsave) {
-  uint32_t rand, exp, sign;
-  uint32_t *mant;
-
-  mant = (uint32_t *)(&dest->mant[0]);
-  rngread(rngfd, rngsave, &rand, 4);
-
-  for (int i = 0; i < 8; ++i) {
-    *mant <<= 4;
-    *mant += rand % 10;
-    rand /= 10;
-  }
-  
-  mant = (uint32_t *)(&dest->mant[4]);
-  rngread(rngfd, rngsave, &rand, 4);
-
-  for (int i = 0; i < 8; ++i) {
-    *mant <<= 4;
-    *mant += rand % 10;
-    rand >>= 4;
-  }
-  
-  rngread(rngfd, rngsave, &exp, 4);
-  rngread(rngfd, rngsave, &sign, 4);
-
-  exp %= 192;
-  sign %= 2;
-  sign <<= 1;
-
-  dest->exp = exp - 101;
-  dest->sign = sign - 1;
-  dest->special = FPFD_NUMBER;
-}
-
-void fpfd32_bin_rand(fpfd32_bin_t *dest, int rngfd, int rngsave) {
-  uint32_t exp, sign;
-
-  rngread(rngfd, rngsave, dest->mant, 8);
-  rngread(rngfd, rngsave, &exp, 4);
-  rngread(rngfd, rngsave, &sign, 4);
-
-  exp %= 192;
-  sign %= 2;
-  sign <<= 1;
-
-  dest->exp = exp - 101;
-  dest->sign = sign - 1;
-  dest->special = FPFD_NUMBER;
+  /* Loop until we have zero or a number. */
+  do {
+    rngread(rng, rngsave, dest, sizeof(fpfd32_t));
+    fpfd32_impl_expand(&rop, dest);
+  } while (rop.special != FPFD_ZERO && rop.special != FPFD_NUMBER);
 }

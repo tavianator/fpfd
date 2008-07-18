@@ -21,8 +21,8 @@ check_PROGRAMS = signedzero-dpd signedzero-bid
 TESTS          = $(check_PROGRAMS)
 
 signedzero_dpd_SOURCES = signedzero.c
-signedzero_dpd_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-dpd/libfpfd-dpd.la
+signedzero_dpd_LDADD   = ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 signedzero_dpd_CFLAGS  = -W -Wall -Wextra -std=gnu99
 signedzero_bid_SOURCES = $(signedzero_dpd_SOURCES)
-signedzero_bid_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-bid/libfpfd-bid.la
+signedzero_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 signedzero_bid_CFLAGS  = $(signedzero_dpd_CFLAGS)

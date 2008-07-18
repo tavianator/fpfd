@@ -18,7 +18,6 @@
  *************************************************************************/
 
 #include "bench.h"
-#include "../src/fpfd_impl.h" // For fpfd_panic
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -28,29 +27,30 @@
 
 int main(int argc, char **argv) {
   if (argc < 3) {
-    fpfd_panic("main(): Wrong arguments");
+    fprintf(stderr, "main(): Wrong arguments\n");
     return EXIT_FAILURE;
   }
 
-  int rngfd = open(argv[1], O_RDONLY);
-  int rngsave = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC,
-                     S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  FILE *rng = fopen(argv[1], "r");
+  FILE *rngsave = fopen(argv[2], "w");
 
-  if (rngfd == -1 || rngsave == -1) {
-    fpfd_panic("main(): open() failed");
+  if (rng == NULL || rngsave == NULL) {
+    perror("open");
+    return EXIT_FAILURE;
   }
 
   if (!hcreate(40)) {
-    fpfd_panic("main(): hcreate() failed");
+    perror("hcreate");
+    return EXIT_FAILURE;
   }
 
   /* Should be enough to get consistent tick counts every time
    */
   const unsigned int trials = 100;
 
-  fpfd32_bench(trials, rngfd, rngsave);
+  fpfd32_bench(trials, rng, rngsave);
 
-  close(rngsave);
-  close(rngfd);
+  fclose(rngsave);
+  fclose(rng);
   return EXIT_SUCCESS;
 }

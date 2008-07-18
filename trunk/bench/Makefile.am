@@ -27,11 +27,11 @@ H_SOURCES = bench.h
 
 EXTRA_PROGRAMS        = benchmark-dpd benchmark-bid
 benchmark_dpd_SOURCES = $(C_SOURCES) $(S_SOURCES) $(H_SOURCES)
-benchmark_dpd_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-dpd/libfpfd-dpd.la
+benchmark_dpd_LDADD   = ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 benchmark_dpd_CFLAGS  = -W -Wall -Wextra -std=gnu99
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
-benchmark_bid_LDADD   = ../libfpfd/libfpfd.la ../libfpfd-bid/libfpfd-bid.la
-benchmark_bid_CFLAGS  = $(benchmark_bid_CFLAGS)
+benchmark_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+benchmark_bid_CFLAGS  = $(benchmark_dpd_CFLAGS)
 
 bench: benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
 	echo DPD Encoding results:
