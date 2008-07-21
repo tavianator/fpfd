@@ -33,14 +33,9 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h stddef.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h stddef.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_UINT32_T
-AC_TYPE_INT32_T
-AC_TYPE_UINT16_T
-AC_TYPE_UINT64_T
-AC_TYPE_UINT8_T
 AC_TYPE_SIZE_T
 
 # Static or dynamic linking of back-end?

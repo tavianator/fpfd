@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-# uint64_t rdtsc();
+# unsigned long rdtsc();
 #
 # Return the time stamp counter, and serialize the instruction
 
@@ -29,12 +29,10 @@ rdtsc:
         movl $0, %eax           # Make cpuid take a consistent number of ticks
         cpuid                   # Serialize
         rdtsc                   # Read time stamp counter
-        movl %eax, -8(%esp)
-        movl %edx, -4(%esp)     # Store tsc
+        movl %eax, -4(%esp)     # Store tsc
         movl $0, %eax
         cpuid                   # Serialize again
-        movl -8(%esp), %eax
-        movl -4(%esp), %edx
+        movl -4(%esp), %eax
         popl %ebx
         ret
         .size rdtsc, .-rdtsc

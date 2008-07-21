@@ -22,9 +22,9 @@
 #include <stdlib.h> /* For malloc, exit */
 #include <stdio.h> /* For perror */
 
-void fpfd_store_ticks(const char *fn, uint64_t ticks) {
+void fpfd_store_ticks(const char *fn, unsigned long ticks) {
   ENTRY e, *ep;
-  uint64_t tsc1, tsc2;
+  unsigned long tsc1, tsc2;
 
   e.key = fn;
   ep = hsearch(e, FIND);
