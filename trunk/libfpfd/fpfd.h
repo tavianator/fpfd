@@ -21,20 +21,18 @@
 #ifndef FPFD_H
 #define FPFD_H
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
 typedef enum {
   FPFD_RNDN, FPFD_RNDNA, FPFD_RNDZ, FPFD_RNDU, FPFD_RNDD
 } fpfd_rnd_t;
 
-typedef uint8_t fpfd32_t[4];
+typedef unsigned char fpfd32_t[4];
 
-typedef       uint8_t *fpfd32_ptr;
-typedef const uint8_t *fpfd32_srcptr;
+typedef       unsigned char *fpfd32_ptr;
+typedef const unsigned char *fpfd32_srcptr;
 
 /* Assignment */
 
@@ -62,6 +60,6 @@ int fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
 #endif /* FPFD_H */

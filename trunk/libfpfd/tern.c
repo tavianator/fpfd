@@ -20,7 +20,8 @@
 
 #include "fpfd_impl.h"
 
-/* Returns the ternary value + 1, with the 0x10 bit set if an increment call is
+/*
+ * Returns the ternary value + 1, with the 0x10 bit set if an increment call is
  * needed.
  */
 static int fpfd_tern(int sign, int rem, fpfd_rnd_t rnd) {

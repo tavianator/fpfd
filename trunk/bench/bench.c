@@ -18,16 +18,16 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdint.h> // For uint64_t, ...
 
 void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
-  uint64_t tsc1, tsc2;
+  unsigned int i;
+  unsigned long tsc1, tsc2;
   fpfd32_t fp, fp1, fp2;
   fpfd32_impl_t rop, op1, op2;
-  uint32_t rem1, rem2;
+  int rem1, rem2;
   fpfd_rnd_t rnd = FPFD_RNDN;
 
-  for (unsigned int i = 0; i < trials; ++i) {
+  for (i = 0; i < trials; ++i) {
     /* Micro ops */
 
     fpfd32_set_rand(fp1, rng, rngsave);

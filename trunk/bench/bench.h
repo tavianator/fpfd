@@ -20,34 +20,38 @@
 #include "../libfpfd/fpfd_impl.h"
 #include <search.h> /* For hsearch, etc. */
 #include <stddef.h> /* For size_t */
-#include <stdint.h> /* For uint64_t */
 #include <stdio.h> /* For FILE */
 
 typedef struct {
-  uint64_t ticks;
+  unsigned long ticks;
   unsigned int trials;
 } tickinfo;
 
-/* Reads count bytes from rng in an endian-independant way, and writes them
+/*
+ * Reads count bytes from rng in an endian-independant way, and writes them
  * back into rngsave for reproducability
  */
 void rngread(FILE *rng, FILE *rngsave, void *buf, size_t count);
 
-/* Set dest to a random number, read from rng (usually /dev/urandom), and
+/*
+ * Set dest to a random number, read from rng (usually /dev/urandom), and
  * saves the read bytes back in rngsave
  */
 void fpfd32_set_rand(fpfd32_ptr dest, FILE *rng, FILE *rngsave);
 
-/* Gets the number of clock ticks since some time
+/*
+ * Gets the number of clock ticks since some time
  */
-uint64_t rdtsc();
+unsigned long rdtsc();
 
-/* Functions which deal with the hash table.
+/*
+ * Functions which deal with the hash table.
  */
-void fpfd_store_ticks(const char *fn, uint64_t ticks);
+void fpfd_store_ticks(const char *fn, unsigned long ticks);
 double fpfd_ticks(const char *fn);
 
-/* Benchmark the arithmetic operations, and separately their micro-ops. trials
+/*
+ * Benchmark the arithmetic operations, and separately their micro-ops. trials
  * is the number of times to run the benchmark for each operation.
  */
 void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave);

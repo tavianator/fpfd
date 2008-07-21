@@ -44,8 +44,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  /* Should be enough to get consistent tick counts every time
-   */
+  /* Should be enough to get consistent tick counts every time */
   const unsigned int trials = 100;
 
   fpfd32_bench(trials, rng, rngsave);
