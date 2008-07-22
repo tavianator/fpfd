@@ -25,14 +25,35 @@
 extern "C" {
 #endif
 
+/*
+ * Rounding direction:
+ *   FPFD_RNDN  - Round-to-nearest, ties toward zero
+ *   FPFD_RNDNA - Round-to-nearset, ties away from zero
+ *   FPFD_RNDZ  - Round toward zero
+ *   FPFD_RNDU  - Round toward positive infinity
+ *   FPFD_RNDD  - Round toward negative infinity
+ */
 typedef enum {
   FPFD_RNDN, FPFD_RNDNA, FPFD_RNDZ, FPFD_RNDU, FPFD_RNDD
 } fpfd_rnd_t;
 
-typedef unsigned char fpfd32_t[4];
+/* Struct wrapper for the actual data of the decimal types. */
 
-typedef       unsigned char *fpfd32_ptr;
-typedef const unsigned char *fpfd32_srcptr;
+typedef struct {
+  unsigned char data[4];
+} fpfd32_struct_t;
+
+/*
+ * Arrays are allocated on the stack, but passed by reference. We don't simply
+ * do
+ *   typedef unsigned char fpfd32_t[4];
+ * because there would be little type safety between different fpfd*_t's.
+ */
+typedef fpfd32_struct_t fpfd32_t[1];
+
+/* Pointer types */
+typedef       fpfd32_struct_t *fpfd32_ptr;
+typedef const fpfd32_struct_t *fpfd32_srcptr;
 
 /* Assignment */
 

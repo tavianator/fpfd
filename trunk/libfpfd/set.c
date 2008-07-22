@@ -19,9 +19,10 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-#include <string.h>
 
-void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src) {
+void
+fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src)
+{
   /* Don't just memcpy, because we should canonicalize non-canonical inputs */
   fpfd32_impl_t rop;
   fpfd32_impl_expand(&rop, src);
