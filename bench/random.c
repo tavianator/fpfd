@@ -62,5 +62,6 @@ void fpfd32_set_rand(fpfd32_ptr dest, FILE *rng, FILE *rngsave) {
   do {
     rngread(rng, rngsave, dest, sizeof(fpfd32_t));
     fpfd32_impl_expand(&rop, dest);
-  } while (rop.special != FPFD_ZERO && rop.special != FPFD_NUMBER);
+  } while (rop.fields.special != FPFD_ZERO
+           && rop.fields.special != FPFD_NUMBER);
 }

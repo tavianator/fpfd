@@ -27,9 +27,42 @@
 extern "C" {
 #endif
 
+/*
+ * Flag to designate special cases of a floating-point number.
+ *   FPFD_ZERO   - The number is exactly zero. It is useful to have a separate
+ *                 flag for this case, to make it easy for the multiplication
+ *                 and division functions to handle cases like 0 * inf or
+ *                 0 / 0.
+ *   FPFD_NUMBER - The number is a nonzero real number.
+ *   FPFD_SNAN   - The number is a signaling NaN.
+ *   FPFD_QNAN   - The number is a quiet NaN.
+ *   FPFD_INF    - The number is an infinity.
+ */
 typedef enum {
   FPFD_ZERO, FPFD_NUMBER, FPFD_SNAN, FPFD_QNAN, FPFD_INF
 } fpfd_special_t;
+
+/*
+ * A type returned by helper functions used by arithmetic operations.
+ *   FPFD_RET     - Just contract the return value and return 0.
+ *   FPFD_LHS     - Contract lhs to the return value and return 0.
+ *   FPFD_RHS     - Contract rhs to the return value and return 0.
+ *   FPFD_OPERATE - Perform the arithmetic operation.
+ */
+typedef enum {
+  FPFD_RET, FPFD_LHS, FPFD_RHS, FPFD_OPERATE
+} fpfd_action_t;
+
+/*
+ * Factor out elements common to all fpfd*_impl_t's. This enables a single
+ * helper function to handle each permutation of flags for each operation; one
+ * such function for fpfd*_add, another for fpfd*_mul, etc.
+ */
+typedef struct {
+  int exp;
+  int sign;
+  fpfd_special_t special;
+} fpfd_impl_t;  
 
 /*
  * These structs represent expanded versions of the coresponding fpfdX_t.
@@ -39,9 +72,7 @@ typedef enum {
 
 typedef struct {
   unsigned char mant[8];
-  int exp;
-  int sign;
-  fpfd_special_t special;
+  fpfd_impl_t fields;
 } fpfd32_impl_t;
 
 /*
@@ -52,6 +83,9 @@ typedef struct {
  * 0.01 rounds to 1, and 5.01 rounds to 6. A value of 10 signifies that an
  * infinity was returned. The fpfdX_*_ternN functions convert these values to
  * correct ternary values, and round the result correctly.
+ *
+ * These functions are implemented in assembly by the implementation library
+ * for each encoding.
  */
 
 void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
@@ -76,11 +110,12 @@ int fpfd32_impl_tern2(fpfd32_impl_t *dest, int rem1, int rem2,
 
 /* 
  * Propogate NaNs correctly.
- * Returns 0 if neither lhs nor rhs is NaN (either sNaN or qNaN), 1 if lhs is
- * NaN, or 2 if rhs is NaN. If a NaN is detected, it is propogated to dest.
+ *
+ * Returns FPFD_OPERATE if neither lhs nor rhs is NaN. If lhs is NaN, set
+ * lhs->special to FPFD_QNAN, and return FPFD_LHS. Otherwise, if rhs is NaN,
+ * behave analogously for rhs, returning FPFD_RHS.
  */
-int fpfd32_impl_nanprop(fpfd32_impl_t *dest,
-                        const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+fpfd_action_t fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs);
 
 #ifdef __cplusplus
 }
