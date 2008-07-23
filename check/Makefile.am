@@ -20,7 +20,7 @@
 check_PROGRAMS = signedzero-dpd signedzero-bid
 TESTS          = $(check_PROGRAMS)
 
-signedzero_dpd_SOURCES = signedzero.c check.h
+signedzero_dpd_SOURCES = signedzero.c
 signedzero_dpd_LDADD   = ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 signedzero_bid_SOURCES = $(signedzero_dpd_SOURCES)
 signedzero_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
