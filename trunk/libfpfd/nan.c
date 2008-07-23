@@ -19,7 +19,6 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
-#include <string.h>
 
 fpfd_action_t
 fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs)

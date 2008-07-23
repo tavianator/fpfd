@@ -18,10 +18,9 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <stdio.h>     /* For fread              */
+#include <string.h>    /* For memcpy             */
+#include <arpa/inet.h> /* For ntohl, htonl, etc. */
 
 void rngread(FILE *rng, FILE *rngsave, void *buf, size_t count) {
   uint32_t n32;

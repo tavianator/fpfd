@@ -19,8 +19,8 @@
 
 #include "../libfpfd/fpfd_impl.h"
 #include <search.h> /* For hsearch, etc. */
-#include <stddef.h> /* For size_t */
-#include <stdio.h> /* For FILE */
+#include <stddef.h> /* For size_t        */
+#include <stdio.h>  /* For FILE          */
 
 typedef struct {
   unsigned long ticks;
