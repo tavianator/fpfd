@@ -18,14 +18,14 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# int fpfd32_impl_normalize(fpfd32_impl_t *dest);
+# int fpfd32_impl_scale(fpfd32_impl_t *dest);
 #
-# Normalize the value in dest.
+# Scale the value in dest, to fit in the compressed format
 
         .text
-.globl fpfd32_impl_normalize
-        .type fpfd32_impl_normalize, @function
-fpfd32_impl_normalize:
+.globl fpfd32_impl_scale
+        .type fpfd32_impl_scale, @function
+fpfd32_impl_scale:
         pushl %ebx
         pushl %esi
         movl 12(%esp), %esi     # Put dest in esi
@@ -45,9 +45,9 @@ fpfd32_impl_normalize:
         addl 8(%esi), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
-        cmpl $-107, %ecx
-        jl .LuflowMSW
         cmpl $-101, %ecx
+        jl .LuflowMSW
+        cmpl $-95, %ecx
         jl .LsubnormMSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         movl $0, %ecx
@@ -55,7 +55,7 @@ fpfd32_impl_normalize:
         shrdl $4, %edx, %eax
         shrl $4, %edx           # Shift edx:eax.ecx to the 28th bit
         movl %edx, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the normalized mantissa
+        movl $0, 4(%esi)        # Set dest->mant to the scaled mantissa
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -68,7 +68,7 @@ fpfd32_impl_normalize:
         ret
 .LsubnormMSW:
         negl %ecx
-        subl $101, %ecx
+        subl $95, %ecx
         shll $2, %ecx
         addl $4, %ecx
         movl $0, %ebx
@@ -77,8 +77,8 @@ fpfd32_impl_normalize:
         shrl %cl, %edx          # Shift edx:eax.ebx to the correct bit
         movl %ebx, %ecx
         movl %edx, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the subnormalized mantissa
-        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
+        movl $0, 4(%esi)        # Set dest->mant to the subscaled mantissa
+        movl $-95, 8(%esi)      # Set the exponent to the sumnormal exponent
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -125,15 +125,15 @@ fpfd32_impl_normalize:
         addl 8(%esi), %ecx      # Add (4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
-        cmpl $-107, %ecx
-        jl .LuflowLSW
         cmpl $-101, %ecx
+        jl .LuflowLSW
+        cmpl $-95, %ecx
         jl .LsubnormLSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         shrdl $4, %eax, %edx
         shrl $4, %eax           # Shift eax.edx to the 28th bit
         movl %eax, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the normalized mantissa
+        movl $0, 4(%esi)        # Set dest->mant to the scaled mantissa
         movl %edx, %eax
         shrl $28, %eax
         popl %esi
@@ -141,14 +141,14 @@ fpfd32_impl_normalize:
         ret
 .LsubnormLSW:
         negl %ecx
-        subl $101, %ecx
+        subl $95, %ecx
         shll $2, %ecx
         addl $4, %ecx
         shrdl %cl, %eax, %edx
         shrl %cl, %eax          # Shift eax.edx to the correct bit
         movl %eax, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the subnormalized mantissa
-        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
+        movl $0, 4(%esi)        # Set dest->mant to the subscaled mantissa
+        movl $-95, 8(%esi)      # Set the exponent to the sumnormal exponent
         movl %edx, %eax
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax
@@ -187,4 +187,4 @@ fpfd32_impl_normalize:
         popl %esi
         popl %ebx
         ret
-        .size fpfd32_impl_normalize, .-fpfd32_impl_normalize
+        .size fpfd32_impl_scale, .-fpfd32_impl_scale

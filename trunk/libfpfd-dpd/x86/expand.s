@@ -65,7 +65,7 @@ fpfd32_impl_expand:
         andl $0x600, %edx
         shrl $3, %edx
         orl %ecx, %edx
-        subl $101, %edx
+        subl $95, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
@@ -92,7 +92,7 @@ fpfd32_impl_expand:
         andl $0x180, %edx
         shrl %edx
         orl %ecx, %edx
-        subl $101, %edx
+        subl $95, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER

@@ -18,15 +18,15 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_impl_t *src);
+# void fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src);
 #
 # Shrinks the expanded encoding in src to the compact encoding in dest. Src
 # must be normalized.
 
         .text
-.globl fpfd32_impl_contract
-        .type fpfd32_impl_contract, @function
-fpfd32_impl_contract:
+.globl fpfd32_impl_compress
+        .type fpfd32_impl_compress, @function
+fpfd32_impl_compress:
         pushl %ebx
         movl 12(%esp), %ecx
         movl (%ecx), %eax
@@ -57,7 +57,7 @@ fpfd32_impl_contract:
         cmpl $4, %edx
         je .Linf
         movl 8(%ecx), %edx
-        addl $101, %edx         # Get the biased exponent
+        addl $95, %edx          # Get the biased exponent
         testl $0x20000000, %eax
         jnz .L1i
         movl %edx, %ecx
@@ -115,4 +115,4 @@ fpfd32_impl_contract:
         movl %eax, (%ecx)
         popl %ebx
         ret
-        .size fpfd32_impl_contract, .-fpfd32_impl_contract
+        .size fpfd32_impl_compress, .-fpfd32_impl_compress

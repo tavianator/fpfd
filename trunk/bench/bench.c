@@ -49,9 +49,9 @@ void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
     fpfd_store_ticks("fpfd32_impl_addsub(1)", tsc2 - tsc1);
 
     tsc1 = rdtsc();
-    rem2 = fpfd32_impl_normalize(&rop);
+    rem2 = fpfd32_impl_scale(&rop);
     tsc2 = rdtsc();
-    fpfd_store_ticks("fpfd32_impl_normalize(addsub(1))", tsc2 - tsc1);
+    fpfd_store_ticks("fpfd32_impl_scale(addsub(1))", tsc2 - tsc1);
 
     tsc1 = rdtsc();
     rem1 = fpfd32_impl_addsub(&rop, -1, &op1, &op2);
@@ -59,9 +59,9 @@ void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
     fpfd_store_ticks("fpfd32_impl_addsub(-1)", tsc2 - tsc1);
 
     tsc1 = rdtsc();
-    rem2 = fpfd32_impl_normalize(&rop);
+    rem2 = fpfd32_impl_scale(&rop);
     tsc2 = rdtsc();
-    fpfd_store_ticks("fpfd32_impl_normalize(addsub(-1))", tsc2 - tsc1);
+    fpfd_store_ticks("fpfd32_impl_scale(addsub(-1))", tsc2 - tsc1);
 
     tsc1 = rdtsc();
     fpfd32_impl_mul(&rop, &op1, &op2);
@@ -69,9 +69,9 @@ void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
     fpfd_store_ticks("fpfd32_impl_mul", tsc2 - tsc1);
 
     tsc1 = rdtsc();
-    rem2 = fpfd32_impl_normalize(&rop);
+    rem2 = fpfd32_impl_scale(&rop);
     tsc2 = rdtsc();
-    fpfd_store_ticks("fpfd32_impl_normalize(mul)", tsc2 - tsc1);
+    fpfd_store_ticks("fpfd32_impl_scale(mul)", tsc2 - tsc1);
 
     tsc1 = rdtsc();
     rem1 = fpfd32_impl_div(&rop, &op1, &op2);
@@ -79,9 +79,9 @@ void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
     fpfd_store_ticks("fpfd32_impl_div", tsc2 - tsc1);
 
     tsc1 = rdtsc();
-    rem2 = fpfd32_impl_normalize(&rop);
+    rem2 = fpfd32_impl_scale(&rop);
     tsc2 = rdtsc();
-    fpfd_store_ticks("fpfd32_impl_normalize(div)", tsc2 - tsc1);
+    fpfd_store_ticks("fpfd32_impl_scale(div)", tsc2 - tsc1);
 
     tsc1 = rdtsc();
     fpfd32_impl_tern(&rop, rem2, rnd);
@@ -94,9 +94,9 @@ void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave) {
     fpfd_store_ticks("fpfd32_impl_tern2", tsc2 - tsc1);
 
     tsc1 = rdtsc();
-    fpfd32_from_bcd(fp, &rop);
+    fpfd32_impl_compress(fp, &rop);
     tsc2 = rdtsc();
-    fpfd_store_ticks("fpfd32_from_bcd", tsc2 - tsc1);
+    fpfd_store_ticks("fpfd32_impl_compress", tsc2 - tsc1);
 
     /* Macro ops */
 
