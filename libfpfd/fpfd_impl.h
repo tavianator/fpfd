@@ -44,9 +44,9 @@ typedef enum {
 
 /*
  * A type returned by helper functions used by arithmetic operations.
- *   FPFD_RET     - Just contract the return value and return 0.
- *   FPFD_LHS     - Contract lhs to the return value and return 0.
- *   FPFD_RHS     - Contract rhs to the return value and return 0.
+ *   FPFD_RET     - Just compress the return value and return 0.
+ *   FPFD_LHS     - Compress lhs to the return value and return 0.
+ *   FPFD_RHS     - Compress rhs to the return value and return 0.
  *   FPFD_OPERATE - Perform the arithmetic operation.
  */
 typedef enum {
@@ -89,7 +89,7 @@ typedef struct {
  */
 
 void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
-void fpfd32_impl_contract(fpfd32_ptr dest, const fpfd32_impl_t *src);
+void fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src);
 
 void fpfd32_impl_inc(fpfd32_impl_t *dest);
 
@@ -100,7 +100,7 @@ void fpfd32_impl_mul(fpfd32_impl_t *dest,
 int  fpfd32_impl_div(fpfd32_impl_t *dest,
                      const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
 
-int fpfd32_impl_normalize(fpfd32_impl_t *dest);
+int fpfd32_impl_scale(fpfd32_impl_t *dest);
 
 /* Help with correct rounding */
 

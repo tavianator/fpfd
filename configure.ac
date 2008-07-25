@@ -69,5 +69,6 @@ AC_CONFIG_FILES([Makefile
                  libfpfd-dpd/Makefile
                  libfpfd-bid/Makefile
                  check/Makefile
-		 bench/Makefile])
+		 bench/Makefile
+                 doc/Makefile])
 AC_OUTPUT

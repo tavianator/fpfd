@@ -97,17 +97,17 @@ fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
 
   switch (fpfd_add_action(&rop.fields, &op1.fields, &op2.fields, rnd)) {
   case FPFD_RET:
-    fpfd32_impl_contract(dest, &rop);
+    fpfd32_impl_compress(dest, &rop);
     break;
   case FPFD_LHS:
-    fpfd32_impl_contract(dest, &op1);
+    fpfd32_impl_compress(dest, &op1);
     break;
   case FPFD_RHS:
-    fpfd32_impl_contract(dest, &op2);
+    fpfd32_impl_compress(dest, &op2);
     break;
   case FPFD_OPERATE:
     rem1 = fpfd32_impl_addsub(&rop, 1, &op1, &op2);
-    rem2 = fpfd32_impl_normalize(&rop);
+    rem2 = fpfd32_impl_scale(&rop);
     tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
     break;
   }
