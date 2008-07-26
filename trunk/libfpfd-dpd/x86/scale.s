@@ -34,7 +34,7 @@ fpfd32_impl_scale:
         bsrl %edx, %ecx         # Find the leading non-zero bit
         jz .LzeroMSW
         addl $4, %ecx
-        andl $0xC, %ecx         # Add one and round up to a multiple of 4
+        andl $0x1C, %ecx        # Add one and round up to a multiple of 4
         subl $32, %ecx
         negl %ecx               # Subtract from 32
         shldl %cl, %eax, %edx
@@ -115,7 +115,7 @@ fpfd32_impl_scale:
         bsrl %eax, %ecx
         jz .Lzero
         addl $4, %ecx
-        andl $0xC, %ecx         # Add one and round up to a multiple of 4
+        andl $0x1C, %ecx        # Add one and round up to a multiple of 4
         subl $32, %ecx
         negl %ecx               # Subtract from 32
         shll %cl, %eax          # Shift eax all the way to the left
