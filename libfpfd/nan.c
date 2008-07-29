@@ -33,5 +33,5 @@ fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs)
     action = FPFD_RHS;
   }
 
-  return 0;
+  return action;
 }

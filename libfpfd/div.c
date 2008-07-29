@@ -27,7 +27,7 @@ fpfd_div_sign(fpfd_impl_t *op1, fpfd_impl_t *op2) {
   } else {
     return -1;
   }
-  /* return op1->sign ^ op2->sign ^ -1; */
+  /* return op1->sign ^ op2->sign ^ 1; */
 }
 
 static fpfd_action_t
@@ -115,6 +115,7 @@ fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     rem1 = fpfd32_impl_div(&rop, &op1, &op2);
     rem2 = fpfd32_impl_scale(&rop);
     tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
+    fpfd32_impl_compress(dest, &rop);
     break;
   }
 
