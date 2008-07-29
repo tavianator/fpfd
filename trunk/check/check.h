@@ -28,12 +28,17 @@ void fpfd32_set_neg_one(fpfd32_ptr dest);  /*        negative one      */
 void fpfd32_set_neg_inf(fpfd32_ptr dest);  /*        negative infinity */
 
 /*
- * If the special flag of src != special, print err followed by a space and the
- * rounding mode in brakets, as in 'Error (FPFD_RNDN)'.
+ * If the special flag of res != special, print err followed by a space and the
+ * rounding mode in brakets, then a newline, as in 'Error (FPFD_RNDN)\n'. Then
+ * dump the hex values of the operands as 'lhs @ rhs == src\n'.
  */
-void fpfd32_assert_special(fpfd32_srcptr src, fpfd_special_t special,
+void fpfd32_assert_special(fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+                           fpfd32_srcptr res,
+                           fpfd_special_t special,
                            const char *err, fpfd_rnd_t rnd);
 
-/* Like fpfd32_assert_special, but fail if the sign of src != sign */
-void fpfd32_assert_sign(fpfd32_srcptr src, int sign, const char *err,
-                        fpfd_rnd_t rnd);
+/* Like fpfd32_assert_special, but fail if the sign of res != sign */
+void fpfd32_assert_sign(fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+                        fpfd32_srcptr res,
+                        int sign,
+                        const char *err, fpfd_rnd_t rnd);

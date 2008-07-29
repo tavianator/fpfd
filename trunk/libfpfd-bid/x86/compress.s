@@ -71,6 +71,7 @@ fpfd32_impl_compress:
         movl 8(%esp), %ecx
         movl %eax, (%ecx)
         popl %ebx
+        ret
 .LsNaN:
         orl $0x7E000000, %eax
         orl %ebx, %eax

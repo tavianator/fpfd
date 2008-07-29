@@ -49,8 +49,11 @@ fpfd32_impl_expand:
         subl $95, %edx
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x007FFFFF, %ecx
+        cmpl $0, %ecx
+        je .Lzero               # Test for a zero operand to support FPFD_ZERO
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
+        movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
         popl %ebx
         ret
 .L2ii:
@@ -69,9 +72,20 @@ fpfd32_impl_expand:
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x001FFFFF, %ecx
         orl $0x00800000, %ecx
+        cmpl $10000000, %ecx
+        jae .Lzero              # If the significand exceeds the maximum
+                                # significand in the decimal encoding, zero is
+                                # used instead
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
-        movl $0, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
+        popl %ebx
+        ret
+.Lzero:  
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
+        movl $0, 16(%eax)       # Set the special flag to FPFD_ZERO
         popl %ebx
         ret
 .LsNaN:
@@ -79,7 +93,7 @@ fpfd32_impl_expand:
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $1, 16(%eax)
+        movl $2, 16(%eax)       # Set the special flag to FPFD_SNAN
         popl %ebx
         ret
 .LqNaN:
@@ -87,7 +101,7 @@ fpfd32_impl_expand:
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $2, 16(%eax)
+        movl $3, 16(%eax)       # Set the special flag to FPFD_QNAN
         popl %ebx
         ret
 .Linf:
@@ -95,7 +109,7 @@ fpfd32_impl_expand:
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $3, 16(%eax)
+        movl $4, 16(%eax)       # Set the special flag to FPFD_INF
         popl %ebx
         ret
         .size fpfd32_impl_expand, .-fpfd32_impl_expand

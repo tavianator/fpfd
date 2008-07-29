@@ -109,6 +109,7 @@ fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     rem1 = fpfd32_impl_addsub(&rop, 1, &op1, &op2);
     rem2 = fpfd32_impl_scale(&rop);
     tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
+    fpfd32_impl_compress(dest, &rop);
     break;
   }
 

@@ -102,28 +102,28 @@ fpfd32_impl_expand:
         movl $0, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $0, 16(%eax)
+        movl $0, 16(%eax)       # Set the special flag to FPFD_ZERO
         popl %ebx
         ret
 .LsNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $2, 16(%eax)
+        movl $2, 16(%eax)       # Set the special flag to FPFD_SNAN
         popl %ebx
         ret
 .LqNaN:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $3, 16(%eax)
+        movl $3, 16(%eax)       # Set the special flag to FPFD_QNAN
         popl %ebx
         ret
 .Linf:
         movl %ebx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $4, 16(%eax)
+        movl $4, 16(%eax)       # Set the special flag to FPFD_INF
         popl %ebx
         ret
         .size fpfd32_impl_expand, .-fpfd32_impl_expand

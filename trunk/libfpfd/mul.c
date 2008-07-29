@@ -27,7 +27,7 @@ fpfd_mul_sign(fpfd_impl_t *op1, fpfd_impl_t *op2) {
   } else {
     return -1;
   }
-  /* return op1->sign ^ op2->sign ^ -1; */
+  /* return op1->sign ^ op2->sign ^ 1; */
 }
 
 static fpfd_action_t
@@ -114,6 +114,7 @@ fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     fpfd32_impl_mul(&rop, &op1, &op2);
     rem  = fpfd32_impl_scale(&rop);
     tern = fpfd32_impl_tern(&rop, rem, rnd);
+    fpfd32_impl_compress(dest, &rop);
     break;
   }
 

@@ -51,6 +51,10 @@ void fpfd32_set_neg_inf(fpfd32_ptr dest) {
   fpfd32_neg(dest, dest);
 }
 
+static void fpfd32_dump(FILE *file, fpfd32_srcptr fp) {
+  fprintf(file, "0x%X", *fp);
+}
+
 static const char *fpfd_rnd_str(fpfd_rnd_t rnd) {
   switch (rnd) {
   case FPFD_RNDN:
@@ -68,26 +72,39 @@ static const char *fpfd_rnd_str(fpfd_rnd_t rnd) {
 }
 
 void
-fpfd32_assert_special(fpfd32_srcptr src, fpfd_special_t special,
-                      const char *err, fpfd_rnd_t rnd)
+fpfd32_assert_special(fpfd32_srcptr lhs, fpfd32_srcptr rhs, fpfd32_srcptr res,
+                      fpfd_special_t special, const char *err, fpfd_rnd_t rnd)
 {
   fpfd32_impl_t op;
-  fpfd32_impl_expand(&op, src);
+  fpfd32_impl_expand(&op, res);
 
   if (op.fields.special != special) {
     fprintf(stderr, "%s (%s)\n", err, fpfd_rnd_str(rnd));
+    fpfd32_dump(stderr, lhs);
+    fprintf(stderr, " @ ");
+    fpfd32_dump(stderr, rhs);
+    fprintf(stderr, " == ");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
   }
 }
 
 void
-fpfd32_assert_sign(fpfd32_srcptr src, int sign, const char *err, fpfd_rnd_t rnd)
+fpfd32_assert_sign(fpfd32_srcptr lhs, fpfd32_srcptr rhs, fpfd32_srcptr res,
+                   int sign, const char *err, fpfd_rnd_t rnd)
 {
   fpfd32_impl_t op;
-  fpfd32_impl_expand(&op, src);
+  fpfd32_impl_expand(&op, res);
 
   if (op.fields.sign != sign) {
     fprintf(stderr, "%s (%s)\n", err, fpfd_rnd_str(rnd));
+    fpfd32_dump(stderr, lhs);
+    fprintf(stderr, " @ ");
+    fpfd32_dump(stderr, rhs);
+    fprintf(stderr, " == ");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
   }
 }
