@@ -17,10 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-check_PROGRAMS = signedzero-dpd signedzero-bid
-TESTS          = $(check_PROGRAMS)
+check_LTLIBRARIES = libfpfd-check.la
+check_PROGRAMS    = signedzero-dpd signedzero-bid
+TESTS             = $(check_PROGRAMS)
 
-signedzero_dpd_SOURCES = signedzero.c
-signedzero_dpd_LDADD   = ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+libfpfd_check_la_SOURCES = check.c check.h
+
+signedzero_dpd_SOURCES = signedzero.c check.h
+signedzero_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 signedzero_bid_SOURCES = $(signedzero_dpd_SOURCES)
-signedzero_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+signedzero_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la

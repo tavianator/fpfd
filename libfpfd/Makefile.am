@@ -19,7 +19,7 @@
 
 FPFD_VERSION = 0:0:0
 
-C_SOURCES = add.c nan.c set.c tern.c
+C_SOURCES = add.c div.c mul.c nan.c neg.c set.c sub.c tern.c
 H_SOURCES = fpfd.h fpfd_impl.h
 
 nobase_include_HEADERS = fpfd.h
