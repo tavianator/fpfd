@@ -47,7 +47,7 @@ typedef struct {
  * Arrays are allocated on the stack, but passed by reference. We don't simply
  * do
  *   typedef unsigned char fpfd32_t[4];
- * because there would be little type safety between different fpfd*_t's.
+ * because there would be no type safety between different fpfd*_t's.
  */
 typedef fpfd32_struct_t fpfd32_t[1];
 
@@ -58,6 +58,13 @@ typedef const fpfd32_struct_t *fpfd32_srcptr;
 /* Assignment */
 
 void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src);
+int  fpfd32_set_si(fpfd32_ptr dest, long src);
+int  fpfd32_set_ui(fpfd32_ptr dest, unsigned long src);
+
+/* Sign operations */
+void fpfd32_copysign(fpfd32_ptr dest,
+                     fpfd32_srcptr val_src, fpfd32_srcptr sign_src);
+void fpfd32_neg(fpfd32_ptr dest, fpfd32_srcptr src);
 
 /* Addition */
 
