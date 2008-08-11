@@ -58,33 +58,59 @@ typedef const fpfd32_struct_t *fpfd32_srcptr;
 /* Assignment */
 
 void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src);
-int  fpfd32_set_si(fpfd32_ptr dest, long src);
-int  fpfd32_set_ui(fpfd32_ptr dest, unsigned long src);
+int  fpfd32_set_si(fpfd32_ptr dest, long src, fpfd_rnd_t rnd);
+int  fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd);
+
+void fpfd32_set_zero(fpfd32_ptr dest);
+void fpfd32_set_one(fpfd32_ptr dest);
+void fpfd32_set_inf(fpfd32_ptr dest);
+void fpfd32_set_neg_zero(fpfd32_ptr dest);
+void fpfd32_set_neg_one(fpfd32_ptr dest);
+void fpfd32_set_neg_inf(fpfd32_ptr dest);
 
 /* Sign operations */
+void fpfd32_neg(fpfd32_ptr dest, fpfd32_srcptr src);
 void fpfd32_copysign(fpfd32_ptr dest,
                      fpfd32_srcptr val_src, fpfd32_srcptr sign_src);
-void fpfd32_neg(fpfd32_ptr dest, fpfd32_srcptr src);
 
 /* Addition */
-
 int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd);
 
 /* Subtraction */
-
 int fpfd32_sub(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd);
 
 /* Multiplication */
-
 int fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd);
 
 /* Division */
-
 int fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd);
+
+/* Trigonometric functions */
+int fpfd32_sin(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
+int fpfd32_cos(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
+int fpfd32_tan(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
+
+/* General comparison. Returns an integer with the sign of lhs - rhs. */
+int fpfd32_cmp(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+
+/* Predicates. Return 0 if false, nonzero if true. */
+
+int fpfd32_greater_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_greaterequal_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_less_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_lessequal_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_lessgreater_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_equal_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+int fpfd32_unordered_p(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
+
+int fpfd32_nan_p(fpfd32_srcptr src);
+int fpfd32_inf_p(fpfd32_srcptr src);
+int fpfd32_number_p(fpfd32_srcptr src);
+int fpfd32_zero_p(fpfd32_srcptr src);
 
 #ifdef __cplusplus
 }

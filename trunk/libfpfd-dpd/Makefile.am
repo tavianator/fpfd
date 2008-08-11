@@ -18,7 +18,7 @@
 #########################################################################
 
 if X86
-S_SOURCES = x86/compress.s x86/dpdtable.s x86/expand.s x86/inc.s x86/scale.s
+S_SOURCES = x86/addsub.s x86/compress.s x86/dpdtable.s x86/expand.s x86/inc.s x86/scale.s
 endif
 
 lib_LTLIBRARIES        = libfpfd-dpd.la

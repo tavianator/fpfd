@@ -28,6 +28,7 @@ Copyright @copyright{} 2008 Tavian Barnes
 * Introduction:: An introduction to the FPFD library
 * Encodings:: The DPD and BID decimal encodings
 * Benchmarking:: Benchmarking FPFD and its encodings
+* Implementation:: Details of FPFD's implementation
 * Type Index::
 * Function Index::
 * Concept Index::
@@ -55,13 +56,28 @@ The C interface is designed similarly to the MPFR library interface; notably, al
 @cindex BID
 @cindex binary
 
-The IEEE 754R standard specifies two encoding schemes for decimal floating-point numbers: DPD (Densely-Packed-Decimal) and BID (Binary-Integer-Decimal). The DPD encoding uses the DPD encoding, which compresses 3 BCD (Binary-Coded-Decimal) digits from 12 bits to 10, using only logic operations. The BID encoding simply stores the coefficient as a large binary integer. Each encoding has performance benefits and detriments, and one goal of the FPFD project is to find out which encoding is faster, in a software implementation, on many types of hardware.
+The IEEE 754R standard specifies two encoding schemes for decimal floating-point numbers: DPD (Densely-Packed-Decimal) and BID (Binary-Integer-Decimal). The DPD compresses 3 BCD (Binary-Coded-Decimal) digits from 12 bits to 10, using only logic operations. The BID encoding simply stores the coefficient as a large binary integer. Each encoding has performance benefits and detriments, and one goal of the FPFD project is to determine which encoding is faster, in a software implementation, on many architectures. @xref{Benchmarking}.
+
+@menu
+* Implementation libraries:: Using a particualar encoding
+@end menu
+
+@node Implementation libraries
+@section Implementation libraries
+
+The FPFD library delegates encoding-specific operations to one of two implementation libraries: libfpfd-dpd, and libfpfd-bid. Aditionally, one of the encodings may be statically compiled into libfpfd, to eliminate the need to link programs with two libraries just to use FPFD. This separation makes it easy to switch an application between the two encodings, either by re-linking or using @code{LD_PRELOAD}. For details of the API exposed by the implementation libraries, @xref{Implementation}.
 
 
 @node Benchmarking
 @chapter Benchmarking
 
 @cindex benchmarking
+
+
+@node Implementation
+@chapter Implementation
+
+@cindex implementation
 
 
 @node Type Index
