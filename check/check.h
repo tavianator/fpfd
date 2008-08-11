@@ -20,25 +20,11 @@
 #include "../libfpfd/fpfd.h"
 #include "../libfpfd/fpfd_impl.h"
 
-void fpfd32_set_pos_zero(fpfd32_ptr dest); /* Set to positive zero     */
-void fpfd32_set_pos_one(fpfd32_ptr dest);  /*        positive one      */
-void fpfd32_set_pos_inf(fpfd32_ptr dest);  /*        positive infinity */
-void fpfd32_set_neg_zero(fpfd32_ptr dest); /*        negative zero     */
-void fpfd32_set_neg_one(fpfd32_ptr dest);  /*        negative one      */
-void fpfd32_set_neg_inf(fpfd32_ptr dest);  /*        negative infinity */
-
 /*
- * If the special flag of res != special, print err followed by a space and the
- * rounding mode in brakets, then a newline, as in 'Error (FPFD_RNDN)\n'. Then
- * dump the hex values of the operands as 'lhs @ rhs == src\n'.
+ * Print helpfil diagnostics, and assert that res has its sign equal to 'sign'
+ * and its special flag equal to 'special'.
  */
-void fpfd32_assert_special(fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-                           fpfd32_srcptr res,
-                           fpfd_special_t special,
-                           const char *err, fpfd_rnd_t rnd);
 
-/* Like fpfd32_assert_special, but fail if the sign of res != sign */
-void fpfd32_assert_sign(fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-                        fpfd32_srcptr res,
-                        int sign,
-                        const char *err, fpfd_rnd_t rnd);
+void fpfd32_assert_ss2(fpfd32_srcptr res, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+                       fpfd_rnd_t rnd, int sign, fpfd_special_t special,
+                       const char *op);

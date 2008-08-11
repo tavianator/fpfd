@@ -20,41 +20,34 @@
 
 #include "fpfd_impl.h"
 
-void
-fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src)
+int
+fpfd32_nan_p(fpfd32_srcptr src)
 {
-  /* Don't just memcpy, because we should canonicalize non-canonical inputs */
-  fpfd32_impl_t rop;
-  fpfd32_impl_expand(&rop, src);
-  fpfd32_impl_compress(dest, &rop);
-}
-
-void fpfd32_set_zero(fpfd32_ptr dest) {
-  fpfd32_set_ui(dest, 0, FPFD_RNDNA);
-}
-
-void fpfd32_set_one(fpfd32_ptr dest) {
-  fpfd32_set_ui(dest, 1, FPFD_RNDNA);
-}
-
-void fpfd32_set_inf(fpfd32_ptr dest) {
   fpfd32_impl_t impl;
-  impl.fields.sign = 1;
-  impl.fields.special = FPFD_INF;
-  fpfd32_impl_compress(dest, &impl);
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.special == FPFD_SNAN || impl.fields.special == FPFD_QNAN;
 }
 
-void fpfd32_set_neg_zero(fpfd32_ptr dest) {
-  fpfd32_set_zero(dest);
-  fpfd32_neg(dest, dest);
+int
+fpfd32_inf_p(fpfd32_srcptr src)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.special == FPFD_INF;
 }
 
-void fpfd32_set_neg_one(fpfd32_ptr dest) {
-  fpfd32_set_one(dest);
-  fpfd32_neg(dest, dest);
+int
+fpfd32_number_p(fpfd32_srcptr src)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.special == FPFD_ZERO || impl.fields.special == FPFD_NUMBER;
 }
 
-void fpfd32_set_neg_inf(fpfd32_ptr dest) {
-  fpfd32_set_inf(dest);
-  fpfd32_neg(dest, dest);
+int
+fpfd32_zero_p(fpfd32_srcptr src)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.special == FPFD_ZERO;
 }
