@@ -26,15 +26,15 @@
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
         pushl %ebx
-        movl 12(%esp), %eax     # Put sign in eax
-        movl 16(%esp), %ebx     # Put lhs in ebx
-        movl 20(%esp), %ecx     # Put rhs in ecx
-        xorl 12(%ebx), %eax
-        xorl 12(%ecx), %eax     # Calculate
+        movl 12(%esp), %ecx     # Put sign in ecx
+        movl 16(%esp), %eax     # Put lhs in eax
+        movl 20(%esp), %edx     # Put rhs in edx
+        xorl 12(%eax), %ecx
+        xorl 12(%edx), %ecx     # Calculate
                                 # (sign ^ lhs->fields.sign ^ rhs->fields.sign)
         js .Lsub                # If the result is -1, we are subtracting
-        movl 8(%ebx), %ecx
-        subl 8(%ecx), %ecx      # lhs->fields.exp - rhs->fields.sign
+        movl 8(%eax), %ecx
+        subl 8(%edx), %ecx      # lhs->fields.exp - rhs->fields.sign
         
         popl %ebx
         ret

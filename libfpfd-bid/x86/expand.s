@@ -46,7 +46,7 @@ fpfd32_impl_expand:
         je .L2ii                # If the combination field begins with 11,
                                 # follow 754r DRAFT 1.5.0, S3.5, p19, 2.ii
         shrl $3, %edx
-        subl $95, %edx
+        subl $101, %edx
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x007FFFFF, %ecx
         cmpl $0, %ecx
@@ -68,7 +68,7 @@ fpfd32_impl_expand:
         je .Linf
         shrl %edx
         andl $0xFF, %edx
-        subl $95, %edx
+        subl $101, %edx
         movl %edx, 8(%eax)      # Subtract bias and store exponent
         andl $0x001FFFFF, %ecx
         orl $0x00800000, %ecx
