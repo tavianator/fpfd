@@ -45,9 +45,9 @@ fpfd32_impl_scale:
         addl 8(%esi), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
-        cmpl $-101, %ecx
+        cmpl $-107, %ecx
         jl .LuflowMSW
-        cmpl $-95, %ecx
+        cmpl $-101, %ecx
         jl .LsubnormMSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         movl $0, %ecx
@@ -68,7 +68,7 @@ fpfd32_impl_scale:
         ret
 .LsubnormMSW:
         negl %ecx
-        subl $95, %ecx
+        subl $101, %ecx
         shll $2, %ecx
         addl $4, %ecx
         movl $0, %ebx
@@ -77,8 +77,8 @@ fpfd32_impl_scale:
         shrl %cl, %edx          # Shift edx:eax.ebx to the correct bit
         movl %ebx, %ecx
         movl %edx, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the subscaled mantissa
-        movl $-95, 8(%esi)      # Set the exponent to the sumnormal exponent
+        movl $0, 4(%esi)        # Set dest->mant to the subnormal mantissa
+        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -93,8 +93,8 @@ fpfd32_impl_scale:
         movl $0, (%esi)
         movl $0, 4(%esi)
         movl $0, 8(%esi)
-        movl %eax, %ecx
         movl %edx, %ebx
+        movl %eax, %ecx
         movl $0, %eax
 .LspecialMSW:
         cmpl $0, %ebx
@@ -125,9 +125,9 @@ fpfd32_impl_scale:
         addl 8(%esi), %ecx      # Add (4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
-        cmpl $-101, %ecx
+        cmpl $-107, %ecx
         jl .LuflowLSW
-        cmpl $-95, %ecx
+        cmpl $-101, %ecx
         jl .LsubnormLSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
         shrdl $4, %eax, %edx
@@ -141,14 +141,14 @@ fpfd32_impl_scale:
         ret
 .LsubnormLSW:
         negl %ecx
-        subl $95, %ecx
+        subl $101, %ecx
         shll $2, %ecx
         addl $4, %ecx
         shrdl %cl, %eax, %edx
         shrl %cl, %eax          # Shift eax.edx to the correct bit
         movl %eax, (%esi)
         movl $0, 4(%esi)        # Set dest->mant to the subscaled mantissa
-        movl $-95, 8(%esi)      # Set the exponent to the sumnormal exponent
+        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
         movl %edx, %eax
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax

@@ -57,7 +57,7 @@ fpfd32_impl_compress:
         cmpl $4, %edx
         je .Linf
         movl 8(%ecx), %edx
-        addl $95, %edx          # Get the biased exponent
+        addl $101, %edx         # Get the biased exponent
         testl $0x20000000, %eax
         jnz .L1i
         movl %edx, %ecx
