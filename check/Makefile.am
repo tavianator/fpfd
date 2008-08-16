@@ -18,12 +18,17 @@
 #########################################################################
 
 check_LTLIBRARIES = libfpfd-check.la
-check_PROGRAMS    = signedzero-dpd signedzero-bid
+check_PROGRAMS    = signedzero-dpd signedzero-bid noncanonical-dpd noncanonical-bid
 TESTS             = $(check_PROGRAMS)
 
 libfpfd_check_la_SOURCES = check.c check.h
 
-signedzero_dpd_SOURCES = signedzero.c check.h
+signedzero_dpd_SOURCES = signedzero.c
 signedzero_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 signedzero_bid_SOURCES = $(signedzero_dpd_SOURCES)
 signedzero_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+
+noncanonical_dpd_SOURCES = noncanonical-dpd.c
+noncanonical_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+noncanonical_bid_SOURCES = noncanonical-bid.c
+noncanonical_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la

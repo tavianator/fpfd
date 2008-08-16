@@ -74,7 +74,7 @@ fpfd32_impl_expand:
         orl $0x00800000, %ecx
         cmpl $10000000, %ecx
         jae .Lzero              # If the significand exceeds the maximum
-                                # significand in the decimal encoding, zero is
+                                # significand of the decimal encoding, zero is
                                 # used instead
         movl %ecx, (%eax)       # Return concatenated significand
         movl $0, 4(%eax)        # Set the high-order significand bits to zero
@@ -89,19 +89,31 @@ fpfd32_impl_expand:
         popl %ebx
         ret
 .LsNaN:
+        movl $2, 16(%eax)       # Set the special flag to FPFD_SNAN
         andl $0x000FFFFF, %ecx
+        cmpl $1000000, %ecx
+        jae .LNaNzero           # If the payload exceeds the maximum payload of
+                                # the decimal encoding, zero is used instead
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $2, 16(%eax)       # Set the special flag to FPFD_SNAN
         popl %ebx
         ret
 .LqNaN:
+        movl $3, 16(%eax)       # Set the special flag to FPFD_QNAN
         andl $0x000FFFFF, %ecx
+        cmpl $1000000, %ecx
+        jae .LNaNzero           # If the payload exceeds the maximum payload of
+                                # the decimal encoding, zero is used instead
         movl %ecx, (%eax)
         movl $0, 4(%eax)
         movl $0, 8(%eax)
-        movl $3, 16(%eax)       # Set the special flag to FPFD_QNAN
+        popl %ebx
+        ret
+.LNaNzero:
+        movl $0, (%eax)
+        movl $0, 4(%eax)
+        movl $0, 8(%eax)
         popl %ebx
         ret
 .Linf:

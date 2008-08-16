@@ -19,12 +19,29 @@
 
 #include "../libfpfd/fpfd.h"
 #include "../libfpfd/fpfd_impl.h"
+#include <stdio.h>  /* For FILE     */
+#include <stdint.h> /* For uint32_t */
 
 /*
- * Print helpfil diagnostics, and assert that res has its sign equal to 'sign'
- * and its special flag equal to 'special'.
+ * Conversion to/from uint32_t's. Obviously, this is encoding dependant.
  */
+void fpfd32_set_manually(fpfd32_ptr dest, uint32_t src);
+void fpfd32_get_manually(uint32_t *dest, fpfd32_srcptr src);
 
-void fpfd32_assert_ss2(fpfd32_srcptr res, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-                       fpfd_rnd_t rnd, int sign, fpfd_special_t special,
-                       const char *op);
+/*
+ * Return nonzero if, for example, the expanded mantissa == mant.
+ */
+int fpfd32_impl_check_mant(const fpfd32_impl_t *impl, uint32_t h, uint32_t l);
+int fpfd32_check_mant(fpfd32_srcptr src, uint32_t mant);
+int fpfd32_check_exp(fpfd32_srcptr src, int exp);
+int fpfd32_check_sign(fpfd32_srcptr src, int sign);
+int fpfd32_check_special(fpfd32_srcptr src, fpfd_special_t special);
+int fpfd32_check_manually(fpfd32_srcptr src, uint32_t mask, uint32_t cmp);
+
+/*
+ * Functions to write fpfd-related things to a stream.
+ */
+const char *fpfd_rnd_str(fpfd_rnd_t rnd);
+const char *fpfd_special_str(fpfd_special_t special);
+void fpfd32_dump(FILE *file, fpfd32_srcptr fp);
+void fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *fp);

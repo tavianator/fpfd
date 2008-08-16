@@ -20,10 +20,87 @@
 #include "check.h"
 #include <stdlib.h>    /* For EXIT_SUCCESS, EXIT_FAILURE */
 #include <stdio.h>     /* For fprintf, stderr            */
+#include <string.h>    /* For memcpy                     */
 #include <inttypes.h>  /* For PRI... macros              */
 #include <arpa/inet.h> /* For htonl()                    */
 
-static const char *
+void
+fpfd32_set_manually(fpfd32_ptr dest, uint32_t src)
+{
+  memcpy(dest, &src, 4);
+}
+
+void
+fpfd32_get_manually(uint32_t *dest, fpfd32_srcptr src)
+{
+  memcpy(dest, src, 4);
+}
+
+/* Checks */
+
+int
+fpfd32_impl_check_mant(const fpfd32_impl_t *impl, uint32_t h, uint32_t l)
+{
+  if (htonl(1) == 1) { /* Big-endian    */
+    return memcmp(impl->mant, &h, 4) == 0
+      && memcmp(impl->mant + 4, &l, 4) == 0;
+  } else {             /* Little-endian */
+    return memcmp(impl->mant, &l, 4) == 0
+      && memcmp(impl->mant + 4, &h, 4) == 0;
+  }
+}
+
+int
+fpfd32_check_mant(fpfd32_srcptr src, uint32_t mant)
+{
+  uint32_t zero = 0x0;
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+
+  if (htonl(1) == 1) { /* Big-endian    */
+    return memcmp(impl.mant, &zero, 4) == 0
+      && memcmp(impl.mant + 4, &mant, 4) == 0;
+  } else {             /* Little-endian */
+    return memcmp(impl.mant, &mant, 4) == 0
+      && memcmp(impl.mant + 4, &zero, 4) == 0;
+  }
+}
+
+int
+fpfd32_check_exp(fpfd32_srcptr src, int exp)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.exp == exp;
+}
+
+int
+fpfd32_check_sign(fpfd32_srcptr src, int sign)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.sign == sign;
+}
+
+int
+fpfd32_check_special(fpfd32_srcptr src, fpfd_special_t special)
+{
+  fpfd32_impl_t impl;
+  fpfd32_impl_expand(&impl, src);
+  return impl.fields.special == special;
+}
+
+int
+fpfd32_check_manually(fpfd32_srcptr src, uint32_t mask, uint32_t cmp)
+{
+  uint32_t test;
+  fpfd32_get_manually(&test, src);
+  return (test & mask) == cmp;
+}
+
+/* Display */
+
+const char *
 fpfd_rnd_str(fpfd_rnd_t rnd)
 {
   switch (rnd) {
@@ -41,7 +118,7 @@ fpfd_rnd_str(fpfd_rnd_t rnd)
   return NULL;
 }
 
-static const char *
+const char *
 fpfd_special_str(fpfd_special_t special)
 {
   switch (special) {
@@ -59,71 +136,30 @@ fpfd_special_str(fpfd_special_t special)
   return NULL;
 }
 
-static void
+void
 fpfd32_dump(FILE *file, fpfd32_srcptr fp)
 {
   fprintf(file, "0x%.8" PRIX32, *fp);
 }
 
-static void
-fpfd32_dump_impl(FILE *file, fpfd32_srcptr fp)
+void
+fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl)
 {
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, fp);
-
   uint32_t l, h; /* Low and high 32 bits of fp.mant */
 
   if (htonl(1) != 1) { /* Little-endian */
-    l = *((uint32_t *)impl.mant);
-    h = *(((uint32_t *)impl.mant) + 1);
+    l = *((uint32_t *)impl->mant);
+    h = *(((uint32_t *)impl->mant) + 1);
   } else {             /* Big-endian    */
-    l = *(((uint32_t *)impl.mant) + 1);
-    h = *((uint32_t *)impl.mant);
+    l = *(((uint32_t *)impl->mant) + 1);
+    h = *((uint32_t *)impl->mant);
   }
 
-  fprintf(file,
-          "{\n  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
+  fprintf(file, "{\n"
+          "  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
           "  exp     = %d\n"
           "  sign    = %+d\n"
           "  special = %s\n}",
-          h, l, impl.fields.exp, impl.fields.sign,
-          fpfd_special_str(impl.fields.special));
-}
-
-static void
-fpfd32_dump_op2(FILE *file,
-                fpfd32_srcptr res, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-                fpfd_rnd_t rnd, const char *op)
-{
-  fprintf(file, "fpfd32_%s(", op);
-
-  fpfd32_dump(file, res);
-  fprintf(file, " = ");
-  fpfd32_dump_impl(file, res);
-  fprintf(file, ", ");
-
-  fpfd32_dump(file, lhs);
-  fprintf(file, " = ");
-  fpfd32_dump_impl(file, lhs);
-  fprintf(file, ", ");
-
-  fpfd32_dump(file, rhs);
-  fprintf(file, " = ");
-  fpfd32_dump_impl(file, rhs);
-  fprintf(file, ", %s);\n\n", fpfd_rnd_str(rnd));
-}
-
-void
-fpfd32_assert_ss2(fpfd32_srcptr res, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-                  fpfd_rnd_t rnd, int sign, fpfd_special_t special,
-                  const char *op) {
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, res);
-
-  if (impl.fields.sign != sign || impl.fields.special != special) {
-    fpfd32_dump_op2(stderr, res, lhs, rhs, rnd, op);
-    fprintf(stderr, "--- ERROR: expected sign == %d, special == %s ---\n\n",
-            impl.fields.sign, fpfd_special_str(special));
-    exit(EXIT_FAILURE);
-  }
+          h, l, impl->fields.exp, impl->fields.sign,
+          fpfd_special_str(impl->fields.special));
 }
