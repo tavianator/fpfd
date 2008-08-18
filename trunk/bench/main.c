@@ -28,14 +28,14 @@ void fpfd_bench_results(FILE *file);
 int
 main(int argc, char **argv)
 {
+  /* Should be enough to get consistent tick counts every time */
+  const unsigned int trials = 100;
+
   /* The number of table enteries. */
   if (!hcreate(40)) {
     perror("hcreate");
     exit(EXIT_FAILURE);
   }
-
-  /* Should be enough to get consistent tick counts every time */
-  const unsigned int trials = 100;
 
   fpfd_bench(trials);
   fpfd_bench_results(stdout);

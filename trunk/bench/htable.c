@@ -27,22 +27,24 @@ void
 fpfd_store_ticks(const char *key, unsigned long ticks)
 {
   ENTRY e, *ep;
+  tickinfo *t;
   unsigned long tsc1, tsc2;
 
-  e.key = key;
+  e.key = (char *)key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
-    tickinfo *t = malloc(sizeof(tickinfo));
+    t = malloc(sizeof(tickinfo));
+
+    if (!t) {
+      perror("malloc");
+      exit(EXIT_FAILURE);
+    }
+
     t->ticks    = 0;
     t->ticks_sq = 0;
     t->trials   = 0;
     e.data      = t;
-
-    if (!e.data) {
-      perror("malloc");
-      exit(EXIT_FAILURE);
-    }
 
     ep = hsearch(e, ENTER);
 
@@ -57,8 +59,8 @@ fpfd_store_ticks(const char *key, unsigned long ticks)
 
   ticks -= tsc2 - tsc1;
 
-  tickinfo *t = ep->data;
-  t->ticks += ticks;
+  t           =  ep->data;
+  t->ticks    += ticks;
   t->ticks_sq += ticks * ticks;
   ++t->trials;
 }
@@ -67,17 +69,19 @@ double
 fpfd_mean_ticks(const char *key)
 {
   ENTRY e, *ep;
+  tickinfo *t;
+  double ticks, trials;
 
-  e.key = key;
+  e.key = (char *)key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
     return -1.0;
   }
 
-  tickinfo *t = ep->data;
-  double ticks = t->ticks;
-  double trials = t->trials;
+  t      = ep->data;
+  ticks  = t->ticks;
+  trials = t->trials;
   return ticks / trials;
 }
 
@@ -85,17 +89,19 @@ double
 fpfd_stddev_ticks(const char *key)
 {
   ENTRY e, *ep;
+  tickinfo *t;
+  double ticks, ticks_sq, trials;
 
-  e.key = key;
+  e.key = (char *)key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
     return -1.0;
   }
 
-  tickinfo *t = ep->data;
-  double ticks = ticks;
-  double ticks_sq = ticks_sq;
-  double trials = trials;
+  t        = ep->data;
+  ticks    = ticks;
+  ticks_sq = ticks_sq;
+  trials   = trials;
   return sqrt((ticks_sq - (ticks * ticks / trials)) / trials);
 }
