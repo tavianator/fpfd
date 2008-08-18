@@ -22,37 +22,44 @@
 #include <stddef.h> /* For size_t        */
 #include <stdio.h>  /* For FILE          */
 
-typedef struct {
+typedef struct
+{
   unsigned long ticks;
+  unsigned long ticks_sq;
   unsigned int trials;
 } tickinfo;
 
 /*
- * Reads count bytes from rng in an endian-independant way, and writes them
- * back into rngsave for reproducability
+ * Gets the number of clock ticks since some time. Extremely high-resolution
+ * timer.
  */
-void rngread(FILE *rng, FILE *rngsave, void *buf, size_t count);
-
-/*
- * Set dest to a random number, read from rng (usually /dev/urandom), and
- * saves the read bytes back in rngsave
- */
-void fpfd32_set_rand(fpfd32_ptr dest, FILE *rng, FILE *rngsave);
-
-/*
- * Gets the number of clock ticks since some time
- */
-unsigned long rdtsc();
+unsigned long fpfd_rdtsc();
 
 /*
  * Functions which deal with the hash table.
+ *   fpfd_record_ticks stores the tick count of the trial in the hash table.
+ *   fpfd_mean_ticks returns the mean tick count for a particular key.
+ *   fpfd_stddev_ticks returns the standard deviation in the tick count for a
+ *     particular key.
  */
-void fpfd_store_ticks(const char *fn, unsigned long ticks);
-double fpfd_ticks(const char *fn);
+void fpfd_record_ticks(const char *key, unsigned long ticks);
+double fpfd_mean_ticks(const char *key);
+double fpfd_stddev_ticks(const char *key);
 
 /*
- * Benchmark the arithmetic operations, and separately their micro-ops. trials
- * is the number of times to run the benchmark for each operation.
+ * Routines which benchmark part of the programmer or implementation interfaces.
+ * Each stores information about the number of clock ticks in a global hash
+ * table, with strings describing the routine being profiled as the key.
  */
-void fpfd32_bench(unsigned int trials, FILE *rng, FILE *rngsave);
 
+void fpfd32_bench_impl_expand(unsigned int trials);
+void fpfd32_bench_impl_compress(unsigned int trials);
+void fpfd32_bench_impl_scale(unsigned int trials);
+void fpfd32_bench_impl_inc(unsigned int trials);
+void fpfd32_bench_impl_addsub(unsigned int trials);
+void fpfd32_bench_impl_mul(unsigned int trials);
+void fpfd32_bench_impl_div(unsigned int trials);
+
+void fpfd32_bench_addsub(unsigned int trials);
+void fpfd32_bench_mul(unsigned int trials);
+void fpfd32_bench_div(unsigned int trials);
