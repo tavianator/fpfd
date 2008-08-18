@@ -18,38 +18,48 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <search.h>
+#include <stdio.h>  /* For fprintf, FILE */
+#include <stdlib.h> /* For exit, EXIT_*  */
+#include <search.h> /* For hcreate       */
 
-int main(int argc, char **argv) {
-  if (argc < 3) {
-    fprintf(stderr, "main(): Wrong arguments\n");
-    return EXIT_FAILURE;
-  }
+void fpfd_bench(unsigned int trials);
+void fpfd_bench_results(FILE *file);
 
-  FILE *rng = fopen(argv[1], "r");
-  FILE *rngsave = fopen(argv[2], "w");
-
-  if (rng == NULL || rngsave == NULL) {
-    perror("open");
-    return EXIT_FAILURE;
-  }
-
+int
+main(int argc, char **argv)
+{
+  /* The number of table enteries. */
   if (!hcreate(40)) {
     perror("hcreate");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   /* Should be enough to get consistent tick counts every time */
   const unsigned int trials = 100;
 
-  fpfd32_bench(trials, rng, rngsave);
+  fpfd_bench(trials);
+  fpfd_bench_results(stdout);
 
-  fclose(rngsave);
-  fclose(rng);
   return EXIT_SUCCESS;
+}
+
+void
+fpfd_bench(unsigned int trials)
+{
+  fpfd32_bench_impl_expand(trials);
+  fpfd32_bench_impl_compress(trials);
+  fpfd32_bench_impl_scale(trials);
+  fpfd32_bench_impl_inc(trials);
+  fpfd32_bench_impl_addsub(trials);
+  fpfd32_bench_impl_mul(trials);
+  fpfd32_bench_impl_div(trials);
+
+  fpfd32_bench_addsub(trials);
+  fpfd32_bench_mul(trials);
+  fpfd32_bench_div(trials);
+}
+
+void
+fpfd_bench_results(FILE *file)
+{
 }

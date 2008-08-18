@@ -18,22 +18,26 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <search.h> /* For hsearch */
+#include <search.h> /* For hsearch      */
 #include <stdlib.h> /* For malloc, exit */
-#include <stdio.h> /* For perror */
+#include <stdio.h>  /* For perror       */
+#include <math.h>   /* For sqrt         */
 
-void fpfd_store_ticks(const char *fn, unsigned long ticks) {
+void
+fpfd_store_ticks(const char *key, unsigned long ticks)
+{
   ENTRY e, *ep;
   unsigned long tsc1, tsc2;
 
-  e.key = fn;
+  e.key = key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
     tickinfo *t = malloc(sizeof(tickinfo));
-    t->ticks = 0;
-    t->trials = 0;
-    e.data = t;
+    t->ticks    = 0;
+    t->ticks_sq = 0;
+    t->trials   = 0;
+    e.data      = t;
 
     if (!e.data) {
       perror("malloc");
@@ -48,20 +52,23 @@ void fpfd_store_ticks(const char *fn, unsigned long ticks) {
     }
   }
 
-  tsc1 = rdtsc();
-  tsc2 = rdtsc();
+  tsc1 = fpfd_rdtsc();
+  tsc2 = fpfd_rdtsc();
 
   ticks -= tsc2 - tsc1;
 
   tickinfo *t = ep->data;
   t->ticks += ticks;
+  t->ticks_sq += ticks * ticks;
   ++t->trials;
 }
 
-double fpfd_ticks(const char *fn) {
+double
+fpfd_mean_ticks(const char *key)
+{
   ENTRY e, *ep;
 
-  e.key = fn;
+  e.key = key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
@@ -69,5 +76,26 @@ double fpfd_ticks(const char *fn) {
   }
 
   tickinfo *t = ep->data;
-  return (double)t->ticks/(double)t->trials;
+  double ticks = t->ticks;
+  double trials = t->trials;
+  return ticks / trials;
+}
+
+double
+fpfd_stddev_ticks(const char *key)
+{
+  ENTRY e, *ep;
+
+  e.key = key;
+  ep = hsearch(e, FIND);
+
+  if (!ep) {
+    return -1.0;
+  }
+
+  tickinfo *t = ep->data;
+  double ticks = ticks;
+  double ticks_sq = ticks_sq;
+  double trials = trials;
+  return sqrt((ticks_sq - (ticks * ticks / trials)) / trials);
 }

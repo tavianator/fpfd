@@ -17,14 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-# unsigned long rdtsc();
+# unsigned long fpfd_rdtsc();
 #
 # Return the time stamp counter, and serialize the instruction
 
         .text
-.globl rdtsc
-        .type rdtsc, @function
-rdtsc:
+.globl fpfd_rdtsc
+        .type fpfd_rdtsc, @function
+fpfd_rdtsc:
         pushl %ebx              # Callee-save register, clobbered by cpuid
         movl $0, %eax           # Make cpuid take a consistent number of ticks
         cpuid                   # Serialize
@@ -35,4 +35,4 @@ rdtsc:
         movl -4(%esp), %eax
         popl %ebx
         ret
-        .size rdtsc, .-rdtsc
+        .size fpfd_rdtsc, .-fpfd_rdtsc
