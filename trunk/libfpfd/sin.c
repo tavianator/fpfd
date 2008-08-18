@@ -1,7 +1,7 @@
 /*************************************************************************
  * Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               *
  *                                                                       *
- * This file is part of The FPFD Library                                 *
+ * This file is part of The FPFD Library.                                *
  *                                                                       *
  * The FPFD Library is free software; you can redistribute it and/or     *
  * modify it under the terms of the GNU Lesser General Public License as *
