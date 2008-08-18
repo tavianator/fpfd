@@ -20,10 +20,63 @@
 
 #include "fpfd_impl.h"
 
+/* ---   HACKS   --- */
+
+#include <string.h> /* For memset */
+
+int
+fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd)
+{
+  fpfd32_impl_t impl;
+
+  memset(impl.mant, 0, 8);
+  if (src == 0) {
+    impl.fields.exp = 0;
+    impl.fields.sign = 1;
+    impl.fields.special = FPFD_ZERO;
+  } else {
+    memset(impl.mant, 1, 1); /* Only works on little-endian */
+    impl.fields.exp = 0;
+    impl.fields.sign = 1;
+    impl.fields.special = FPFD_NUMBER;
+  }
+  fpfd32_impl_compress(dest, &impl);
+
+  return 0;
+}
+
+int
+fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
+                   const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
+{
+  return 0;
+}
+
+void
+fpfd32_impl_mul(fpfd32_impl_t *dest,
+                const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
+{
+}
+
+int
+fpfd32_impl_div(fpfd32_impl_t *dest,
+                const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
+{
+  return 0;
+}
+
+int
+fpfd32_impl_scale(fpfd32_impl_t *dest)
+{
+  return 0;
+}
+
+/* --- END HACKS --- */
+
 void
 fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src)
 {
-  /* Don't just memcpy, because we should canonicalize non-canonical inputs */
+  /* Don't just memmove, because we should canonicalize non-canonical inputs */
   fpfd32_impl_t rop;
   fpfd32_impl_expand(&rop, src);
   fpfd32_impl_compress(dest, &rop);

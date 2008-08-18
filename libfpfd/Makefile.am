@@ -27,11 +27,3 @@ nobase_include_HEADERS = fpfd.h
 lib_LTLIBRARIES    = libfpfd.la
 libfpfd_la_SOURCES = $(C_SOURCES) $(H_SOURCES)
 libfpfd_la_LDFLAGS = -version-info $(FPFD_VERSION)
-
-if STATIC_DPD
-  libfpfd_la_LIBADD  = ../libfpfd-dpd/libfpfd-dpd.la
-endif
-
-if STATIC_BID
-  libfpfd_la_LIBADD  = ../libfpfd-bid/libfpfd-bid.la
-endif

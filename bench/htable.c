@@ -24,7 +24,7 @@
 #include <math.h>   /* For sqrt         */
 
 void
-fpfd_store_ticks(const char *key, unsigned long ticks)
+fpfd_record_ticks(const char *key, unsigned long ticks)
 {
   ENTRY e, *ep;
   tickinfo *t;

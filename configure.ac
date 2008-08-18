@@ -34,20 +34,6 @@ AC_CHECK_HEADERS([arpa/inet.h stddef.h stdio.h stdlib.h string.h unistd.h])
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
-dnl Static or dynamic linking of back-end?
-AC_ARG_ENABLE([impl],
-              [AS_HELP_STRING([--enable-impl={no, dpd, bid}],
-                              [statically link either the dpd or bid back-end
-                               into libfpfd.])],
-              [case $enable_impl in
-                   no | dpd | bid) ;;
-                   *) AC_ERROR([Argument to --enable-impl should be 'no', 'dpd', or 'bid', not '$enable_impl'])
-               esac],
-              [enable_impl=no])
-
-AM_CONDITIONAL([STATIC_DPD], [test "x$enable_impl" = xdpd])
-AM_CONDITIONAL([STATIC_BID], [test "x$enable_impl" = xbid])
-
 dnl Find out which assembly files to compile
 AC_CANONICAL_HOST
 
@@ -61,9 +47,9 @@ esac
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
-                 libfpfd/Makefile
                  libfpfd-dpd/Makefile
                  libfpfd-bid/Makefile
+                 libfpfd/Makefile
                  check/Makefile
 		 bench/Makefile
                  doc/Makefile])
