@@ -31,13 +31,15 @@ void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
 int
 main()
 {
+  fpfd32_t noncanon_sNaN, noncanon_qNaN, noncanon_inf;
+  fpfd32_t big_mant_num, big_mant_sNaN, big_mant_qNaN;
+
   /* --- Encoding-independant tests --- */
 
   /*
    * NaNs should have G_6 through G_{w+4} set to zero, infinities should have
    * G_5 through G_{w+4} and T set to zero.
    */
-  fpfd32_t noncanon_sNaN, noncanon_qNaN, noncanon_inf;
 
   fpfd32_set_manually(noncanon_sNaN, 0x7FF00000);
   fpfd32_set(noncanon_sNaN, noncanon_sNaN);
@@ -58,8 +60,6 @@ main()
    * the DPD encoding are non-canonical and evaluate to zero, even for NaN
    * payloads.
    */
-  fpfd32_t big_mant_num, big_mant_sNaN, big_mant_qNaN;
-
   fpfd32_set_manually(big_mant_num, 0x77FFFFFF);
   fpfd32_assert(big_mant_num, 0x0, FPFD_ZERO);
 

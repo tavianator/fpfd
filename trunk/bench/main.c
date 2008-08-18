@@ -47,6 +47,7 @@ void
 fpfd_bench(unsigned int trials)
 {
   fpfd32_bench_impl_expand(trials);
+  /*
   fpfd32_bench_impl_compress(trials);
   fpfd32_bench_impl_scale(trials);
   fpfd32_bench_impl_inc(trials);
@@ -57,9 +58,13 @@ fpfd_bench(unsigned int trials)
   fpfd32_bench_addsub(trials);
   fpfd32_bench_mul(trials);
   fpfd32_bench_div(trials);
+  */
 }
 
 void
 fpfd_bench_results(FILE *file)
 {
+  fprintf(file,
+          "\n--- fpfd32_impl_expand ---\n"
+          "");
 }

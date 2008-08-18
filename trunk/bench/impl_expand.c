@@ -16,3 +16,24 @@
  * You should have received a copy of the GNU General Public License     *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
+
+#include "bench.h"
+
+void
+fpfd32_bench_impl_expand(unsigned int trials)
+{
+  fpfd32_t fp;
+  fpfd32_impl_t impl;
+  unsigned long tsc1, tsc2;
+  unsigned int i;
+
+  for (i = 0; i < trials; ++i) {
+    fpfd32_random(fp);
+
+    tsc1 = fpfd_rdtsc();
+    fpfd32_impl_expand(&impl, fp);
+    tsc2 = fpfd_rdtsc();
+
+    fpfd_record_ticks("fpfd32_impl_expand", tsc2 - tsc1);
+  }
+}
