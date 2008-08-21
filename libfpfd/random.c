@@ -19,69 +19,35 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
+#include <stdlib.h> /* For rand, rand_r, srand, RAND_MAX */
+#include <limits.h> /* For UCHAR_MAX                     */
 
-/*
- * Returns the ternary value + 1, with the 0x10 bit set if an increment call is
- * needed.
- */
-static int fpfd_tern(int sign, int rem, fpfd_rnd_t rnd);
-
-int
-fpfd32_impl_tern(fpfd32_impl_t *dest, int rem, fpfd_rnd_t rnd)
+void
+fpfd32_random(fpfd32_ptr dest)
 {
-  int tern = fpfd_tern(dest->fields.sign, rem, rnd);
-  if (tern & 0x10) fpfd32_impl_inc(dest);
-  return (tern & 0xF) - 1;
-}
+  fpfd32_impl_t impl;
+  long bits, bits_left = 0;
+  unsigned int i;
 
-int
-fpfd32_impl_tern2(fpfd32_impl_t *dest, int rem1, int rem2, fpfd_rnd_t rnd)
-{
-  if ((rem2 == 0 || rem2 == 5) && rem1 != 0) ++rem2;
-  return fpfd32_impl_tern(dest, rem2, rnd);
-}
-
-static int
-fpfd_tern(int sign, int rem, fpfd_rnd_t rnd)
-{
-  int tern;
-
-  if (rem == 0) {
-    tern = 0x1;
-  } else if (rem == 10) {
-    tern = 1 - sign;
-  } else {
-    switch (rnd) {
-    case FPFD_RNDN:
-      if (rem <= 5) {
-        tern = 1 + sign;
-      } else {
-        tern = (1 - sign) | 0x10;
+  do {
+    for (i = 0; i < sizeof(dest->data); ++i) {
+      if (bits_left <= UCHAR_MAX) {
+        bits = rand();
+        bits_left = RAND_MAX;
       }
-      break;
 
-    case FPFD_RNDNA:
-      if (rem < 5) {
-        tern = 1 + sign;
-      } else {
-        tern = (1 - sign) | 0x10;
-      }
-      break;
-
-    case FPFD_RNDZ:
-      tern = 1 + sign;
-      break;
-
-    case FPFD_RNDU:
-      tern = 1 - sign;
-      if (sign > 0) tern |= 0x10;
-      break;
-
-    case FPFD_RNDD:
-      tern = 1 + sign;
-      if (sign > 0) tern |= 0x10;
-      break;
+      dest->data[i] = bits;
+      bits >>= CHAR_BIT;
+      bits_left >>= CHAR_BIT;
     }
-  }
-  return tern;
+
+    fpfd32_impl_expand(&impl, dest);
+  } while (impl.fields.special != FPFD_ZERO
+           && impl.fields.special != FPFD_NUMBER);
+}
+
+void
+fpfd32_srandom(unsigned int seed)
+{
+  srand(seed);
 }

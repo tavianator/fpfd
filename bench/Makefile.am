@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-C_SOURCES = htable.c impl_expand.c main.c
+C_SOURCES = htable.c impl_expand.c main.c xmalloc.c
 
 if X86
 S_SOURCES = x86/rdtsc.s
@@ -32,7 +32,5 @@ benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
 bench: benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
-	echo DPD Encoding results:
-	./benchmark-dpd$(EXEEXT) /dev/urandom ./rngsave
-	echo BID Encoding results:
-	./benchmark-bid$(EXEEXT) /dev/urandom ./rngsave
+	./benchmark-dpd$(EXEEXT)
+	./benchmark-bid$(EXEEXT)
