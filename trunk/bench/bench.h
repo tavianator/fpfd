@@ -22,12 +22,12 @@
 #include <stddef.h> /* For size_t        */
 #include <stdio.h>  /* For FILE          */
 
-typedef struct
-{
-  unsigned long ticks;
-  unsigned long ticks_sq;
-  unsigned int trials;
-} tickinfo;
+/*
+ * These work like the standard library functions without the 'x' prefix, but
+ * call exit(EXIT_FAILURE) upon allocation failure.
+ */
+void *xmalloc(size_t size);
+void *xrealloc(void *ptr, size_t size);
 
 /*
  * Gets the number of clock ticks since some time. Extremely high-resolution

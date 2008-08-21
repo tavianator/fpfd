@@ -1,7 +1,7 @@
 /*************************************************************************
  * Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               *
  *                                                                       *
- * This file is part of The FPFD Library Benchmark Suite.                *
+ * This file is part of The FPFD Library Benchmark Suite                 *
  *                                                                       *
  * The FPFD Library Benchmark Suite is free software; you can            *
  * redistribute it and/or modify it under the terms of the GNU General   *
@@ -18,57 +18,31 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdio.h>  /* For fprintf, FILE */
-#include <stdlib.h> /* For exit, EXIT_*  */
-#include <search.h> /* For hcreate       */
+#include <stdlib.h> /* For malloc, exit */
+#include <stdio.h>  /* For perror       */
 
-void fpfd_bench(unsigned int trials);
-void fpfd_bench_results(FILE *file);
-
-int
-main(int argc, char **argv)
+void *
+xmalloc(size_t size)
 {
-  /* Should be enough to get consistent tick counts every time */
-  const unsigned int trials = 10;
+  void *ptr = malloc(size);
 
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
+  if (!ptr) {
+    perror("malloc");
     exit(EXIT_FAILURE);
   }
 
-  fpfd_bench(trials);
-  fpfd_bench_results(stdout);
-
-  return EXIT_SUCCESS;
+  return ptr;
 }
 
-void
-fpfd_bench(unsigned int trials)
+void *
+xrealloc(void *ptr, size_t size)
 {
-  fpfd32_bench_impl_expand(trials);
-  /*
-  fpfd32_bench_impl_compress(trials);
-  fpfd32_bench_impl_scale(trials);
-  fpfd32_bench_impl_inc(trials);
-  fpfd32_bench_impl_addsub(trials);
-  fpfd32_bench_impl_mul(trials);
-  fpfd32_bench_impl_div(trials);
+  ptr = realloc(ptr, size);
 
-  fpfd32_bench_addsub(trials);
-  fpfd32_bench_mul(trials);
-  fpfd32_bench_div(trials);
-  */
-}
+  if (!ptr) {
+    perror("realloc");
+    exit(EXIT_FAILURE);
+  }
 
-void
-fpfd_bench_results(FILE *file)
-{
-  fprintf(file,
-          "\n--- fpfd32_impl_expand ---\n"
-          "Mean: %g\tStandard deviation: %g\n",
-          fpfd_mean_ticks("fpfd32_impl_expand"),
-          fpfd_stddev_ticks("fpfd32_impl_expand"));
-
-  fprintf(file, "\n");
+  return ptr;
 }

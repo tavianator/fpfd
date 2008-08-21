@@ -20,6 +20,41 @@
 
 #include "fpfd_impl.h"
 
+static fpfd_action_t fpfd_div_action(fpfd_impl_t *rop,
+                                     fpfd_impl_t *op1, fpfd_impl_t *op2);
+
+int
+fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
+           fpfd_rnd_t rnd)
+{
+  int tern = 0;
+  int rem1, rem2;
+  fpfd32_impl_t rop, op1, op2;
+
+  fpfd32_impl_expand(&op1, lhs);
+  fpfd32_impl_expand(&op2, rhs);
+
+  switch (fpfd_div_action(&rop.fields, &op1.fields, &op2.fields)) {
+  case FPFD_RET:
+    fpfd32_impl_compress(dest, &rop);
+    break;
+  case FPFD_LHS:
+    fpfd32_impl_compress(dest, &op1);
+    break;
+  case FPFD_RHS:
+    fpfd32_impl_compress(dest, &op2);
+    break;
+  case FPFD_OPERATE:
+    rem1 = fpfd32_impl_div(&rop, &op1, &op2);
+    rem2 = fpfd32_impl_scale(&rop);
+    tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
+    fpfd32_impl_compress(dest, &rop);
+    break;
+  }
+
+  return tern;
+}
+
 static int
 fpfd_div_sign(fpfd_impl_t *op1, fpfd_impl_t *op2) {
   if (op1->sign == op2->sign) {
@@ -88,36 +123,4 @@ fpfd_div_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2)
   }
 
   return action;
-}
-
-int
-fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-           fpfd_rnd_t rnd)
-{
-  int tern = 0;
-  int rem1, rem2;
-  fpfd32_impl_t rop, op1, op2;
-
-  fpfd32_impl_expand(&op1, lhs);
-  fpfd32_impl_expand(&op2, rhs);
-
-  switch (fpfd_div_action(&rop.fields, &op1.fields, &op2.fields)) {
-  case FPFD_RET:
-    fpfd32_impl_compress(dest, &rop);
-    break;
-  case FPFD_LHS:
-    fpfd32_impl_compress(dest, &op1);
-    break;
-  case FPFD_RHS:
-    fpfd32_impl_compress(dest, &op2);
-    break;
-  case FPFD_OPERATE:
-    rem1 = fpfd32_impl_div(&rop, &op1, &op2);
-    rem2 = fpfd32_impl_scale(&rop);
-    tern = fpfd32_impl_tern2(&rop, rem1, rem2, rnd);
-    fpfd32_impl_compress(dest, &rop);
-    break;
-  }
-
-  return tern;
 }

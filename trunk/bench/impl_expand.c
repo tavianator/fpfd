@@ -27,6 +27,10 @@ fpfd32_bench_impl_expand(unsigned int trials)
   unsigned long tsc1, tsc2;
   unsigned int i;
 
+  /* Warm up cache */
+  fpfd32_random(fp);
+  fpfd32_impl_expand(&impl, fp);
+
   for (i = 0; i < trials; ++i) {
     fpfd32_random(fp);
 

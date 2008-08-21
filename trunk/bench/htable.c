@@ -23,28 +23,78 @@
 #include <stdio.h>  /* For perror       */
 #include <math.h>   /* For sqrt         */
 
+typedef struct {
+  unsigned int trials;
+  unsigned long *list;
+  size_t size, capacity;
+} ticklist_t;
+
+static void fpfd_save_ticks(const char *key, unsigned long ticks);
+static double fpfd_raw_mean_ticks(const char *key);
+
 void
 fpfd_record_ticks(const char *key, unsigned long ticks)
 {
-  ENTRY e, *ep;
-  tickinfo *t;
   unsigned long tsc1, tsc2;
+
+  tsc1 = fpfd_rdtsc();
+  tsc2 = fpfd_rdtsc();
+
+  fpfd_save_ticks(key, ticks);
+  fpfd_save_ticks("fpfd_rdtsc", tsc2 - tsc1);
+}
+
+double
+fpfd_mean_ticks(const char *key)
+{
+  return fpfd_raw_mean_ticks(key) - fpfd_raw_mean_ticks("fpfd_rdtsc");
+}
+
+double
+fpfd_stddev_ticks(const char *key)
+{
+  ENTRY e, *ep;
+  ticklist_t *tl;
+  double ticks, ticks_sq = 0.0, mean;
+  size_t i;
 
   e.key = (char *)key;
   ep = hsearch(e, FIND);
 
   if (!ep) {
-    t = malloc(sizeof(tickinfo));
+    return -1.0;
+  }
 
-    if (!t) {
-      perror("malloc");
-      exit(EXIT_FAILURE);
-    }
+  tl = ep->data;
 
-    t->ticks    = 0;
-    t->ticks_sq = 0;
-    t->trials   = 0;
-    e.data      = t;
+  for (i = 0; i < tl->size; ++i) {
+    ticks = tl->list[i];
+    ticks *= ticks;
+    ticks_sq += ticks;
+  }
+  mean = fpfd_raw_mean_ticks(key);
+
+  return sqrt((ticks_sq / tl->trials) - mean * mean);
+}
+
+static void
+fpfd_save_ticks(const char *key, unsigned long ticks)
+{
+  ENTRY e, *ep;
+  ticklist_t *tl;
+
+  e.key = (char *)key;
+  ep = hsearch(e, FIND);
+
+  if (!ep) {
+    tl = xmalloc(sizeof(ticklist_t));
+
+    tl->trials = 0;
+    tl->list = xmalloc(sizeof(unsigned long));
+    tl->size = 0;
+    tl->capacity = 1;
+
+    e.data = tl;
 
     ep = hsearch(e, ENTER);
 
@@ -54,23 +104,26 @@ fpfd_record_ticks(const char *key, unsigned long ticks)
     }
   }
 
-  tsc1 = fpfd_rdtsc();
-  tsc2 = fpfd_rdtsc();
+  tl = ep->data;
 
-  ticks -= tsc2 - tsc1;
+  ++tl->trials;
 
-  t           =  ep->data;
-  t->ticks    += ticks;
-  t->ticks_sq += ticks * ticks;
-  ++t->trials;
+  if (tl->size == tl->capacity) {
+    tl->capacity *= 2;
+    tl->list = xrealloc(tl->list, tl->capacity * sizeof(unsigned long));
+  }
+
+  tl->list[tl->size] = ticks;
+  ++tl->size;
 }
 
-double
-fpfd_mean_ticks(const char *key)
+static double
+fpfd_raw_mean_ticks(const char *key)
 {
   ENTRY e, *ep;
-  tickinfo *t;
-  double ticks, trials;
+  ticklist_t *tl;
+  double ticks = 0.0;
+  size_t i;
 
   e.key = (char *)key;
   ep = hsearch(e, FIND);
@@ -79,29 +132,11 @@ fpfd_mean_ticks(const char *key)
     return -1.0;
   }
 
-  t      = ep->data;
-  ticks  = t->ticks;
-  trials = t->trials;
-  return ticks / trials;
-}
+  tl = ep->data;
 
-double
-fpfd_stddev_ticks(const char *key)
-{
-  ENTRY e, *ep;
-  tickinfo *t;
-  double ticks, ticks_sq, trials;
-
-  e.key = (char *)key;
-  ep = hsearch(e, FIND);
-
-  if (!ep) {
-    return -1.0;
+  for (i = 0; i < tl->size; ++i) {
+    ticks += tl->list[i];
   }
 
-  t        = ep->data;
-  ticks    = ticks;
-  ticks_sq = ticks_sq;
-  trials   = trials;
-  return sqrt((ticks_sq - (ticks * ticks / trials)) / trials);
+  return ticks / tl->trials;
 }
