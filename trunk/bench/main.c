@@ -18,18 +18,18 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdio.h>  /* For fprintf, FILE */
+#include <stdio.h>  /* For fprintf, fopen */
 #include <stdlib.h> /* For exit, EXIT_*  */
 #include <search.h> /* For hcreate       */
 
-void fpfd_bench(unsigned int trials);
-void fpfd_bench_results(FILE *file);
+static void fpfd_bench(unsigned int trials);
+static void fpfd_bench_results();
 
 int
 main(int argc, char **argv)
 {
   /* Should be enough to get consistent tick counts every time */
-  const unsigned int trials = 10;
+  const unsigned int trials = 1000;
 
   /* The number of table enteries. */
   if (!hcreate(40)) {
@@ -38,7 +38,7 @@ main(int argc, char **argv)
   }
 
   fpfd_bench(trials);
-  fpfd_bench_results(stdout);
+  fpfd_bench_results();
 
   return EXIT_SUCCESS;
 }
@@ -62,13 +62,16 @@ fpfd_bench(unsigned int trials)
 }
 
 void
-fpfd_bench_results(FILE *file)
+fpfd_bench_results()
 {
-  fprintf(file,
-          "\n--- fpfd32_impl_expand ---\n"
-          "Mean: %g\tStandard deviation: %g\n",
-          fpfd_mean_ticks("fpfd32_impl_expand"),
-          fpfd_stddev_ticks("fpfd32_impl_expand"));
+  FILE *file;
+  int i = 0;
 
-  fprintf(file, "\n");
+  file = fopen("fpfd32_impl_expand.dat", "w");
+  fpfd_write_ticks("fpfd32_impl_expand", file);
+  fclose(file);
+
+  file = fopen("fpfd32_summary.dat", "w");
+  fpfd_write_tick_summary("fpfd32_impl_expand", file, &i);
+  fclose(file);
 }

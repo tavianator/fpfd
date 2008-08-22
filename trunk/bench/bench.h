@@ -18,16 +18,33 @@
  *************************************************************************/
 
 #include "../libfpfd/fpfd_impl.h"
-#include <search.h> /* For hsearch, etc. */
+#include <search.h> /* For ENTRY, ACTION */
 #include <stddef.h> /* For size_t        */
 #include <stdio.h>  /* For FILE          */
 
 /*
- * These work like the standard library functions without the 'x' prefix, but
- * call exit(EXIT_FAILURE) upon allocation failure.
+ * The type that stores the tick count of each trial, which is used by the hash
+ * table.
  */
+typedef struct {
+  unsigned int trials;
+  unsigned long *list;
+  size_t size, capacity;
+} ticklist_t;
+
+/*
+ * These work like the standard library functions without the 'x' prefix, but
+ * call exit(EXIT_FAILURE) upon failure, so are guaranteed to have succeeded if
+ * they return.
+ */
+
 void *xmalloc(size_t size);
 void *xrealloc(void *ptr, size_t size);
+
+FILE *xfopen(const char *path, const char *mode);
+void xfclose(FILE *fp);
+
+ENTRY *xhsearch(ENTRY item, ACTION action);
 
 /*
  * Gets the number of clock ticks since some time. Extremely high-resolution
@@ -38,13 +55,13 @@ unsigned long fpfd_rdtsc();
 /*
  * Functions which deal with the hash table.
  *   fpfd_record_ticks stores the tick count of the trial in the hash table.
- *   fpfd_mean_ticks returns the mean tick count for a particular key.
- *   fpfd_stddev_ticks returns the standard deviation in the tick count for a
- *     particular key.
+ *   fpfd_write_ticks writes the tick count of each trial to file.
+ *   fpfd_write_tick_summary writes the mean tick count and standard deviation
+ *     to file.
  */
 void fpfd_record_ticks(const char *key, unsigned long ticks);
-double fpfd_mean_ticks(const char *key);
-double fpfd_stddev_ticks(const char *key);
+void fpfd_write_ticks(const char *key, FILE *file);
+void fpfd_write_tick_summary(const char *key, FILE *file, int *i);
 
 /*
  * Routines which benchmark part of the programmer or implementation interfaces.

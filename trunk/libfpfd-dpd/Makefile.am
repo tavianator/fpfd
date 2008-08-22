@@ -17,9 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
+lib_LTLIBRARIES = libfpfd-dpd.la
+
 if X86
-S_SOURCES = x86/addsub.s x86/compress.s x86/dpdtable.s x86/expand.s x86/inc.s x86/scale.s
+dist_libfpfd_dpd_la_SOURCES   = x86/addsub.s x86/compress.s x86/expand.s x86/inc.s x86/scale.s
+nodist_libfpfd_dpd_la_SOURCES = x86/dpdtable.s
 endif
 
-lib_LTLIBRARIES        = libfpfd-dpd.la
-libfpfd_dpd_la_SOURCES = $(S_SOURCES)
+EXTRA_DIST = x86/dpdtable.sh
