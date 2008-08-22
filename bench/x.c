@@ -21,6 +21,8 @@
 #include <stdlib.h> /* For malloc, exit */
 #include <stdio.h>  /* For perror       */
 
+static void xdie();
+
 void *
 xmalloc(size_t size)
 {
@@ -28,7 +30,7 @@ xmalloc(size_t size)
 
   if (!ptr) {
     perror("malloc");
-    exit(EXIT_FAILURE);
+    xdie();
   }
 
   return ptr;
@@ -41,8 +43,49 @@ xrealloc(void *ptr, size_t size)
 
   if (!ptr) {
     perror("realloc");
-    exit(EXIT_FAILURE);
+    xdie();
   }
 
   return ptr;
+}
+
+FILE *
+xfopen(const char *path, const char *mode)
+{
+  FILE *ptr = fopen(path, mode);
+
+  if (!ptr) {
+    perror("fopen");
+    xdie();
+  }
+
+  return ptr;
+}
+
+void
+xfclose(FILE *fp)
+{
+  if (fclose(fp)) {
+    perror("fclose");
+    xdie();
+  }
+}
+
+ENTRY *
+xhsearch(ENTRY item, ACTION action)
+{
+  ENTRY *ptr = hsearch(item, action);
+
+  if (!ptr) {
+    perror("hsearch");
+    xdie();
+  }
+
+  return ptr;
+}
+
+static void
+xdie()
+{
+  exit(EXIT_FAILURE);
 }
