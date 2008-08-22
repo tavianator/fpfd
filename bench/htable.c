@@ -44,19 +44,32 @@ fpfd_write_ticks(const char *key, FILE *file)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
-  double rdtsc;
+  double rdtsc, mean, stddev;
   size_t i;
 
   rdtsc = fpfd_mean_ticks("fpfd_rdtsc");
+  mean = fpfd_mean_ticks(key) - rdtsc;
+  stddev = fpfd_stddev_ticks(key);
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
 
   tl = ep->data;
 
+  /* Each trial */
   for (i = 0; i < tl->size; ++i) {
     fprintf(file, "%lu\t%g\n", (unsigned long)i, tl->list[i] - rdtsc);
   }
+
+  /* Mean */
+  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
+          mean, (unsigned long)tl->size - 1, mean);
+
+  /* One standard deviation above and below the mean */
+  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
+          mean + stddev, (unsigned long)tl->size - 1, mean + stddev);
+  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
+          mean - stddev, (unsigned long)tl->size - 1, mean - stddev);
 }
 
 void
