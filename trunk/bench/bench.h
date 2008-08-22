@@ -61,7 +61,7 @@ unsigned long fpfd_rdtsc();
  */
 void fpfd_record_ticks(const char *key, unsigned long ticks);
 void fpfd_write_ticks(const char *key, FILE *file);
-void fpfd_write_tick_summary(const char *key, FILE *file, int *i);
+void fpfd_write_tick_summary(const char *key, FILE *file, int i);
 
 /*
  * Routines which benchmark part of the programmer or implementation interfaces.

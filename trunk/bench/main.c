@@ -65,13 +65,8 @@ void
 fpfd_bench_results()
 {
   FILE *file;
-  int i = 0;
 
   file = fopen("fpfd32_impl_expand.dat", "w");
   fpfd_write_ticks("fpfd32_impl_expand", file);
-  fclose(file);
-
-  file = fopen("fpfd32_summary.dat", "w");
-  fpfd_write_tick_summary("fpfd32_impl_expand", file, &i);
   fclose(file);
 }
