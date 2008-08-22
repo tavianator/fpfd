@@ -60,7 +60,7 @@ fpfd_write_ticks(const char *key, FILE *file)
 }
 
 void
-fpfd_write_tick_summary(const char *key, FILE *file, int *i)
+fpfd_write_tick_summary(const char *key, FILE *file, int i)
 {
   double mean, stddev, rdtsc;
 
@@ -68,8 +68,7 @@ fpfd_write_tick_summary(const char *key, FILE *file, int *i)
   stddev = fpfd_stddev_ticks(key);
   rdtsc = fpfd_mean_ticks("fpfd_rdtsc");
 
-  fprintf(file, "%d\t%g\t%g\n", *i, mean - rdtsc, stddev);
-  ++*i;
+  fprintf(file, "%d\t%g\t%g\n", i, mean - rdtsc, stddev);
 }
 
 static void
