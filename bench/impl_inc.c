@@ -18,65 +18,28 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdio.h>  /* For fprintf, fopen */
-#include <stdlib.h> /* For exit, EXIT_*   */
-#include <search.h> /* For hcreate        */
 
-static void fpfd_bench(unsigned int trials);
-static void fpfd_bench_results();
-
-int
-main(int argc, char **argv)
+void
+fpfd32_bench_impl_inc(unsigned int trials)
 {
-  /* Should be enough to get consistent tick counts every time */
-  const unsigned int trials = 1000;
+  fpfd32_t fp;
+  fpfd32_impl_t impl;
+  unsigned long tsc1, tsc2;
+  unsigned int i;
 
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
-    exit(EXIT_FAILURE);
+  /* Warm up cache */
+  fpfd32_random(fp);
+  fpfd32_impl_expand(&impl, fp);
+  fpfd32_impl_inc(&impl);
+
+  for (i = 0; i < trials; ++i) {
+    fpfd32_random(fp);
+    fpfd32_impl_expand(&impl, fp);
+
+    tsc1 = fpfd_rdtsc();
+    fpfd32_impl_inc(&impl);
+    tsc2 = fpfd_rdtsc();
+
+    fpfd_record_ticks("fpfd32_impl_inc", tsc2 - tsc1);
   }
-
-  fpfd_bench(trials);
-  fpfd_bench_results();
-
-  return EXIT_SUCCESS;
-}
-
-void
-fpfd_bench(unsigned int trials)
-{
-  fpfd32_bench_impl_expand(trials);
-  fpfd32_bench_impl_compress(trials);
-  /*
-  fpfd32_bench_impl_scale(trials);
-  */
-  fpfd32_bench_impl_inc(trials);
-  /*
-  fpfd32_bench_impl_addsub(trials);
-  fpfd32_bench_impl_mul(trials);
-  fpfd32_bench_impl_div(trials);
-
-  fpfd32_bench_addsub(trials);
-  fpfd32_bench_mul(trials);
-  fpfd32_bench_div(trials);
-  */
-}
-
-void
-fpfd_bench_results()
-{
-  FILE *file;
-
-  file = fopen("fpfd32_impl_expand.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_expand", file);
-  fclose(file);
-
-  file = fopen("fpfd32_impl_compress.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_compress", file);
-  fclose(file);
-
-  file = fopen("fpfd32_impl_inc.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_inc", file);
-  fclose(file);
 }

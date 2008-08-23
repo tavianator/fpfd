@@ -62,7 +62,7 @@ fpfd32_impl_inc:
         movl 8(%ecx), %eax
         addl $1, %eax           # Increment the exponent
         cmpl $90, %eax
-        jg .Loflow              # Test for overflow
+        ja .Loflow              # Test for overflow
         movl %eax, 8(%ecx)
         movl $0x01000000, (%ecx)
         popl %esi
