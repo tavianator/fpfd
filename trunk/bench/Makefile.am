@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-C_SOURCES = htable.c impl_compress.c impl_expand.c main.c x.c
+C_SOURCES = htable.c impl_compress.c impl_expand.c impl_inc.c main.c x.c
 
 if X86
 S_SOURCES = x86/rdtsc.s
