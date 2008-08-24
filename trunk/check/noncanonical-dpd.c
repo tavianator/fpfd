@@ -18,12 +18,8 @@
  *************************************************************************/
 
 #include "check.h"
-#include <inttypes.h> /* For uint32_t, PRIX32           */
-#include <stdio.h>    /* For fprintf, stderr            */
-#include <stdlib.h>   /* For EXIT_SUCCESS, EXIT_FAILURE */
-
-void fpfd32_assert(fpfd32_srcptr res, uint32_t mant, fpfd_special_t special);
-void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
+#include <stdio.h>  /* For fprintf, stderr            */
+#include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
 
 /*
  * Check cases where a non-canonical value should be handled specially.
@@ -31,62 +27,11 @@ void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
 int
 main()
 {
-  fpfd32_t noncanon_sNaN, noncanon_qNaN, noncanon_inf;
-
-  /* --- Encoding-independant tests --- */
+  fpfd32_check_independent();
 
   /*
-   * NaNs should have G_6 through G_{w+4} set to zero, infinities should have
-   * G_5 through G_{w+4} and T set to zero.
+   * Encoding-dependant tests
    */
 
-  fpfd32_set_manually(noncanon_sNaN, 0x7FF00000);
-  fpfd32_set(noncanon_sNaN, noncanon_sNaN);
-  fpfd32_assert_manually(noncanon_sNaN, 0x7FF00000, 0x7E000000);
-
-  fpfd32_set_manually(noncanon_qNaN, 0x7DF00000);
-  fpfd32_set(noncanon_qNaN, noncanon_qNaN);
-  fpfd32_assert_manually(noncanon_qNaN, 0x7FF00000, 0x7C000000);
-
-  fpfd32_set_manually(noncanon_inf, 0x7BF00000);
-  fpfd32_set(noncanon_inf, noncanon_inf);
-  fpfd32_assert_manually(noncanon_inf, 0x7FFFFFFF, 0x78000000);
-
-  /* --- Encoding-dependant tests --- */
-
   return EXIT_SUCCESS;
-}
-
-void
-fpfd32_assert(fpfd32_srcptr res, uint32_t mant, fpfd_special_t special)
-{
-  if (!fpfd32_check_mant(res, mant) || !fpfd32_check_special(res, special)) {
-    fpfd32_impl_t res_impl;
-    fpfd32_impl_expand(&res_impl, res);
-
-    fprintf(stderr, "\n");
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
-    fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.16" PRIX32 
-                    ", special == %s ---\n\n",
-            mant, fpfd_special_str(special));
-    exit(EXIT_FAILURE);
-  }
-}
-
-void
-fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp)
-{
-  if (!fpfd32_check_manually(res, mask, cmp)) {
-    fpfd32_impl_t res_impl;
-    fpfd32_impl_expand(&res_impl, res);
-
-    fprintf(stderr, "\n");
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, "\n\n--- ERROR: Expected (op & %.8" PRIX32 ") "
-                    "== %.8" PRIX32 " ---\n\n",
-            mask, cmp);
-    exit(EXIT_FAILURE);
-  }
 }

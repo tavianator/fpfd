@@ -17,35 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "noncanonical.h"
-#include <stdio.h>  /* For fprintf, stderr            */
-#include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
+#include "check.h"
 
-/*
- * Check cases where a non-canonical value should be handled specially.
- */
-int
-main()
-{
-  fpfd32_t big_mant_num, big_mant_sNaN, big_mant_qNaN;
+/* Encoding-independent tests */
+void fpfd32_check_independent();
 
-  fpfd32_check_independent();
-
-  /*
-   * Encoding-dependant tests
-   *
-   * Mantissas with numerical value greater than the maximum representable by
-   * the DPD encoding are non-canonical and evaluate to zero, even for NaN
-   * payloads.
-   */
-  fpfd32_set_manually(big_mant_num, 0x77FFFFFF);
-  fpfd32_assert(big_mant_num, 0x0, FPFD_ZERO);
-
-  fpfd32_set_manually(big_mant_sNaN, 0x7E0FFFFF);
-  fpfd32_assert(big_mant_sNaN, 0x0, FPFD_SNAN);
-
-  fpfd32_set_manually(big_mant_qNaN, 0x7C0FFFFF);
-  fpfd32_assert(big_mant_qNaN, 0x0, FPFD_QNAN);
-
-  return EXIT_SUCCESS;
-}
+void fpfd32_assert(fpfd32_srcptr res, uint32_t mant, fpfd_special_t special);
+void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
