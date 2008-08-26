@@ -181,8 +181,8 @@ fpfd32_impl_scale:
         ret
 .Lzero:
         movl $0, (%esi)
-        movl $0, 4(%esi)
-        movl $0, 8(%esi)
+        movl $0, 4(%esi)        # Set dest->mant to zero
+        movl $0, 8(%esi)        # Set dest->exp to zero
         movl $0, %eax
         popl %esi
         popl %ebx

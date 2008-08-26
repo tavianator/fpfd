@@ -38,14 +38,14 @@ main()
    * the DPD encoding are non-canonical and evaluate to zero, even for NaN
    * payloads.
    */
-  fpfd32_set_manually(big_mant_num, 0x77FFFFFF);
-  fpfd32_assert(big_mant_num, 0x0, FPFD_ZERO);
+  fpfd32_set_manually(big_mant_num, UINT32_C(0x77FFFFFF));
+  fpfd32_assert(big_mant_num, 0, FPFD_ZERO);
 
-  fpfd32_set_manually(big_mant_sNaN, 0x7E0FFFFF);
-  fpfd32_assert(big_mant_sNaN, 0x0, FPFD_SNAN);
+  fpfd32_set_manually(big_mant_sNaN, UINT32_C(0x7E0FFFFF));
+  fpfd32_assert(big_mant_sNaN, 0, FPFD_SNAN);
 
-  fpfd32_set_manually(big_mant_qNaN, 0x7C0FFFFF);
-  fpfd32_assert(big_mant_qNaN, 0x0, FPFD_QNAN);
+  fpfd32_set_manually(big_mant_qNaN, UINT32_C(0x7C0FFFFF));
+  fpfd32_assert(big_mant_qNaN, 0, FPFD_QNAN);
 
   return EXIT_SUCCESS;
 }

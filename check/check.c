@@ -36,6 +36,18 @@ fpfd32_get_manually(uint32_t *dest, fpfd32_srcptr src)
   memcpy(dest, src, 4);
 }
 
+void
+fpfd32_impl_set_manually(fpfd32_impl_t *dest, uint32_t h, uint32_t l)
+{
+  if (htonl(1) == 1) { /* Big-endian    */
+    memcpy(dest->mant, &h, 4);
+    memcpy(dest->mant + 4, &l, 4);
+  } else {             /* Little-endian */
+    memcpy(dest->mant, &l, 4);
+    memcpy(dest->mant + 4, &h, 4);
+  }
+}
+
 /* Checks */
 
 int
@@ -157,7 +169,7 @@ fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl)
 
   fprintf(file, "{\n"
           "  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
-          "  exp     = %d\n"
+          "  exp     = %+d\n"
           "  sign    = %+d\n"
           "  special = %s\n}",
           h, l, impl->fields.exp, impl->fields.sign,
