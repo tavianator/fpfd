@@ -97,8 +97,8 @@ function dpd2bcd() {
     echo "        .value 0b0000$a$b$c$d$e$f$g$h$i$j$k$m"
 }
 
-echo ".globl fpfd_bcd2dpd"
 echo "        .data"
+echo ".globl fpfd_bcd2dpd"
 echo "        .align 32"
 echo "        .type fpfd_bcd2dpd, @object"
 echo "        .size fpfd_bcd2dpd, 4914"
@@ -111,7 +111,6 @@ done
 
 echo ""
 echo ".globl fpfd_dpd2bcd"
-echo "        .data"
 echo "        .align 32"
 echo "        .type fpfd_dpd2bcd, @object"
 echo "        .size fpfd_dpd2bcd, 2046"

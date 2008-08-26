@@ -31,17 +31,20 @@ fpfd32_check_independent()
 
   fpfd32_t noncanon_sNaN, noncanon_qNaN, noncanon_inf;
 
-  fpfd32_set_manually(noncanon_sNaN, 0x7FF00000);
+  fpfd32_set_manually(noncanon_sNaN, UINT32_C(0x7FF00000));
   fpfd32_set(noncanon_sNaN, noncanon_sNaN);
-  fpfd32_assert_manually(noncanon_sNaN, 0x7FF00000, 0x7E000000);
+  fpfd32_assert_manually(noncanon_sNaN,
+                         UINT32_C(0x7FF00000), UINT32_C(0x7E000000));
 
-  fpfd32_set_manually(noncanon_qNaN, 0x7DF00000);
+  fpfd32_set_manually(noncanon_qNaN, UINT32_C(0x7DF00000));
   fpfd32_set(noncanon_qNaN, noncanon_qNaN);
-  fpfd32_assert_manually(noncanon_qNaN, 0x7FF00000, 0x7C000000);
+  fpfd32_assert_manually(noncanon_qNaN,
+                         UINT32_C(0x7FF00000), UINT32_C(0x7C000000));
 
-  fpfd32_set_manually(noncanon_inf, 0x7BF00000);
+  fpfd32_set_manually(noncanon_inf, UINT32_C(0x7BF00000));
   fpfd32_set(noncanon_inf, noncanon_inf);
-  fpfd32_assert_manually(noncanon_inf, 0x7FFFFFFF, 0x78000000);
+  fpfd32_assert_manually(noncanon_inf,
+                         UINT32_C(0x7FFFFFFF), UINT32_C(0x78000000));
 }
 
 void

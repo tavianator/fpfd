@@ -18,7 +18,7 @@
 #########################################################################
 
 if X86
-S_SOURCES = x86/compress.s x86/expand.s x86/inc.s x86/mul.s
+S_SOURCES = x86/compress.s x86/expand.s x86/inc.s x86/mul.s x86/scale.s x86/scaletable.s
 endif
 
 lib_LTLIBRARIES        = libfpfd-bid.la

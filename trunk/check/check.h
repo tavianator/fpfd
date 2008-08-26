@@ -25,8 +25,11 @@
 /*
  * Conversion to/from uint32_t's. Obviously, this is encoding dependant.
  */
+
 void fpfd32_set_manually(fpfd32_ptr dest, uint32_t src);
 void fpfd32_get_manually(uint32_t *dest, fpfd32_srcptr src);
+
+void fpfd32_impl_set_manually(fpfd32_impl_t *dest, uint32_t h, uint32_t l);
 
 /*
  * Return nonzero if, for example, the expanded mantissa == mant.
