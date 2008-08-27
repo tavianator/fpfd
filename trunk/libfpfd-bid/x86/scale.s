@@ -43,35 +43,38 @@ fpfd32_impl_scale:
         jb .LunderLSW           # The mantissa is too small
         cmpl $10000000, %eax
         jae .LoverLSW           # The mantissa is too big
+        movl %eax, %edx
+        movl $0, %eax
         jmp .Lnorm
 .LunderLSW:
-        movl fpfd_lsw_bsr2mul(,%ebx,4), %edx
-        mull %edx               # Scale the mantissa to within normalized range
+        imull fpfd_lsw_bsr2mul(,%ebx,4), %eax
+                                # Scale the mantissa to within normalized range
         movl fpfd_lsw_bsr2exp(,%ebx,4), %ebx
         addl 8(%esi), %ebx      # Correct the exponent
-        cmpl $1000000, %eax
+        movl %eax, %edx
+        movl $0, %eax
+        cmpl $1000000, %edx
         jae .Lnorm
-        movl $10, %edx          # Mantissa still too small
-        mull %edx
+        imull $10, %edx, %edx   # Mantissa still too small
         subl $1, %ebx           # Correct the exponent again
         jmp .Lnorm
 .LoverLSW:
         movl fpfd_lsw_bsr2mul(,%ebx,4), %edx
         mull %edx
         movl fpfd_lsw_bsr2shr(,%ebx,4), %ecx
+        shrdl %cl, %edx, %eax
         shrl %cl, %edx
         movl fpfd_lsw_bsr2exp(,%ebx,4), %ebx
         addl 8(%esi), %ebx      # Correct the exponent
-        movl %edx, %eax
-        cmpl $10000000, %eax
+        cmpl $10000000, %edx
         jb .Lnorm
+        movl %edx, %eax         # Mantissa still too large
         movl $0xCCCCCCCD, %edx
         mull %edx
-        shrl $3, %edx
-        addl $1, %ebx
-        movl %edx, %eax
+        shrl $3, %edx           # Divide by 10
+        addl $1, %ebx           # Correct the exponent again
 .Lnorm:
-        movl %eax, (%esi)
+        movl %edx, (%esi)
         movl $0, 4(%esi)
         movl %ebx, 8(%esi)
         popl %esi
