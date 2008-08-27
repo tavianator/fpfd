@@ -57,7 +57,7 @@ unsigned long fpfd_rdtsc();
  *   fpfd_record_ticks stores the tick count of the trial in the hash table.
  *   fpfd_write_ticks writes the tick count for each trial, the mean, and one
  *     standard deviation above and below it, to file, in a format readable by
- *     gnuplot.
+ *     plotutils' graph, gnuplot, or similar.
  */
 void fpfd_record_ticks(const char *key, unsigned long ticks);
 void fpfd_write_ticks(const char *key, FILE *file);
