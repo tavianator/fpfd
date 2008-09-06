@@ -19,11 +19,15 @@
 
 C_SOURCES = htable.c impl_compress.c impl_expand.c impl_inc.c main.c x.c
 
+H_SOURCES = bench.h
+
 if X86
-S_SOURCES = x86/rdtsc.s
+S_SOURCES = x86/rdtsc-x86.s
 endif
 
-H_SOURCES = bench.h
+if X86_64
+S_SOURCES = x86_64/rdtsc-x86_64.s
+endif
 
 EXTRA_PROGRAMS        = benchmark-dpd benchmark-bid
 benchmark_dpd_SOURCES = $(C_SOURCES) $(S_SOURCES) $(H_SOURCES)
