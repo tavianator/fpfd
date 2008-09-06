@@ -17,9 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
+lib_LTLIBRARIES        = libfpfd-bid.la
+
 if X86
-S_SOURCES = x86/compress.s x86/expand.s x86/inc.s x86/mul.s x86/scale.s x86/scaletable.s
+libfpfd_bid_la_SOURCES = x86/compress.s x86/expand.s x86/inc.s x86/mul.s x86/scale.s x86/scaletable.s
 endif
 
-lib_LTLIBRARIES        = libfpfd-bid.la
-libfpfd_bid_la_SOURCES = $(S_SOURCES)
+if X86_64
+libfpfd_bid_la_SOURCES =
+endif

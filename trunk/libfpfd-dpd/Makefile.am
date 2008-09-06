@@ -20,7 +20,9 @@
 lib_LTLIBRARIES = libfpfd-dpd.la
 
 if X86
-dist_libfpfd_dpd_la_SOURCES   = x86/addsub.s x86/compress.s x86/dpdtable.s x86/expand.s x86/inc.s x86/scale.s
+libfpfd_dpd_la_SOURCES = x86/addsub.s x86/compress.s x86/dpdtable.s x86/expand.s x86/inc.s x86/scale.s
 endif
 
-EXTRA_DIST = x86/dpdtable.sh
+if X86_64
+libfpfd_dpd_la_SOURCES =
+endif

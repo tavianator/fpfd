@@ -38,12 +38,7 @@ dnl Find out which assembly files to compile
 AC_CANONICAL_HOST
 
 AM_CONDITIONAL([X86], [echo $host_cpu | grep '.*86$' > /dev/null])
-
-case $host_cpu in
-    *86)
-        $srcdir/libfpfd-dpd/x86/dpdtable.sh > $srcdir/libfpfd-dpd/x86/dpdtable.s
-        ;;
-esac
+AM_CONDITIONAL([X86_64], [echo $host_cpu | grep 'x86_64$' > /dev/null])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
