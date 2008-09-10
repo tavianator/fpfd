@@ -24,5 +24,5 @@ libfpfd_dpd_la_SOURCES = x86/addsub-x86.s x86/compress-x86.s x86/dpdtable-x86.s 
 endif
 
 if X86_64
-libfpfd_dpd_la_SOURCES =
+libfpfd_dpd_la_SOURCES = x86_64/dpdtable-x86_64.s x86_64/expand-x86_64.s
 endif
