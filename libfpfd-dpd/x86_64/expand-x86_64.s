@@ -75,6 +75,7 @@ fpfd32_impl_expand:
         je .LsNaN
         cmpl $0x7C0, %ecx
         je .LqNaN
+        andl $0x7C0, %ecx
         cmpl $0x780, %ecx
         je .Linf
         movl %eax, %ecx
