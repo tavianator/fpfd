@@ -27,15 +27,94 @@
 .globl fpfd32_impl_expand
         .type fpfd32_impl_expand, @function
 fpfd32_impl_expand:
-        movq (%rsi), %rax
-        movq %rax, %rcx
-        movq %rax, %rdx
-        andq $0x3FF, %rcx
+        movl (%rsi), %eax
+        movl %eax, %edx
+        shrl $30, %edx
+        andl $0x2, %edx
+        negl %edx
+        addl $1, %edx
+        movl %edx, 12(%rdi)     # Map the sign bit from (1, 0) to (-1, +1)
+        movl %eax, %ecx
+        movl %eax, %edx
+        andl $0x3FF, %ecx
         movq fpfd_dpd2bcd@GOTPCREL(%rip), %r8   # For position-independance
         movw (%r8,%rcx,2), %cx
-        shrq $10, %rdx
-        andq $0x3FF, %rdx
+        shrl $10, %edx
+        andl $0x3FF, %edx
         movw (%r8,%rdx,2), %dx
-        shlq $12, %rdx
+        shll $12, %edx
+        orl %ecx, %edx          # Convert the trailing significand digits from
+                                # DPD to BCD
+        shrl $20, %eax
+        andl $0x7FF, %eax
+        movl %eax, %ecx
+        andl $0x600, %ecx
+        cmpl $0x600, %ecx
+        je .L1i                 # If the combination field begins with 11,
+                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        movl %eax, %ecx
+        andl $0x1C0, %ecx
+        shll $19, %ecx
+        orl %ecx, %edx
+        jz .Lzero
+        movl %edx, (%rdi)       # Get the leading significand digit
+        movl $0, 4(%rdi)        # Set the high-order significand bits to zero
+        movl %eax, %ecx
+        andl $0x3F, %eax
+        andl $0x600, %ecx
+        shrl $3, %ecx
+        orl %eax, %ecx
+        subl $101, %ecx
+        movl %ecx, 8(%rdi)      # Subtract the bias and store the exponent
+        movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        ret
+.L1i:
+        movl %eax, %ecx
+        andl $0x7E0, %ecx
+        cmpl $0x7E0, %ecx
+        je .LsNaN
+        cmpl $0x7C0, %ecx
+        je .LqNaN
+        cmpl $0x780, %ecx
+        je .Linf
+        movl %eax, %ecx
+        andl $0x040, %ecx
+        orl $0x200, %ecx
+        shll $18, %ecx
+        orl %ecx, %edx
+        movl %edx, (%rdi)       # Get the leading significand digit
+        movl $0, 4(%rdi)        # Set the high-order significand bits to zero
+        movl %eax, %ecx
+        andl $0x3F, %eax
+        andl $0x180, %ecx
+        shrl %ecx
+        orl %eax, %ecx
+        subl $101, %ecx
+        movl %ecx, 8(%rdi)      # Subtract the bias and store the exponent
+        movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        ret
+.Lzero:
+        movl $0, (%rdi)
+        movl $0, 4(%rdi)
+        movl $0, 8(%rdi)
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        ret
+.LsNaN:
+        movl %edx, (%rdi)
+        movl $0, 4(%rdi)
+        movl $0, 8(%rdi)
+        movl $2, 16(%rdi)       # Set the special flag to FPFD_SNAN
+        ret
+.LqNaN:
+        movl %edx, (%rdi)
+        movl $0, 4(%rdi)
+        movl $0, 8(%rdi)
+        movl $3, 16(%rdi)       # Set the special flag to FPFD_QNAN
+        ret
+.Linf:
+        movl %edx, (%rdi)
+        movl $0, 4(%rdi)
+        movl $0, 8(%rdi)
+        movl $4, 16(%rdi)       # Set the special flag to FPFD_INF
         ret
         .size fpfd32_impl_expand, .-fpfd32_impl_expand
