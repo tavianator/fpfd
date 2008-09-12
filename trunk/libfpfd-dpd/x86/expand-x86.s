@@ -35,7 +35,7 @@ fpfd32_impl_expand:
         shrl $30, %edx
         andl $0x2, %edx
         negl %edx
-        incl %edx
+        addl $1, %edx
         movl %edx, 12(%eax)     # Map the sign bit from (1, 0) to (-1, +1)
         movl %ecx, %edx
         andl $0x3FF, %edx
@@ -60,6 +60,7 @@ fpfd32_impl_expand:
         orl %edx, %ebx
         jz .Lzero
         movl %ebx, (%eax)       # Get the leading significand digit
+        movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl %ecx, %edx
         andl $0x3F, %ecx
         andl $0x600, %edx
@@ -67,7 +68,6 @@ fpfd32_impl_expand:
         orl %ecx, %edx
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
-        movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
         popl %ebx
         ret
@@ -78,7 +78,6 @@ fpfd32_impl_expand:
         je .LsNaN
         cmpl $0x7C0, %edx
         je .LqNaN
-        andl $0x7C0, %edx
         cmpl $0x780, %edx
         je .Linf
         movl %ecx, %edx
@@ -87,6 +86,7 @@ fpfd32_impl_expand:
         shll $18, %edx
         orl %edx, %ebx
         movl %ebx, (%eax)       # Get the leading significand digit
+        movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl %ecx, %edx
         andl $0x3F, %ecx
         andl $0x180, %edx
@@ -94,7 +94,6 @@ fpfd32_impl_expand:
         orl %ecx, %edx
         subl $101, %edx
         movl %edx, 8(%eax)      # Subtract the bias and store the exponent
-        movl $0, 4(%eax)        # Set the high-order significand bits to zero
         movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
         popl %ebx
         ret
