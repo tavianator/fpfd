@@ -36,11 +36,11 @@ fpfd32_impl_expand:
         movl %edx, 12(%rdi)     # Map the sign bit from (1, 0) to (-1, +1)
         movl %eax, %ecx
         movl %eax, %edx
-        andl $0x3FF, %ecx
         movq fpfd_dpd2bcd@GOTPCREL(%rip), %r8   # For position-independance
+        andq $0x3FF, %rcx
         movw (%r8,%rcx,2), %cx
         shrl $10, %edx
-        andl $0x3FF, %edx
+        andq $0x3FF, %rdx
         movw (%r8,%rdx,2), %dx
         shll $12, %edx
         orl %ecx, %edx          # Convert the trailing significand digits from
