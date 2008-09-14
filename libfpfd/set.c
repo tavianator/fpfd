@@ -45,21 +45,6 @@ fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd)
   return 0;
 }
 
-void
-fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src)
-{
-}
-
-void
-fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src)
-{
-}
-
-void
-fpfd32_impl_inc(fpfd32_impl_t *dest)
-{
-}
-
 int
 fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
                    const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
