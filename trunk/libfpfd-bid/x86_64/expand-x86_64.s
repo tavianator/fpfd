@@ -20,100 +20,94 @@
 
 # void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
 #
-# Converts the densely-packed-decimal representation in src to the binary-
-# coded-decimal form in dest.
+# Converts the compact binary representation in src to the expanded form
+# dest.
 
         .text
 .globl fpfd32_impl_expand
         .type fpfd32_impl_expand, @function
 fpfd32_impl_expand:
-        movl (%rsi), %eax
-        movl %eax, %edx
+        movl (%rsi), %ecx
+        movl %ecx, %edx
         shrl $30, %edx
         andl $0x2, %edx
         negl %edx
-        addl $1, %edx
+        incl %edx
         movl %edx, 12(%rdi)     # Map the sign bit from (1, 0) to (-1, +1)
-        movl %eax, %ecx
-        movl %eax, %edx
-        movq fpfd_dpd2bcd@GOTPCREL(%rip), %r8   # For position-independance
-        andq $0x3FF, %rcx
-        movw (%r8,%rcx,2), %cx
-        shrl $10, %edx
-        andq $0x3FF, %rdx
-        movw (%r8,%rdx,2), %dx
-        shll $12, %edx
-        orl %ecx, %edx          # Convert the trailing significand digits from
-                                # DPD to BCD
-        shrl $20, %eax
-        andl $0x7FF, %eax
-        movl %eax, %ecx
-        andl $0x600, %ecx
-        cmpl $0x600, %ecx
-        je .L1i                 # If the combination field begins with 11,
-                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
-        movl %eax, %ecx
-        andl $0x1C0, %ecx
-        shll $19, %ecx
-        orl %ecx, %edx
-        jz .Lzero
-        movl %edx, (%rdi)       # Get the leading significand digit
+        movl %ecx, %edx
+        shrl $20, %edx
+        andl $0x7FF, %edx       # Get the combination field
+        movl %edx, %eax
+        andl $0x600, %eax
+        cmpl $0x600, %eax
+        je .L2ii                # If the combination field begins with 11,
+                                # follow 754r DRAFT 1.5.0, S3.5, p19, 2.ii
+        shrl $3, %edx
+        subl $101, %edx
+        movl %edx, 8(%rdi)      # Subtract bias and store exponent
+        andl $0x007FFFFF, %ecx
+        cmpl $0, %ecx
+        je .Lzero               # Test for a zero operand to support FPFD_ZERO
+        movl %ecx, (%rdi)       # Return concatenated significand
         movl $0, 4(%rdi)        # Set the high-order significand bits to zero
-        movl %eax, %ecx
-        andl $0x3F, %eax
-        andl $0x600, %ecx
-        shrl $3, %ecx
-        orl %eax, %ecx
-        subl $101, %ecx
-        movl %ecx, 8(%rdi)      # Subtract the bias and store the exponent
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
-.L1i:
-        movl %eax, %ecx
-        andl $0x7E0, %ecx
-        cmpl $0x7E0, %ecx
+.L2ii:
+        movl %edx, %eax
+        andl $0x7E0, %eax
+        cmpl $0x7E0, %eax
         je .LsNaN
-        cmpl $0x7C0, %ecx
+        cmpl $0x7C0, %eax
         je .LqNaN
-        andl $0x7C0, %ecx
-        cmpl $0x780, %ecx
+        andl $0x7C0, %eax
+        cmpl $0x780, %eax
         je .Linf
-        movl %eax, %ecx
-        andl $0x040, %ecx
-        orl $0x200, %ecx
-        shll $18, %ecx
-        orl %ecx, %edx
-        movl %edx, (%rdi)       # Get the leading significand digit
+        shrl %edx
+        andl $0xFF, %edx
+        subl $101, %edx
+        movl %edx, 8(%rdi)      # Subtract bias and store exponent
+        andl $0x001FFFFF, %ecx
+        orl $0x00800000, %ecx
+        cmpl $10000000, %ecx
+        jae .Lzero              # If the significand exceeds the maximum
+                                # significand of the decimal encoding, zero is
+                                # used instead
+        movl %ecx, (%rdi)       # Return concatenated significand
         movl $0, 4(%rdi)        # Set the high-order significand bits to zero
-        movl %eax, %ecx
-        andl $0x3F, %eax
-        andl $0x180, %ecx
-        shrl %ecx
-        orl %eax, %ecx
-        subl $101, %ecx
-        movl %ecx, 8(%rdi)      # Subtract the bias and store the exponent
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
-.Lzero:
-        movq $0, (%rdi)         # Set the mantissa to zero
-        movl $0, 8(%rdi)        # Set the exponent to zero
+.Lzero:  
+        movq $0, (%rdi)
+        movl $0, 8(%rdi)
         movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
         ret
 .LsNaN:
-        movl %edx, (%rdi)
+        movl $2, 16(%rdi)       # Set the special flag to FPFD_SNAN
+        andl $0x000FFFFF, %ecx
+        cmpl $1000000, %ecx
+        jae .LNaNzero           # If the payload exceeds the maximum payload of
+                                # the decimal encoding, zero is used instead
+        movl %ecx, (%rdi)
         movl $0, 4(%rdi)        # Set the high-order payload bits to zero
         movl $0, 8(%rdi)        # Set the exponent to zero
-        movl $2, 16(%rdi)       # Set the special flag to FPFD_SNAN
         ret
 .LqNaN:
-        movl %edx, (%rdi)
+        movl $3, 16(%rdi)       # Set the special flag to FPFD_QNAN
+        andl $0x000FFFFF, %ecx
+        cmpl $1000000, %ecx
+        jae .LNaNzero           # If the payload exceeds the maximum payload of
+                                # the decimal encoding, zero is used instead
+        movl %ecx, (%rdi)
         movl $0, 4(%rdi)        # Set the high-order payload bits to zero
         movl $0, 8(%rdi)        # Set the exponent to zero
-        movl $3, 16(%rdi)       # Set the special flag to FPFD_QNAN
+        ret
+.LNaNzero:
+        movq $0, (%rdi)         # Set the payload to zero
+        movl $0, 8(%rdi)        # Set the exponent to zero
         ret
 .Linf:
         movq $0, (%rdi)         # Set the payload to zero
-        movl $0, 8(%rdi)
+        movl $0, 8(%rdi)        # Set the exponent to zero
         movl $4, 16(%rdi)       # Set the special flag to FPFD_INF
         ret
         .size fpfd32_impl_expand, .-fpfd32_impl_expand
