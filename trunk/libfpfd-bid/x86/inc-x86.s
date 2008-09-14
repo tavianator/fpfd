@@ -29,7 +29,7 @@ fpfd32_impl_inc:
         movl 4(%esp), %eax
         movl (%eax), %edx
         andl $0xFFFFFF, %edx
-        addl $1,  %edx
+        addl $1, %edx
         cmpl $10000000, %edx
         je .Lrollover
         movl %edx, (%eax)
