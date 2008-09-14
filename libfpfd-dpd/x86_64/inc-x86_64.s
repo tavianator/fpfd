@@ -54,11 +54,9 @@ fpfd32_impl_inc:
         movl %eax, (%rdi)
         ret
 .Lrollover:
-        movl 8(%rdi), %eax
-        addl $1, %eax           # Increment the exponent
-        cmpl $90, %eax
-        ja .Loflow              # Test for overflow
-        movl %eax, 8(%rdi)
+        cmpl $90, 8(%rdi)
+        jge .Loflow             # Test for overflow
+        addl $1, 8(%rdi)        # Increment the exponent
         movl $0x01000000, (%rdi)
         ret
 .Loflow:
