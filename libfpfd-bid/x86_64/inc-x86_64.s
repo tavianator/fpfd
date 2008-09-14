@@ -26,20 +26,19 @@
 .globl fpfd32_impl_inc
         .type fpfd32_impl_inc, @function
 fpfd32_impl_inc:
-        movl 4(%esp), %eax
-        movl (%eax), %edx
+        movl (%rdi), %edx
         andl $0xFFFFFF, %edx
-        addl $1,  %edx
+        addl $1, %edx
         cmpl $10000000, %edx
         je .Lrollover
-        movl %edx, (%eax)
+        movl %edx, (%rdi)
         ret
 .Lrollover:
-        cmpl $90, 8(%eax)
+        cmpl $90, 8(%rdi)
         jge .Loflow
-        addl $1, 8(%eax)
-        movl $1000000, (%eax)
+        addl $1, 8(%rdi)
+        movl $1000000, (%rdi)
 .Loflow:
-        movl $3, 16(%ecx)       # Set the special flag to FPFD_INF
+        movl $3, 16(%rdi)       # Set the special flag to FPFD_INF
         ret
         .size fpfd32_impl_inc, .-fpfd32_impl_inc
