@@ -68,9 +68,8 @@ fpfd32_impl_scale:
         ret
 .LsubnormMSW:
         negl %ecx
-        subl $101, %ecx
+        subl $100, %ecx
         shll $2, %ecx
-        addl $4, %ecx
         movl $0, %ebx
         shrdl %cl, %eax, %ebx
         shrdl %cl, %edx, %eax
@@ -78,7 +77,7 @@ fpfd32_impl_scale:
         movl %ebx, %ecx
         movl %edx, (%esi)
         movl $0, 4(%esi)        # Set dest->mant to the subnormal mantissa
-        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
         shrl $28, %eax
@@ -180,9 +179,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lzero:
-        movl $0, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to zero
         movl $0, 8(%esi)        # Set dest->exp to zero
+        movl $3, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0, %eax
         popl %esi
         popl %ebx
