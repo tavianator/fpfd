@@ -26,3 +26,5 @@ endif
 if X86_64
 libfpfd_dpd_la_SOURCES = x86_64/compress-x86_64.s x86_64/dpdtable-x86_64.s x86_64/expand-x86_64.s x86_64/inc-x86_64.s x86_64/scale-x86_64.s
 endif
+
+EXTRA_DIST = x86/dpdtable-x86.sh
