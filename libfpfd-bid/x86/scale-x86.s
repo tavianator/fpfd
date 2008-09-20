@@ -81,9 +81,7 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lzero:
-        movl $0, (%esi)
-        movl $0, 4(%esi)
-        movl $0, 8(%esi)
+        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0, %eax
         popl %esi
         popl %ebx

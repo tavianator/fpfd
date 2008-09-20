@@ -45,20 +45,41 @@
    * fpfd128_set_##op(dest##64)
    */
 
+#define fpfd_op1(op, dest)                      \
+  fpfd32_##op(dest##32)
+  /*
+   * fpfd64_##op(dest##64)
+   * fpfd128_##op(dest##128)
+   */
+
+#define fpfd_op2(op, dest, src)                 \
+  fpfd32_##op(dest##32, src##32)
+  /*
+   * fpfd64_##op(dest##64, src##64)
+   * fpfd128_##op(dest##128, src##128)
+   */
+
+#define fpfd_op3m(op, dest, op1, op2, rnd)      \
+  fpfd32_##op(dest##32, op1##32, op2##32, rnd)
+  /*
+   * fpfd64_##op(dest##64, op1##64, op2##64, rnd)
+   * fpfd128_##op(dest##128, op1##128, op2##128, rnd)
+   */
+
 /*
  * These macros assert things about an fpfd*_t. On assertion failure, they print
  * a diagnostic, and set exitstatus to EXIT_FAILURE.
  *
- * They are of the form fpfd_assert_*. The * is composed of the following tokens
- * which, along with their order, indicate the rest of the macro's parameters as
- * described.
+ * They are of the form fpfd_[impl_]assert_*. The * is composed of the following
+ * tokens which, along with their order, indicate the rest of the macro's
+ * parameters as described.
  *
  *   o  - The next argument is the name of the fpfd function, without the fpfd*_
  *        prefix, which produced the result. This function is called before the
  *        assertion, with the resultant operand, and possibly the a1 or a2 and m
  *        operands. It is also written in the diagnostic.
- *   r  - The name of the resultant operand, as passed to fpfd_declare. These
- *        variables are checked against the assertion made by the macro.
+ *   r  - The name of the resultant operand, as passed to fpfd_[impl_]declare.
+ *        These variables are checked against the assertion made by the macro.
  *   a1 - The next argument is the name of the second, source operand in the
  *        unary function which produced the result.
  *   a2 - The next two arguments are the name of the two source operands in the
@@ -72,29 +93,35 @@
  *   f  - The next argument is an fpfd_special_t, and the special flag of the
  *        result is asserted to be equal to it.
  *
- * To save space here, only those macros used by tests are defined.
+ * To save space here, only those macros actually used by tests are defined.
  */
 
 #define fpfd_assert_ora2msf(op, res, arg1, arg2, rnd, sign, special)    \
-  fpfd32_##op(res##32, arg1##32, arg2##32, rnd);                        \
+  fpfd_op3m(op, res, arg1, arg2, rnd);                                  \
   fpfd32_assert_ora2msf(#op, res##32, arg1##32, arg2##32, rnd, sign, special)
   /*
-   * fpfd64_##op(res##64, arg1##64, arg2##64, rnd);
    * fpfd64_assert_ora2msf(#op, res##64, arg1##64, arg2##64, rnd,
-   *                       sign, special);
-   * fpfd128_##op(res##128, arg1##128, arg2##128, rnd);
+   *                       sign, special)
    * fpfd128_assert_ora2msf(#op, res##128, arg1##128, arg2##128, rnd,
-   *                        sign, special);
+   *                        sign, special)
    */
 
 #define fpfd_assert_rf(res, special)            \
   fpfd32_assert_rf(res##32, special)
   /*
-   * fpfd64_assert_rf(res##64, special);
-   * fpfd128_assert_rf(res##128, special);
+   * fpfd64_assert_rf(res##64, special)
+   * fpfd128_assert_rf(res##128, special)
    */
 
-/* main() should return this */
+#define fpfd_impl_assert_ore(op, res, exp)      \
+  fpfd_op1(op, res);                            \
+  fpfd32_impl_assert_ore(#op, res##32, exp)
+  /*
+   * fpfd64_impl_assert_ore(#op, res##64, exp);
+   * fpfd128_impl_assert_ore(#op, res##128, exp);
+   */
+
+/* main() should return this. */
 extern int exitstatus;
 
 /*
@@ -105,6 +132,8 @@ void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
                            fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
                            fpfd_special_t special);
 void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
+
+void fpfd32_impl_assert_ore(const char *op, const fpfd32_impl_t *res, int exp);
 
 /*
  * For more manual checking, call these directly.
@@ -120,9 +149,12 @@ void fpfd32_impl_get_manually(uint32_t *h, uint32_t *l,
                               const fpfd32_impl_t *src);
 
 /* Manual assertions */
+
 void fpfd32_assert_mant(fpfd32_srcptr res, uint32_t src);
 void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t src);
 void fpfd32_assert_mask(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
+
+void fpfd32_impl_assert_mant(const fpfd32_impl_t *res, uint32_t h, uint32_t l);
 
 /* Display-related functions */
 const char *fpfd_rnd_str(fpfd_rnd_t rnd);

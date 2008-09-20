@@ -17,39 +17,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "noncanonical.h"
+#include "check.h"
 #include <stdio.h>  /* For fprintf, stderr            */
 #include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
 
 /*
- * Check cases where a non-canonical value should be handled specially.
+ * Check that fpfd*_impl_scale is behaving correctly.
  */
 int
 main()
 {
-  fpfd_declare(big_mant_num);
-  fpfd_declare(big_mant_sNaN);
-  fpfd_declare(big_mant_qNaN);
-
-  fpfd_check_independent();
+  fpfd_impl_declare(impl);
+  fpfd_declare(res);
 
   /*
-   * Encoding-dependant tests
-   *
-   * Mantissas with numerical value greater than the maximum representable by
-   * the DPD encoding are non-canonical and evaluate to zero, even for NaN
-   * payloads.
+   * Make sure we handle a zero significand correctly.
    */
-  fpfd32_set_manually(big_mant_num32, UINT32_C(0x77FFFFFF));
-  fpfd_assert_rf(big_mant_num, FPFD_ZERO);
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0));
+  fpfd_op1(impl_scale, &impl);
+  fpfd_op2(impl_compress, res, &impl);
+  fpfd_assert_rf(res, FPFD_ZERO);
 
-  fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
-  fpfd32_assert_mant(big_mant_sNaN32, UINT32_C(0));
-  fpfd_assert_rf(big_mant_sNaN, FPFD_SNAN);
+  /*
+   * These values are less than the scaled coefficient range, and are unlikely
+   * to be passed to fpfd*_impl_scale during normal operation.
+   */
 
-  fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
-  fpfd32_assert_mant(big_mant_qNaN32, UINT32_C(0));
-  fpfd_assert_rf(big_mant_qNaN, FPFD_QNAN);
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1));
+  impl32.fields.exp = 0;
+  fpfd_impl_assert_ore(impl_scale, &impl, -6);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   return exitstatus;
 }
