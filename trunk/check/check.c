@@ -78,6 +78,17 @@ fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special)
   }
 }
 
+void
+fpfd32_impl_assert_ore(const char *op, const fpfd32_impl_t *res, int exp)
+{
+  if (res->fields.exp != exp) {
+    fprintf(stderr, "\nfpfd32_%s(", op);
+    fpfd32_impl_dump(stderr, res);
+    fprintf(stderr, ");\n\n--- ERROR: Expected exp == %d ---\n\n", exp);
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
 /* Get/set manually */
 
 void
@@ -127,12 +138,28 @@ fpfd32_assert_mant(fpfd32_srcptr res, uint32_t src)
   fpfd32_impl_expand(&res_impl, res);
   fpfd32_impl_get_manually(&h, &l, &res_impl);
 
-  if (h != UINT32_C(0x0) || l != src) {
+  if (h != UINT32_C(0) || l != src) {
     fprintf(stderr, "\n");
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
     fpfd32_impl_dump(stderr, &res_impl);
     fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.16" PRIX32 " ---\n\n",
+            src);
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+void
+fpfd32_assert_manually(fpfd32_srcptr res, uint32_t src)
+{
+  uint32_t test;
+
+  fpfd32_get_manually(&test, res);
+
+  if (test != src) {
+    fprintf(stderr, "\n");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, "\n\n--- ERROR: Expected op == 0x%.8" PRIX32 " ---\n\n",
             src);
     exitstatus = EXIT_FAILURE;
   }
@@ -151,6 +178,22 @@ fpfd32_assert_mask(fpfd32_srcptr res, uint32_t mask, uint32_t cmp)
     fprintf(stderr, "\n\n--- ERROR: Expected (op & 0x%.8" PRIX32 ") "
                     "== 0x%.8" PRIX32 " ---\n\n",
             mask, cmp);
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+void fpfd32_impl_assert_mant(const fpfd32_impl_t *res, uint32_t h, uint32_t l)
+{
+  uint32_t impl_h, impl_l;
+
+  fpfd32_impl_get_manually(&impl_h, &impl_l, res);
+
+  if (impl_h != h || impl_l != l) {
+    fprintf(stderr, "\n");
+    fpfd32_impl_dump(stderr, res);
+    fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.8" PRIX32 "%.8" PRIX32
+                    " ---\n\n",
+            h, l);
     exitstatus = EXIT_FAILURE;
   }
 }
