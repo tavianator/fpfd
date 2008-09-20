@@ -27,7 +27,9 @@
 int
 main()
 {
-  fpfd32_t big_mant_num, big_mant_sNaN, big_mant_qNaN;
+  fpfd_declare(big_mant_num);
+  fpfd_declare(big_mant_sNaN);
+  fpfd_declare(big_mant_qNaN);
 
   fpfd32_check_independent();
 
@@ -38,14 +40,16 @@ main()
    * the DPD encoding are non-canonical and evaluate to zero, even for NaN
    * payloads.
    */
-  fpfd32_set_manually(big_mant_num, UINT32_C(0x77FFFFFF));
-  fpfd32_assert(big_mant_num, 0, FPFD_ZERO);
+  fpfd32_set_manually(big_mant_num32, UINT32_C(0x77FFFFFF));
+  fpfd_assert_rf(big_mant_num, FPFD_ZERO);
 
-  fpfd32_set_manually(big_mant_sNaN, UINT32_C(0x7E0FFFFF));
-  fpfd32_assert(big_mant_sNaN, 0, FPFD_SNAN);
+  fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
+  fpfd32_assert_mant(big_mant_sNaN32, UINT32_C(0x0));
+  fpfd_assert_rf(big_mant_sNaN, FPFD_SNAN);
 
-  fpfd32_set_manually(big_mant_qNaN, UINT32_C(0x7C0FFFFF));
-  fpfd32_assert(big_mant_qNaN, 0, FPFD_QNAN);
+  fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
+  fpfd32_assert_mant(big_mant_qNaN32, UINT32_C(0x0));
+  fpfd_assert_rf(big_mant_qNaN, FPFD_QNAN);
 
-  return EXIT_SUCCESS;
+  return exitstatus;
 }

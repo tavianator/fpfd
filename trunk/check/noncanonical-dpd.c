@@ -33,5 +33,5 @@ main()
    * Encoding-dependant tests
    */
 
-  return EXIT_SUCCESS;
+  return exitstatus;
 }
