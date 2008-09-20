@@ -27,7 +27,7 @@
 int
 main()
 {
-  fpfd32_check_independent();
+  fpfd_check_independent();
 
   /*
    * Encoding-dependant tests

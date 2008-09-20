@@ -20,4 +20,4 @@
 #include "check.h"
 
 /* Encoding-independent tests */
-void fpfd32_check_independent();
+void fpfd_check_independent();

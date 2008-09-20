@@ -31,7 +31,7 @@ main()
   fpfd_declare(big_mant_sNaN);
   fpfd_declare(big_mant_qNaN);
 
-  fpfd32_check_independent();
+  fpfd_check_independent();
 
   /*
    * Encoding-dependant tests
