@@ -24,6 +24,44 @@
 #include <inttypes.h>  /* For PRI... macros              */
 #include <arpa/inet.h> /* For htonl()                    */
 
+int exitstatus = EXIT_SUCCESS;
+
+/* Assertions */
+
+void
+fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
+                      fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
+                      fpfd_special_t special)
+{
+  fpfd32_impl_t res_impl, op1_impl, op2_impl;
+
+  fpfd32_impl_expand(&res_impl, res);
+
+  if (res_impl.fields.sign != sign || res_impl.fields.special != special) {
+    fpfd32_impl_expand(&op1_impl, op1);
+    fpfd32_impl_expand(&op2_impl, op2);
+
+    fprintf(stderr, "\nfpfd32_%s(", op);
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &res_impl);
+    fprintf(stderr, ", ");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &op1_impl);
+    fprintf(stderr, ", ");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &op2_impl);
+    fprintf(stderr, ", %s);\n", fpfd_rnd_str(rnd));
+    fprintf(stderr, "\n--- ERROR: Expected sign == %d, special == %s ---\n\n",
+            sign, fpfd_special_str(special));
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+/* Get / set */
+
 void
 fpfd32_set_manually(fpfd32_ptr dest, uint32_t src)
 {
