@@ -22,7 +22,7 @@
 #include <stdlib.h>   /* For exit, EXIT_FAILURE */
 
 void
-fpfd32_check_independent()
+fpfd_check_independent()
 {
   /*
    * NaNs should have G_6 through G_{w+4} set to zero, infinities should have
