@@ -21,6 +21,3 @@
 
 /* Encoding-independent tests */
 void fpfd32_check_independent();
-
-void fpfd32_assert(fpfd32_srcptr res, uint32_t mant, fpfd_special_t special);
-void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);

@@ -87,6 +87,13 @@
    *                        sign, special);
    */
 
+#define fpfd_assert_rf(res, special)            \
+  fpfd32_assert_rf(res##32, special)
+  /*
+   * fpfd64_assert_rf(res##64, special);
+   * fpfd128_assert_rf(res##128, special);
+   */
+
 /* main() should return this */
 extern int exitstatus;
 
@@ -97,12 +104,13 @@ extern int exitstatus;
 void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
                            fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
                            fpfd_special_t special);
+void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
 /*
- * For more manual checking. Call these directly.
+ * For more manual checking, call these directly.
  */
 
-/* Conversion to/from uint32_t's. Obviously, this is encoding dependant. */
+/* Conversion to/from uint32_t's. */
 
 void fpfd32_set_manually(fpfd32_ptr dest, uint32_t src);
 void fpfd32_get_manually(uint32_t *dest, fpfd32_srcptr src);
@@ -111,16 +119,12 @@ void fpfd32_impl_set_manually(fpfd32_impl_t *dest, uint32_t h, uint32_t l);
 void fpfd32_impl_get_manually(uint32_t *h, uint32_t *l,
                               const fpfd32_impl_t *src);
 
-int fpfd32_impl_check_mant(const fpfd32_impl_t *impl, uint32_t h, uint32_t l);
-int fpfd32_check_mant(fpfd32_srcptr src, uint32_t mant);
-int fpfd32_check_exp(fpfd32_srcptr src, int exp);
-int fpfd32_check_sign(fpfd32_srcptr src, int sign);
-int fpfd32_check_special(fpfd32_srcptr src, fpfd_special_t special);
-int fpfd32_check_manually(fpfd32_srcptr src, uint32_t mask, uint32_t cmp);
+/* Manual assertions */
+void fpfd32_assert_mant(fpfd32_srcptr res, uint32_t src);
+void fpfd32_assert_manually(fpfd32_srcptr res, uint32_t src);
+void fpfd32_assert_mask(fpfd32_srcptr res, uint32_t mask, uint32_t cmp);
 
-/*
- * Functions to write fpfd-related things to a stream.
- */
+/* Display-related functions */
 const char *fpfd_rnd_str(fpfd_rnd_t rnd);
 const char *fpfd_special_str(fpfd_special_t special);
 void fpfd32_dump(FILE *file, fpfd32_srcptr fp);

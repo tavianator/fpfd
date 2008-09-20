@@ -60,7 +60,25 @@ fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
   }
 }
 
-/* Get / set */
+void
+fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special)
+{
+  fpfd32_impl_t res_impl;
+
+  fpfd32_impl_expand(&res_impl, res);
+
+  if (res_impl.fields.special != special) {
+    fprintf(stderr, "\n");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &res_impl);
+    fprintf(stderr, "\n\n--- ERROR: Expected special == %s ---\n\n",
+            fpfd_special_str(special));
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+/* Get/set manually */
 
 void
 fpfd32_set_manually(fpfd32_ptr dest, uint32_t src)
@@ -86,66 +104,55 @@ fpfd32_impl_set_manually(fpfd32_impl_t *dest, uint32_t h, uint32_t l)
   }
 }
 
-/* Checks */
-
-int
-fpfd32_impl_check_mant(const fpfd32_impl_t *impl, uint32_t h, uint32_t l)
+void
+fpfd32_impl_get_manually(uint32_t *h, uint32_t *l, const fpfd32_impl_t *src)
 {
   if (htonl(1) == 1) { /* Big-endian    */
-    return memcmp(impl->mant, &h, 4) == 0
-      && memcmp(impl->mant + 4, &l, 4) == 0;
+    memcpy(h, src->mant, 4);
+    memcpy(l, src->mant + 4, 4);
   } else {             /* Little-endian */
-    return memcmp(impl->mant, &l, 4) == 0
-      && memcmp(impl->mant + 4, &h, 4) == 0;
+    memcpy(l, src->mant, 4);
+    memcpy(h, src->mant + 4, 4);
   }
 }
 
-int
-fpfd32_check_mant(fpfd32_srcptr src, uint32_t mant)
-{
-  uint32_t zero = 0x0;
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, src);
+/* Manual assertions */
 
-  if (htonl(1) == 1) { /* Big-endian    */
-    return memcmp(impl.mant, &zero, 4) == 0
-      && memcmp(impl.mant + 4, &mant, 4) == 0;
-  } else {             /* Little-endian */
-    return memcmp(impl.mant, &mant, 4) == 0
-      && memcmp(impl.mant + 4, &zero, 4) == 0;
+void
+fpfd32_assert_mant(fpfd32_srcptr res, uint32_t src)
+{
+  fpfd32_impl_t res_impl;
+  uint32_t h, l;
+
+  fpfd32_impl_expand(&res_impl, res);
+  fpfd32_impl_get_manually(&h, &l, &res_impl);
+
+  if (h != UINT32_C(0x0) || l != src) {
+    fprintf(stderr, "\n");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &res_impl);
+    fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.16" PRIX32 " ---\n\n",
+            src);
+    exitstatus = EXIT_FAILURE;
   }
 }
 
-int
-fpfd32_check_exp(fpfd32_srcptr src, int exp)
-{
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, src);
-  return impl.fields.exp == exp;
-}
-
-int
-fpfd32_check_sign(fpfd32_srcptr src, int sign)
-{
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, src);
-  return impl.fields.sign == sign;
-}
-
-int
-fpfd32_check_special(fpfd32_srcptr src, fpfd_special_t special)
-{
-  fpfd32_impl_t impl;
-  fpfd32_impl_expand(&impl, src);
-  return impl.fields.special == special;
-}
-
-int
-fpfd32_check_manually(fpfd32_srcptr src, uint32_t mask, uint32_t cmp)
+void
+fpfd32_assert_mask(fpfd32_srcptr res, uint32_t mask, uint32_t cmp)
 {
   uint32_t test;
-  fpfd32_get_manually(&test, src);
-  return (test & mask) == cmp;
+
+  fpfd32_get_manually(&test, res);
+
+  if ((test & mask) != cmp) {
+    fprintf(stderr, "\n");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, "\n\n--- ERROR: Expected (op & 0x%.8" PRIX32 ") "
+                    "== 0x%.8" PRIX32 " ---\n\n",
+            mask, cmp);
+    exitstatus = EXIT_FAILURE;
+  }
 }
 
 /* Display */
