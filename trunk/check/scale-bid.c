@@ -45,7 +45,7 @@ main()
 
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1));
   impl32.fields.exp = 0;
-  fpfd_impl_assert_ore(impl_scale, &impl, -6);
+  fpfd_impl_assert_orev(impl_scale, &impl, -6, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   return exitstatus;

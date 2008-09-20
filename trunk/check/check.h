@@ -92,6 +92,8 @@
  *        to be equal to it.
  *   f  - The next argument is an fpfd_special_t, and the special flag of the
  *        result is asserted to be equal to it.
+ *   v  - The next argument is an int, and the return value of the function is
+ *        asserted to be equal to it.
  *
  * To save space here, only those macros actually used by tests are defined.
  */
@@ -113,19 +115,18 @@
    * fpfd128_assert_rf(res##128, special)
    */
 
-#define fpfd_impl_assert_ore(op, res, exp)      \
-  fpfd_op1(op, res);                            \
-  fpfd32_impl_assert_ore(#op, res##32, exp)
+#define fpfd_impl_assert_orev(op, res, exp, rval)       \
+  fpfd32_impl_assert_orev(#op, res##32, exp, rval, fpfd32_##op(res##32))
   /*
-   * fpfd64_impl_assert_ore(#op, res##64, exp);
-   * fpfd128_impl_assert_ore(#op, res##128, exp);
+   * fpfd64_impl_assert_orev(#op, res##64, exp, rval, fpfd64_#op(res##64))
+   * fpfd128_impl_assert_orev(#op, res##128, exp, rval, fpfd128_#op(res##128))
    */
 
 /* main() should return this. */
 extern int exitstatus;
 
 /*
- * Assertion functions, called by assertion macros. Don't call these directly.
+ * Assertion functions, usually called by assertion macros.
  */
 
 void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
@@ -133,7 +134,8 @@ void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
                            fpfd_special_t special);
 void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
-void fpfd32_impl_assert_ore(const char *op, const fpfd32_impl_t *res, int exp);
+void fpfd32_impl_assert_orev(const char *op, const fpfd32_impl_t *res, int exp,
+                             int rexp, int rval);
 
 /*
  * For more manual checking, call these directly.

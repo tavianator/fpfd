@@ -79,12 +79,16 @@ fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special)
 }
 
 void
-fpfd32_impl_assert_ore(const char *op, const fpfd32_impl_t *res, int exp)
+fpfd32_impl_assert_orev(const char *op, const fpfd32_impl_t *res, int exp,
+                        int rexp, int rval)
 {
-  if (res->fields.exp != exp) {
+  if (res->fields.exp != exp || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ");\n\n--- ERROR: Expected exp == %d ---\n\n", exp);
+    fprintf(stderr, ") = %d\n", rval);
+    fprintf(stderr,
+            "\n--- ERROR: Expected exp == %d, fpfd32_%s() == %d ---\n\n",
+            exp, op, rexp);
     exitstatus = EXIT_FAILURE;
   }
 }
