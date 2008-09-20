@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "check.h"
+#include "noncanonical.h"
 #include <stdio.h>  /* For fprintf, stderr            */
 #include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
 

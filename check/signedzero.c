@@ -57,164 +57,129 @@ main()
   fpfd_check_div(FPFD_RNDU);
   fpfd_check_div(FPFD_RNDD);
 
-  return EXIT_SUCCESS;
-}
-
-/* Rather than write this out every time... */
-#define fpfd_check_op(op, res, lhs, rhs, rnd, sign, special)            \
-  fpfd32_##op(res##32, lhs##32, rhs##32, rnd);                          \
-  fpfd32_assert(res##32, lhs##32, rhs##32, rnd, sign, special, #op)
-
-void
-fpfd32_assert(fpfd32_srcptr res, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-              fpfd_rnd_t rnd, int sign, fpfd_special_t special,
-              const char *op)
-{
-  if (!fpfd32_check_sign(res, sign) || !fpfd32_check_special(res, special)) {
-    fpfd32_impl_t res_impl, lhs_impl, rhs_impl;
-    fpfd32_impl_expand(&res_impl, res);
-    fpfd32_impl_expand(&lhs_impl, lhs);
-    fpfd32_impl_expand(&rhs_impl, rhs);
-
-    fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
-    fprintf(stderr, ", ");
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &lhs_impl);
-    fprintf(stderr, ", ");
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &rhs_impl);
-    fprintf(stderr, ", %s);\n", fpfd_rnd_str(rnd));
-    fprintf(stderr, "\n--- ERROR: Expected sign == %d, special == %s ---\n\n",
-            sign, fpfd_special_str(special));
-    exit(EXIT_FAILURE);
-  }
+  return exitstatus;
 }
 
 void
 fpfd_check_add(fpfd_rnd_t rnd)
 {
-  fpfd32_t pz32; /* Positive zero */
-  fpfd32_t nz32; /* Negative zero */
+  fpfd_declare(pz); /* Positive zero */
+  fpfd_declare(nz); /* Negative zero */
 
-  fpfd32_t res32; /* Result */
+  fpfd_declare(res); /* Result */
 
-  fpfd32_set_zero(pz32);
-  fpfd32_set_neg_zero(nz32);
+  fpfd_set(pz, zero);
+  fpfd_set(nz, neg_zero);
 
   if (rnd == FPFD_RNDD) {
-    fpfd_check_op(add, res, pz, pz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(add, res, pz, nz, rnd, -1, FPFD_ZERO);
-    fpfd_check_op(add, res, nz, pz, rnd, -1, FPFD_ZERO);
-    fpfd_check_op(add, res, nz, nz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, pz, pz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, pz, nz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, nz, pz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, nz, nz, rnd, -1, FPFD_ZERO);
   } else {
-    fpfd_check_op(add, res, pz, pz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(add, res, pz, nz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(add, res, nz, pz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(add, res, nz, nz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, pz, pz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, pz, nz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, nz, pz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(add, res, nz, nz, rnd, -1, FPFD_ZERO);
   }
 }
 
 void
 fpfd_check_sub(fpfd_rnd_t rnd)
 {
-  fpfd32_t pz32; /* Positive zero */
-  fpfd32_t nz32; /* Negative zero */
+  fpfd_declare(pz); /* Positive zero */
+  fpfd_declare(nz); /* Negative zero */
 
-  fpfd32_t res32; /* Result */
+  fpfd_declare(res); /* Result */
 
-  fpfd32_set_zero(pz32);
-  fpfd32_set_neg_zero(nz32);
+  fpfd_set(pz, zero);
+  fpfd_set(nz, neg_zero);
 
   if (rnd == FPFD_RNDD) {
-    fpfd_check_op(sub, res, pz, pz, rnd, -1, FPFD_ZERO);
-    fpfd_check_op(sub, res, pz, nz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(sub, res, nz, pz, rnd, -1, FPFD_ZERO);
-    fpfd_check_op(sub, res, nz, nz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, pz, pz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, pz, nz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, nz, pz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, nz, nz, rnd, -1, FPFD_ZERO);
   } else {
-    fpfd_check_op(sub, res, pz, pz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(sub, res, pz, nz, rnd, 1, FPFD_ZERO);
-    fpfd_check_op(sub, res, nz, pz, rnd, -1, FPFD_ZERO);
-    fpfd_check_op(sub, res, nz, nz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, pz, pz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, pz, nz, rnd, 1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, nz, pz, rnd, -1, FPFD_ZERO);
+    fpfd_assert_ora2msf(sub, res, nz, nz, rnd, 1, FPFD_ZERO);
   }
 }
 
 void
 fpfd_check_mul(fpfd_rnd_t rnd)
 {
-  fpfd32_t pz32; /* Positive zero */
-  fpfd32_t po32; /* Positive one  */
-  fpfd32_t nz32; /* Negative zero */
-  fpfd32_t no32; /* Negative one  */
+  fpfd_declare(pz); /* Positive zero */
+  fpfd_declare(po); /* Positive one  */
+  fpfd_declare(nz); /* Negative zero */
+  fpfd_declare(no); /* Negative one  */
 
-  fpfd32_t res32; /* Result */
+  fpfd_declare(res); /* Result */
 
-  fpfd32_set_zero(pz32);
-  fpfd32_set_one(po32);
-  fpfd32_set_neg_zero(nz32);
-  fpfd32_set_neg_one(no32);
+  fpfd_set(pz, zero);
+  fpfd_set(po, one);
+  fpfd_set(nz, neg_zero);
+  fpfd_set(no, neg_one);
 
-  fpfd_check_op(mul, res, pz, pz, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(mul, res, pz, nz, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, nz, pz, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, nz, nz, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, pz, pz, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, pz, nz, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, nz, pz, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, nz, nz, rnd, 1, FPFD_ZERO);
 
-  fpfd_check_op(mul, res, pz, po, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(mul, res, pz, no, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, nz, po, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, nz, no, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, pz, po, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, pz, no, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, nz, po, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, nz, no, rnd, 1, FPFD_ZERO);
 
-  fpfd_check_op(mul, res, po, pz, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(mul, res, po, nz, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, no, pz, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(mul, res, no, nz, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, po, pz, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, po, nz, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, no, pz, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(mul, res, no, nz, rnd, 1, FPFD_ZERO);
 }
 
 void
 fpfd_check_div(fpfd_rnd_t rnd)
 {
-  fpfd32_t pz32; /* Positive zero     */
-  fpfd32_t po32; /* Positive one      */
-  fpfd32_t pi32; /* Positive infinity */
-  fpfd32_t nz32; /* Negative zero     */
-  fpfd32_t no32; /* Negative one      */
-  fpfd32_t ni32; /* Negative infinity */
+  fpfd_declare(pz); /* Positive zero     */
+  fpfd_declare(po); /* Positive one      */
+  fpfd_declare(pi); /* Positive infinity */
+  fpfd_declare(nz); /* Negative zero     */
+  fpfd_declare(no); /* Negative one      */
+  fpfd_declare(ni); /* Negative infinity */
 
-  fpfd32_t res32; /* Result */
+  fpfd_declare(res); /* Result */
 
-  fpfd32_set_zero(pz32);
-  fpfd32_set_one(po32);
-  fpfd32_set_inf(pi32);
-  fpfd32_set_neg_zero(nz32);
-  fpfd32_set_neg_one(no32);
-  fpfd32_set_neg_inf(ni32);
+  fpfd_set(pz, zero);
+  fpfd_set(po, one);
+  fpfd_set(pi, inf);
+  fpfd_set(nz, neg_zero);
+  fpfd_set(no, neg_one);
+  fpfd_set(ni, neg_inf);
 
-  fpfd_check_op(div, res, pz, po, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(div, res, pz, no, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, nz, po, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, nz, no, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, pz, po, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, pz, no, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, nz, po, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, nz, no, rnd, 1, FPFD_ZERO);
 
-  fpfd_check_op(div, res, pz, pi, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(div, res, pz, ni, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, nz, pi, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, nz, ni, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, pz, pi, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, pz, ni, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, nz, pi, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, nz, ni, rnd, 1, FPFD_ZERO);
 
-  fpfd_check_op(div, res, po, pz, rnd, 1, FPFD_INF);
-  fpfd_check_op(div, res, po, nz, rnd, -1, FPFD_INF);
-  fpfd_check_op(div, res, no, pz, rnd, -1, FPFD_INF);
-  fpfd_check_op(div, res, no, nz, rnd, 1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, po, pz, rnd, 1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, po, nz, rnd, -1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, no, pz, rnd, -1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, no, nz, rnd, 1, FPFD_INF);
 
-  fpfd_check_op(div, res, po, pi, rnd, 1, FPFD_ZERO);
-  fpfd_check_op(div, res, po, ni, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, no, pi, rnd, -1, FPFD_ZERO);
-  fpfd_check_op(div, res, no, ni, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, po, pi, rnd, 1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, po, ni, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, no, pi, rnd, -1, FPFD_ZERO);
+  fpfd_assert_ora2msf(div, res, no, ni, rnd, 1, FPFD_ZERO);
 
-  fpfd_check_op(div, res, pi, pz, rnd, 1, FPFD_INF);
-  fpfd_check_op(div, res, pi, nz, rnd, -1, FPFD_INF);
-  fpfd_check_op(div, res, ni, pz, rnd, -1, FPFD_INF);
-  fpfd_check_op(div, res, ni, nz, rnd, 1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, pi, pz, rnd, 1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, pi, nz, rnd, -1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, ni, pz, rnd, -1, FPFD_INF);
+  fpfd_assert_ora2msf(div, res, ni, nz, rnd, 1, FPFD_INF);
 }
