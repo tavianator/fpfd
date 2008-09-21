@@ -89,12 +89,12 @@ fpfd32_impl_scale:
 .Lspecial2:
         ret
 .Loflow:
-        movl $3, 16(%esi)       # Set the special flag to FPFD_INF
+        movl $3, 16(%rdi)       # Set the special flag to FPFD_INF
         movl $10, %eax          # Return the special 10 value
         ret
 .Lzero:
-        movl $0, 8(%esi)        # Set dest->exp to zero
-        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
+        movl $0, 8(%rdi)        # Set dest->exp to zero
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
         movl $0, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
