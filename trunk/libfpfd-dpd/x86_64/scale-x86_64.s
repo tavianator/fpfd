@@ -45,13 +45,14 @@ fpfd32_impl_scale:
         cmpl $-101, %ecx
         jl .Lsubnorm
         movl %ecx, 8(%rdi)      # Set dest->exp to the adjusted exponent
+        movq $0, %rax
         shrdq $36, %rdx, %rax
         shrq $36, %rdx          # Shift rdx.rax to the 28th bit
         movq %rdx, (%rdi)       # Set dest->mant to the scaled mantissa
         movq %rax, %rcx
         movq $0x0FFFFFFFFFFFFFFF, %rdx
         andq %rdx, %rcx         # Mask off the most significant nibble
-        shrq $62, %rax
+        shrq $60, %rax
         cmpl $0, %eax
         je .Lspecial
         cmpl $5, %eax
@@ -69,7 +70,7 @@ fpfd32_impl_scale:
         movq %rax, %rcx
         movq $0x0FFFFFFFFFFFFFFF, %rdx
         andq %rdx, %rcx  # Mask off the most significant nibble
-        shrq $62, %rax
+        shrq $60, %rax
         cmpl $0, %eax
         je .Lspecial
         cmpl $5, %eax
@@ -84,7 +85,6 @@ fpfd32_impl_scale:
         cmpq $0, %rcx
         je .Lspecial2
         addl $1, %eax
-        ret
 .Lspecial2:
         ret
 .Loflow:
