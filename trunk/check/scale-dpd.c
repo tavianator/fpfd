@@ -46,7 +46,7 @@ main()
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x1000000));
 
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x999999));
-  impl32.fields.exp = 0;
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999990));
 
