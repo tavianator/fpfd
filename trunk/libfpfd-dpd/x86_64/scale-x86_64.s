@@ -45,9 +45,8 @@ fpfd32_impl_scale:
         cmpl $-101, %ecx
         jl .Lsubnorm
         movl %ecx, 8(%rdi)      # Set dest->exp to the adjusted exponent
-        movl $0, %ecx
         shrdq $36, %rdx, %rax
-        shrq $36, %rax          # Shift rdx.rax to the 28th bit
+        shrq $36, %rdx          # Shift rdx.rax to the 28th bit
         movq %rdx, (%rdi)       # Set dest->mant to the scaled mantissa
         movq %rax, %rcx
         movq $0x0FFFFFFFFFFFFFFF, %rdx
