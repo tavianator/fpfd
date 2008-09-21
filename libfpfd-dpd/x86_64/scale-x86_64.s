@@ -30,7 +30,7 @@ fpfd32_impl_scale:
         bsrq %rdx, %rcx         # Find the leading non-zero bit
         jz .Lzero
         addl $4, %ecx
-        andl $0x3C, %ecx        # Add one and round up to a multiple of 4
+        andl $0x7C, %ecx        # Add one and round up to a multiple of 4
         subl $64, %ecx
         negl %ecx               # Subtract from 64
         shlq %cl, %rdx          # Shift rdx all the way to the left
