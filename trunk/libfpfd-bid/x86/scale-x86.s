@@ -45,6 +45,7 @@ fpfd32_impl_scale:
         jae .LoverLSW           # The mantissa is too big
         movl %eax, %edx
         movl $0, %eax
+        movl 8(%esi), %ebx
         jmp .Lnorm
 .LunderLSW:
         imull fpfd_lsw_bsr2mul(,%ebx,4), %eax
