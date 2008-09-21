@@ -47,7 +47,7 @@ fpfd_lsw_bsr2mul:
         .long 1                 # fpfd_lsw_bsr2mul[20]
         .long 1                 # fpfd_lsw_bsr2mul[21]
         .long 1                 # fpfd_lsw_bsr2mul[22]
-        .long 1                 # fpfd_lsw_bsr2mul[23]
+        .long 0xCCCCCCCD        # fpfd_lsw_bsr2mul[23] = (10 ** -1 << 35) + 1
         .long 0xCCCCCCCD        # fpfd_lsw_bsr2mul[24] = (10 ** -1 << 35) + 1
         .long 0xCCCCCCCD        # fpfd_lsw_bsr2mul[25] = (10 ** -1 << 35) + 1
         .long 0xCCCCCCCD        # fpfd_lsw_bsr2mul[26] = (10 ** -1 << 35) + 1
@@ -62,7 +62,8 @@ fpfd_lsw_bsr2mul:
         .type fpfd_lsw_bsr2shr, @object
         .size fpfd_lsw_bsr2shr, 256
 fpfd_lsw_bsr2shr:
-        .zero 96        # fpfd_lsw_bsr2shr[i], i < 24, is undefined
+        .zero 92        # fpfd_lsw_bsr2shr[i], i < 23, is undefined
+        .long 3         # fpfd_lsw_bsr2shr[23]
         .long 3         # fpfd_lsw_bsr2shr[24]
         .long 3         # fpfd_lsw_bsr2shr[25]
         .long 3         # fpfd_lsw_bsr2shr[26]
@@ -100,7 +101,7 @@ fpfd_lsw_bsr2exp:
         .long 0         # fpfd_lsw_bsr2exp[20]
         .long 0         # fpfd_lsw_bsr2exp[21]
         .long 0         # fpfd_lsw_bsr2exp[22]
-        .long 0         # fpfd_lsw_bsr2exp[23]
+        .long 1         # fpfd_lsw_bsr2exp[23]
         .long 1         # fpfd_lsw_bsr2exp[24]
         .long 1         # fpfd_lsw_bsr2exp[25]
         .long 1         # fpfd_lsw_bsr2exp[26]
