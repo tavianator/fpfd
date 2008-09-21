@@ -45,6 +45,16 @@
    * fpfd128_set_##op(dest##64)
    */
 
+#define fpfd_impl_set_ef(dest, expa, speciala)  \
+  (dest##32)->fields.exp = expa;                \
+  (dest##32)->fields.special = speciala
+  /*
+   * (dest##64)->fields.exp = expa
+   * (dest##64)->fields.special = speciala
+   * (dest##128)->fields.exp = expa
+   * (dest##128)->fields.special = speciala
+   */
+
 #define fpfd_op1(op, dest)                      \
   fpfd32_##op(dest##32)
   /*
@@ -115,11 +125,19 @@
    * fpfd128_assert_rf(res##128, special)
    */
 
-#define fpfd_impl_assert_orev(op, res, exp, rval)       \
-  fpfd32_impl_assert_orev(#op, res##32, exp, rval, fpfd32_##op(res##32))
+#define fpfd_impl_assert_orefv(op, res, exp, special, rval)             \
+  fpfd32_impl_assert_orefv(#op, res##32, exp, special, rval, fpfd32_##op(res##32))
   /*
    * fpfd64_impl_assert_orev(#op, res##64, exp, rval, fpfd64_#op(res##64))
    * fpfd128_impl_assert_orev(#op, res##128, exp, rval, fpfd128_#op(res##128))
+   */
+
+#define fpfd_impl_assert_orf(op, res, special)  \
+  fpfd_op1(op, res);                            \
+  fpfd32_impl_assert_orf(#op, res##32, special)
+  /*
+   * fpfd64_impl_assert_orf(#op, res##64, special)
+   * fpfd128_impl_assert_orf(#op, res##128, special)
    */
 
 /* main() should return this. */
@@ -134,8 +152,10 @@ void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
                            fpfd_special_t special);
 void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
-void fpfd32_impl_assert_orev(const char *op, const fpfd32_impl_t *res, int exp,
-                             int rexp, int rval);
+void fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
+                              fpfd_special_t special, int rexp, int rval);
+void fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
+                            fpfd_special_t special);
 
 /*
  * For more manual checking, call these directly.
