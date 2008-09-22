@@ -17,13 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-FPFD_VERSION = 0:0:0
-
-C_SOURCES = add.c div.c mul.c nan.c neg.c pred.c random.c set.c sin.c sub.c tern.c
-H_SOURCES = fpfd.h fpfd_impl.h
-
 nobase_include_HEADERS = fpfd.h
 
 lib_LTLIBRARIES    = libfpfd.la
-libfpfd_la_SOURCES = $(C_SOURCES) $(H_SOURCES)
-libfpfd_la_LDFLAGS = -version-info $(FPFD_VERSION)
+libfpfd_la_SOURCES = fpfd.h fpfd_impl.h add.c div.c mul.c nan.c neg.c pred.c random.c set.c sin.c sub.c tern.c
+libfpfd_la_LDFLAGS = -version-info 0:0:0

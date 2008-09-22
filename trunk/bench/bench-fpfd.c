@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-fpfd.h"
 #include <stdio.h>  /* For fprintf, fopen */
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */

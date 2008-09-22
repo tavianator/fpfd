@@ -17,47 +17,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "../libfpfd/fpfd_impl.h"
-#include <search.h> /* For ENTRY, ACTION */
-#include <stddef.h> /* For size_t        */
-#include <stdio.h>  /* For FILE          */
+#include "bench.h"
 
 /*
- * The type that stores the tick count of each trial, which is used by the hash
- * table.
- */
-typedef struct {
-  unsigned int trials;
-  unsigned long *list;
-  size_t size, capacity;
-} ticklist_t;
-
-/*
- * These work like the standard library functions without the 'x' prefix, but
- * call exit(EXIT_FAILURE) upon failure, so are guaranteed to have succeeded if
- * they return.
+ * Routines which benchmark part of the programmer or implementation interfaces.
+ * Each stores information about the number of clock ticks in a global hash
+ * table, with strings describing the routine being profiled as the key.
  */
 
-void *xmalloc(size_t size);
-void *xrealloc(void *ptr, size_t size);
+void fpfd32_bench_impl_expand(unsigned int trials);
+void fpfd32_bench_impl_compress(unsigned int trials);
+void fpfd32_bench_impl_scale(unsigned int trials);
+void fpfd32_bench_impl_inc(unsigned int trials);
+void fpfd32_bench_impl_addsub(unsigned int trials);
+void fpfd32_bench_impl_mul(unsigned int trials);
+void fpfd32_bench_impl_div(unsigned int trials);
 
-FILE *xfopen(const char *path, const char *mode);
-void xfclose(FILE *fp);
-
-ENTRY *xhsearch(ENTRY item, ACTION action);
-
-/*
- * Gets the number of clock ticks since some time. Extremely high-resolution
- * timer.
- */
-unsigned long fpfd_rdtsc();
-
-/*
- * Functions which deal with the hash table.
- *   fpfd_record_ticks stores the tick count of the trial in the hash table.
- *   fpfd_write_ticks writes the tick count for each trial, the mean, and one
- *     standard deviation above and below it, to file, in a format readable by
- *     plotutils' graph, gnuplot, or similar.
- */
-void fpfd_record_ticks(const char *key, unsigned long ticks);
-void fpfd_write_ticks(const char *key, FILE *file);
+void fpfd32_bench_addsub(unsigned int trials);
+void fpfd32_bench_mul(unsigned int trials);
+void fpfd32_bench_div(unsigned int trials);
