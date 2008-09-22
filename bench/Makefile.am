@@ -17,23 +17,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-C_SOURCES = htable.c impl_compress.c impl_expand.c impl_inc.c main.c x.c
-
-H_SOURCES = bench.h
+EXTRA_LTLIBRARIES        = libfpfd-bench.la
+libfpfd_bench_la_SOURCES = bench.h htable.c x.c
 
 if X86
-S_SOURCES = x86/rdtsc-x86.s
+libfpfd_bench_la_SOURCES += x86/rdtsc-x86.s
 endif
 
 if X86_64
-S_SOURCES = x86_64/rdtsc-x86_64.s
+libfpfd_bench_la_SOURCES += x86_64/rdtsc-x86_64.s
 endif
 
 EXTRA_PROGRAMS        = benchmark-dpd benchmark-bid
-benchmark_dpd_SOURCES = $(C_SOURCES) $(S_SOURCES) $(H_SOURCES)
-benchmark_dpd_LDADD   = ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
+benchmark_dpd_SOURCES = bench-fpfd.h impl_compress.c impl_expand.c impl_inc.c bench-fpfd.c
+benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
-benchmark_bid_LDADD   = ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
+benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
 bench: benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
 	(cd dpd && ../benchmark-dpd$(EXEEXT))
