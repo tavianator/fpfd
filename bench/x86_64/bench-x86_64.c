@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench-fpfd.h"
+#include "bench-x86_64.h"
 #include <stdio.h>  /* For fprintf, fopen */
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */
 
-static void fpfd_bench(unsigned int trials);
-static void fpfd_bench_results();
+static void x86_64_bench(unsigned int trials);
+static void x86_64_bench_results();
 
 int
 main(int argc, char **argv)
@@ -44,46 +44,36 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  fpfd_bench(trials);
-  fpfd_bench_results();
+  x86_64_bench(trials);
+  x86_64_bench_results();
 
   return EXIT_SUCCESS;
 }
 
 void
-fpfd_bench(unsigned int trials)
+x86_64_bench(unsigned int trials)
 {
-  fpfd32_bench_impl_expand(trials);
-  fpfd32_bench_impl_compress(trials);
-  /*
-  fpfd32_bench_impl_scale(trials);
-  */
-  fpfd32_bench_impl_inc(trials);
-  /*
-  fpfd32_bench_impl_addsub(trials);
-  fpfd32_bench_impl_mul(trials);
-  fpfd32_bench_impl_div(trials);
-
-  fpfd32_bench_addsub(trials);
-  fpfd32_bench_mul(trials);
-  fpfd32_bench_div(trials);
-  */
+  x86_64_bench_mul(trials);
 }
 
 void
-fpfd_bench_results()
+x86_64_bench_results()
 {
   FILE *file;
 
-  file = fopen("fpfd32_impl_expand.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_expand", file);
+  file = fopen("x86_64-mulb.dat", "w");
+  fpfd_write_ticks("mulb", file);
   fclose(file);
 
-  file = fopen("fpfd32_impl_compress.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_compress", file);
+  file = fopen("x86_64-mulw.dat", "w");
+  fpfd_write_ticks("mulw", file);
   fclose(file);
 
-  file = fopen("fpfd32_impl_inc.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_inc", file);
+  file = fopen("x86_64-mull.dat", "w");
+  fpfd_write_ticks("mull", file);
+  fclose(file);
+
+  file = fopen("x86_64-mulq.dat", "w");
+  fpfd_write_ticks("mulq", file);
   fclose(file);
 }

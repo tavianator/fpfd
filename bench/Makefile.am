@@ -23,17 +23,27 @@ libfpfd_bench_la_SOURCES = bench.h htable.c x.c
 if X86
 libfpfd_bench_la_SOURCES += x86/rdtsc-x86.s
 endif
-
 if X86_64
 libfpfd_bench_la_SOURCES += x86_64/rdtsc-x86_64.s
 endif
 
-EXTRA_PROGRAMS        = benchmark-dpd benchmark-bid
-benchmark_dpd_SOURCES = bench-fpfd.h impl_compress.c impl_expand.c impl_inc.c bench-fpfd.c
+EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
+
+benchmark_arch_LDADD = ./libfpfd-bench.la -lm
+
+if X86
+benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/mul-x86.c
+endif
+if X86_64
+benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/mul-x86_64.c
+endif
+
+benchmark_dpd_SOURCES = bench-fpfd.h bench-fpfd.c impl_compress.c impl_expand.c impl_inc.c
 benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
-bench: benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
-	(cd dpd && ../benchmark-dpd$(EXEEXT))
-	(cd bid && ../benchmark-bid$(EXEEXT))
+bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
+	(cd arch && ../benchmark-arch$(EXEEXT) 1000)
+	(cd dpd && ../benchmark-dpd$(EXEEXT) 1000)
+	(cd bid && ../benchmark-bid$(EXEEXT) 1000)
