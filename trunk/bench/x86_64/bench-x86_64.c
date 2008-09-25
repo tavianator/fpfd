@@ -76,4 +76,8 @@ x86_64_bench_results()
   file = fopen("x86_64-mulq.dat", "w");
   fpfd_write_ticks("mulq", file);
   fclose(file);
+
+  file = fopen("x86_64-rdtsc.dat", "w");
+  fpfd_write_ticks("fpfd_rdtsc", file);
+  fclose(file);
 }

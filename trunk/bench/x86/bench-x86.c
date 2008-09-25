@@ -61,15 +61,19 @@ x86_bench_results()
 {
   FILE *file;
 
-  file = fopen("x86_64-mulb.dat", "w");
+  file = fopen("x86-mulb.dat", "w");
   fpfd_write_ticks("mulb", file);
   fclose(file);
 
-  file = fopen("x86_64-mulw.dat", "w");
+  file = fopen("x86-mulw.dat", "w");
   fpfd_write_ticks("mulw", file);
   fclose(file);
 
-  file = fopen("x86_64-mull.dat", "w");
+  file = fopen("x86-mull.dat", "w");
   fpfd_write_ticks("mull", file);
+  fclose(file);
+
+  file = fopen("x86-rdtsc.dat", "w");
+  fpfd_write_ticks("fpfd_rdtsc", file);
   fclose(file);
 }
