@@ -26,11 +26,9 @@
         .type fpfd_rdtsc, @function
 fpfd_rdtsc:
         pushl %ebx              # Callee-save register, clobbered by cpuid
-        movl $0, %eax           # Make cpuid take a consistent number of ticks
         cpuid                   # Serialize
         rdtsc                   # Read time stamp counter
         movl %eax, -4(%esp)     # Store tsc
-        movl $0, %eax
         cpuid                   # Serialize again
         movl -4(%esp), %eax
         popl %ebx

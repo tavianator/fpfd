@@ -25,16 +25,14 @@
 .globl fpfd_rdtsc
         .type fpfd_rdtsc, @function
 fpfd_rdtsc:
-        pushq %rbx              # Callee-save register, clobbered by cpuid
-        movq $0, %rax           # Make cpuid take a consistent number of ticks
+        movq %rbx, %rdi         # Callee-save register, clobbered by cpuid
         cpuid                   # Serialize
         rdtsc                   # Read time stamp counter
         shlq $32, %rdx
         orq %rdx, %rax
-        movq %rax, -4(%rsp)     # Store tsc
-        movq $0, %rax
+        movq %rax, %rsi         # Store tsc
         cpuid                   # Serialize again
-        movq -4(%rsp), %rax
-        popq %rbx
+        movq %rsi, %rax
+        movq %rdi, %rbx
         ret
         .size fpfd_rdtsc, .-fpfd_rdtsc
