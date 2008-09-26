@@ -72,18 +72,6 @@ fpfd_write_ticks(const char *key, FILE *file)
           mean - stddev, (unsigned long)tl->size - 1, mean - stddev);
 }
 
-void
-fpfd_write_tick_summary(const char *key, FILE *file, int i)
-{
-  double mean, stddev, rdtsc;
-
-  mean = fpfd_mean_ticks(key);
-  stddev = fpfd_stddev_ticks(key);
-  rdtsc = fpfd_mean_ticks("fpfd_rdtsc");
-
-  fprintf(file, "%d\t%g\t%g\n", i, mean - rdtsc, stddev);
-}
-
 static void
 fpfd_save_ticks(const char *key, unsigned long ticks)
 {
