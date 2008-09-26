@@ -30,9 +30,6 @@ fpfd_rdtsc:
         rdtsc                   # Read time stamp counter
         shlq $32, %rdx
         orq %rdx, %rax
-        movq %rax, %rsi         # Store tsc
-        cpuid                   # Serialize again
-        movq %rsi, %rax
         movq %rdi, %rbx
         ret
         .size fpfd_rdtsc, .-fpfd_rdtsc
