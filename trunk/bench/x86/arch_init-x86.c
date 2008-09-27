@@ -17,67 +17,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench-x86_64.h"
-#include <stdio.h>  /* For fprintf, fopen */
-#include <stdlib.h> /* For exit, EXIT_*   */
-#include <search.h> /* For hcreate        */
+#include "bench.h"
+#include <stdint.h> /* For uint64_6 */
 
-static void x86_64_bench(unsigned int trials);
-static void x86_64_bench_results();
+unsigned int bench_loops;
 
-int
-main(int argc, char **argv)
+uint64_t ticks64();
+static uint64_t gcd(uint64_t a, uint64_t b);
+
+/*
+ * AMD chips seem to update the TSC every clock cycle, which is good. Old Intel
+ * chips (PIII, Pentium-M, and earlier) do this also. However, new ones, with
+ * the CONSTANT_TSC feature, update the counter  as if the processor is being
+ * run at its highest multiplier, even when it isn't, and furthermore only
+ * increment the TSC at FSB ticks, not CPU ticks. Thus, every TSC returned by
+ * rdtsc will be a multiple of the highest multiplier supported by the CPU. To
+ * detect this, we do a lot of rdtsc's, and find their greatest common
+ * denominator. If it's > 1, we set bench_loops equal to twice it, to support
+ * overclocked CPUs; otherwise, set bench_loops to 1.
+ */
+void
+arch_init()
 {
-  unsigned int trials;
+  #define COUNT 100
+  unsigned int i;
+  uint64_t mult, rdtsc[COUNT];
 
-  if (argc != 2) {
-    fprintf(stderr, "Wrong number of arguments: %d, should be 1.\n", argc - 1);
-    exit(EXIT_FAILURE);
+  for (i = 0; i < COUNT; ++i) {
+    do {
+      rdtsc[i] = ticks64();
+    } while (ticks64() == rdtsc[i]);
   }
 
-  sscanf(argv[1], "%u", &trials);
-
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
-    exit(EXIT_FAILURE);
+  for (i = 1; i < COUNT - 1; ++i) {
+    mult = gcd(rdtsc[i] - rdtsc[0], rdtsc[i + 1] - rdtsc[0]);
   }
 
-  arch_init(); /* Initialize architecture-specific things */
-  x86_64_bench(trials);
-  x86_64_bench_results();
+  if (mult > UINT64_C(1)) {
+    bench_loops = 2 * mult;
+  } else {
+    bench_loops = 1;
+  }
 
-  return EXIT_SUCCESS;
+  #undef COUNT
 }
 
-void
-x86_64_bench(unsigned int trials)
+static uint64_t
+gcd(uint64_t a, uint64_t b)
 {
-  x86_64_bench_mul(trials);
-}
-
-void
-x86_64_bench_results()
-{
-  FILE *file;
-
-  file = fopen("x86_64-mulb.dat", "w");
-  write_ticks("mulb", file);
-  fclose(file);
-
-  file = fopen("x86_64-mulw.dat", "w");
-  write_ticks("mulw", file);
-  fclose(file);
-
-  file = fopen("x86_64-mull.dat", "w");
-  write_ticks("mull", file);
-  fclose(file);
-
-  file = fopen("x86_64-mulq.dat", "w");
-  write_ticks("mulq", file);
-  fclose(file);
-
-  file = fopen("x86_64-overhead.dat", "w");
-  write_ticks("overhead", file);
-  fclose(file);
+  if (b == UINT64_C(0)) {
+    return a;
+  } else {
+    return gcd(b, a % b);
+  }
 }

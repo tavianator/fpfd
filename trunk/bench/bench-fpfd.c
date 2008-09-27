@@ -28,7 +28,6 @@ static void fpfd_bench_results();
 int
 main(int argc, char **argv)
 {
-  /* Should be enough to get consistent tick counts every time */
   unsigned int trials;
 
   if (argc != 2) {
@@ -44,6 +43,7 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
+  arch_init(); /* Initialize architecture-specific things */
   fpfd_bench(trials);
   fpfd_bench_results();
 
@@ -76,14 +76,14 @@ fpfd_bench_results()
   FILE *file;
 
   file = fopen("fpfd32_impl_expand.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_expand", file);
+  write_ticks("fpfd32_impl_expand", file);
   fclose(file);
 
   file = fopen("fpfd32_impl_compress.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_compress", file);
+  write_ticks("fpfd32_impl_compress", file);
   fclose(file);
 
   file = fopen("fpfd32_impl_inc.dat", "w");
-  fpfd_write_ticks("fpfd32_impl_inc", file);
+  write_ticks("fpfd32_impl_inc", file);
   fclose(file);
 }

@@ -23,33 +23,36 @@
 #include <stdio.h>  /* For perror       */
 #include <math.h>   /* For sqrt         */
 
-static void fpfd_save_ticks(const char *key, unsigned long ticks);
-static double fpfd_mean_ticks(const char *key);
-static double fpfd_stddev_ticks(const char *key);
+static void save_ticks(const char *key, unsigned long ticks);
+static double mean_ticks(const char *key);
+static double stddev_ticks(const char *key);
 
 void
-fpfd_record_ticks(const char *key, unsigned long ticks)
+record_ticks(const char *key, unsigned long tick_count)
 {
-  unsigned long tsc1, tsc2;
+  unsigned long i, ticks1, ticks2;
 
-  tsc1 = fpfd_rdtsc();
-  tsc2 = fpfd_rdtsc();
+  ticks1 = ticks();
+  for (i = 0; i < bench_loops; ++i) {
+    __asm__ volatile (""); /* Ensure that the loop is not unrolled */
+  }
+  ticks2 = ticks();
 
-  fpfd_save_ticks(key, ticks);
-  fpfd_save_ticks("fpfd_rdtsc", tsc2 - tsc1);
+  save_ticks(key, tick_count);
+  save_ticks("overhead", ticks2 - ticks1);
 }
 
 void
-fpfd_write_ticks(const char *key, FILE *file)
+write_ticks(const char *key, FILE *file)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
-  double rdtsc, mean, stddev;
+  double overhead, mean, stddev;
   size_t i;
 
-  rdtsc = fpfd_mean_ticks("fpfd_rdtsc");
-  mean = fpfd_mean_ticks(key) - rdtsc;
-  stddev = fpfd_stddev_ticks(key);
+  overhead = mean_ticks("overhead");
+  mean = mean_ticks(key) - overhead;
+  stddev = stddev_ticks(key);
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
@@ -58,7 +61,8 @@ fpfd_write_ticks(const char *key, FILE *file)
 
   /* Each trial */
   for (i = 0; i < tl->size; ++i) {
-    fprintf(file, "%lu\t%g\n", (unsigned long)i, tl->list[i] - rdtsc);
+    fprintf(file, "%lu\t%g\n", (unsigned long)i,
+            ((double)tl->list[i] / bench_loops) - overhead);
   }
 
   /* Mean */
@@ -73,7 +77,7 @@ fpfd_write_ticks(const char *key, FILE *file)
 }
 
 static void
-fpfd_save_ticks(const char *key, unsigned long ticks)
+save_ticks(const char *key, unsigned long tick_count)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -103,12 +107,12 @@ fpfd_save_ticks(const char *key, unsigned long ticks)
     tl->list = xrealloc(tl->list, tl->capacity * sizeof(unsigned long));
   }
 
-  tl->list[tl->size] = ticks;
+  tl->list[tl->size] = tick_count;
   ++tl->size;
 }
 
 static double
-fpfd_mean_ticks(const char *key)
+mean_ticks(const char *key)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -124,11 +128,11 @@ fpfd_mean_ticks(const char *key)
     ticks += tl->list[i];
   }
 
-  return ticks / tl->trials;
+  return (ticks / tl->trials) / bench_loops;
 }
 
 static double
-fpfd_stddev_ticks(const char *key)
+stddev_ticks(const char *key)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -142,11 +146,12 @@ fpfd_stddev_ticks(const char *key)
 
   for (i = 0; i < tl->size; ++i) {
     ticks = tl->list[i];
+    ticks /= bench_loops;
     ticks *= ticks;
     ticks_sq += ticks;
   }
 
-  mean = fpfd_mean_ticks(key);
+  mean = mean_ticks(key);
 
   return sqrt((ticks_sq / tl->trials) - mean * mean);
 }

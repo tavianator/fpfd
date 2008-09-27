@@ -24,8 +24,8 @@ fpfd32_bench_impl_compress(unsigned int trials)
 {
   fpfd32_t fp;
   fpfd32_impl_t impl;
-  unsigned long tsc1, tsc2;
-  unsigned int i;
+  unsigned long ticks1, ticks2;
+  unsigned int i, j;
 
   /* Warm up cache */
   fpfd32_random(fp);
@@ -36,10 +36,13 @@ fpfd32_bench_impl_compress(unsigned int trials)
     fpfd32_random(fp);
     fpfd32_impl_expand(&impl, fp);
 
-    tsc1 = fpfd_rdtsc();
-    fpfd32_impl_compress(fp, &impl);
-    tsc2 = fpfd_rdtsc();
+    ticks1 = ticks();
+    for (j = 0; j < bench_loops; ++j) {
+      __asm__ volatile (""); /* Ensure that the loop is not unrolled */
+      fpfd32_impl_compress(fp, &impl);
+    }
+    ticks2 = ticks();
 
-    fpfd_record_ticks("fpfd32_impl_compress", tsc2 - tsc1);
+    record_ticks("fpfd32_impl_compress", ticks2 - ticks1);
   }
 }
