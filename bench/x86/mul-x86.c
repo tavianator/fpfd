@@ -22,38 +22,41 @@
 void
 x86_bench_mul(unsigned int trials)
 {
-  int i;
-  unsigned long tsc1, tsc2;
+  unsigned int i, j;
+  unsigned long ticks1, ticks2;
 
   for (i = 0; i < trials; ++i) {
     /* mulb */
-    tsc1 = fpfd_rdtsc();
-    __asm__ volatile ("mulb %%dl"
-                      :
-                      :
-                      : "%al", "%dl");
-    tsc2 = fpfd_rdtsc();
-
-    fpfd_record_ticks("mulb", tsc2 - tsc1);
+    ticks1 = ticks();
+    for (j = 0; j < bench_loops; ++j) {
+      __asm__ volatile ("mulb %%dl"
+                        :
+                        :
+                        : "%al", "%dl");
+    }
+    ticks2 = ticks();
+    record_ticks("mulb", ticks2 - ticks1);
 
     /* mulw */
-    tsc1 = fpfd_rdtsc();
-    __asm__ volatile ("mulw %%dx"
-                      :
-                      :
-                      : "%ax", "%dx");
-    tsc2 = fpfd_rdtsc();
-
-    fpfd_record_ticks("mulw", tsc2 - tsc1);
+    ticks1 = ticks();
+    for (j = 0; j < bench_loops; ++j) {
+      __asm__ volatile ("mulw %%dx"
+                        :
+                        :
+                        : "%ax", "%dx");
+    }
+    ticks2 = ticks();
+    record_ticks("mulw", ticks2 - ticks1);
 
     /* mull */
-    tsc1 = fpfd_rdtsc();
-    __asm__ volatile ("mull %%edx"
-                      :
-                      :
-                      : "%eax", "%edx");
-    tsc2 = fpfd_rdtsc();
-
-    fpfd_record_ticks("mull", tsc2 - tsc1);
+    ticks1 = ticks();
+    for (j = 0; j < bench_loops; ++j) {
+      __asm__ volatile ("mull %%edx"
+                        :
+                        :
+                        : "%eax", "%edx");
+    }
+    ticks2 = ticks();
+    record_ticks("mull", ticks2 - ticks1);
   }
 }

@@ -44,6 +44,7 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
+  arch_init(); /* Initialize architecture-specific things */
   x86_bench(trials);
   x86_bench_results();
 
@@ -62,18 +63,18 @@ x86_bench_results()
   FILE *file;
 
   file = fopen("x86-mulb.dat", "w");
-  fpfd_write_ticks("mulb", file);
+  write_ticks("mulb", file);
   fclose(file);
 
   file = fopen("x86-mulw.dat", "w");
-  fpfd_write_ticks("mulw", file);
+  write_ticks("mulw", file);
   fclose(file);
 
   file = fopen("x86-mull.dat", "w");
-  fpfd_write_ticks("mull", file);
+  write_ticks("mull", file);
   fclose(file);
 
-  file = fopen("x86-rdtsc.dat", "w");
-  fpfd_write_ticks("fpfd_rdtsc", file);
+  file = fopen("x86-overhead.dat", "w");
+  write_ticks("overhead", file);
   fclose(file);
 }
