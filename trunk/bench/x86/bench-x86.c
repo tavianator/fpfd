@@ -55,6 +55,7 @@ void
 x86_bench(unsigned int trials)
 {
   x86_bench_mul(trials);
+  x86_bench_div(trials);
 }
 
 void
@@ -72,6 +73,18 @@ x86_bench_results()
 
   file = fopen("x86-mull.dat", "w");
   write_ticks("mull", file);
+  fclose(file);
+
+  file = fopen("x86-divb.dat", "w");
+  write_ticks("divb", file);
+  fclose(file);
+
+  file = fopen("x86-divw.dat", "w");
+  write_ticks("divw", file);
+  fclose(file);
+
+  file = fopen("x86-divl.dat", "w");
+  write_ticks("divl", file);
   fclose(file);
 
   file = fopen("x86-overhead.dat", "w");

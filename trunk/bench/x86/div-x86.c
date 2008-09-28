@@ -18,55 +18,52 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdint.h> /* For uint64_6 */
 
-unsigned int bench_loops;
-
-static uint64_t gcd(uint64_t a, uint64_t b);
-
-/*
- * AMD chips seem to update the TSC every clock cycle, which is good. Old Intel
- * chips (PIII, Pentium-M, and earlier) do this also. However, new ones, with
- * the CONSTANT_TSC feature, update the counter  as if the processor is being
- * run at its highest multiplier, even when it isn't, and furthermore only
- * increment the TSC at FSB ticks, not CPU ticks. Thus, every TSC returned by
- * rdtsc will be a multiple of the highest multiplier supported by the CPU. To
- * detect this, we do a lot of rdtsc's, and find their greatest common
- * denominator. If it's > 1, we set bench_loops equal to twice it, to support
- * overclocked CPUs; otherwise, set bench_loops to 1.
- */
 void
-arch_init()
+x86_bench_div(unsigned int trials)
 {
-  #define COUNT 100
-  unsigned int i;
-  uint64_t mult, rdtsc[COUNT];
+  unsigned int i, j;
+  unsigned long ticks1, ticks2;
 
-  for (i = 0; i < COUNT; ++i) {
-    do {
-      rdtsc[i] = ticks();
-    } while (ticks() == rdtsc[i]);
-  }
+  for (i = 0; i < trials; ++i) {
+    /* divb */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      __asm__ volatile ("movb $0xFD, %%dl\n\t"
+                        "movb $0xFF, %%al\n\t"
+                        "divb %%al"
+                        :
+                        :
+                        : "%al", "%dl");
+    }
+    ticks2 = ticks();
+    /* The two mov's take 2 cycles */
+    record_ticks("divb", ticks2 - ticks1 - (2 * bench_loops));
 
-  for (i = 1; i < COUNT - 1; ++i) {
-    mult = gcd(rdtsc[i] - rdtsc[0], rdtsc[i + 1] - rdtsc[0]);
-  }
+    /* divw */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      __asm__ volatile ("movw $0xFFFD, %%dx\n\t"
+                        "movw $0xFFFF, %%ax\n\t"
+                        "divw %%ax"
+                        :
+                        :
+                        : "%ax", "%dx");
+    }
+    ticks2 = ticks();
+    record_ticks("divw", ticks2 - ticks1 - (2 * bench_loops));
 
-  if (mult > UINT64_C(1)) {
-    bench_loops = 2 * mult;
-  } else {
-    bench_loops = 1;
-  }
-
-  #undef COUNT
-}
-
-static uint64_t
-gcd(uint64_t a, uint64_t b)
-{
-  if (b == UINT64_C(0)) {
-    return a;
-  } else {
-    return gcd(b, a % b);
+    /* divl */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      __asm__ volatile ("movl $0xFFFFFFFD, %%edx\n\t"
+                        "movl $0xFFFFFFFF, %%eax\n\t"
+                        "divl %%eax"
+                        :
+                        :
+                        : "%eax", "%edx");
+    }
+    ticks2 = ticks();
+    record_ticks("divl", ticks2 - ticks1 - (2 * bench_loops));
   }
 }
