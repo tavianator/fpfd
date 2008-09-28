@@ -22,6 +22,12 @@
 #include <stddef.h> /* For size_t        */
 #include <stdio.h>  /* For FILE          */
 
+/* Use this to loop bench_loop times in a consistent manner */
+#define BENCH_LOOP(i) for (i = 0; i < bench_loops; ++i)
+
+/* Use this to prevent the loop from being unrolled */
+#define NO_UNROLL() __asm__ volatile ("")
+
 /*
  * The type that stores the tick count of each trial, which is used by the hash
  * table.

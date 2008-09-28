@@ -35,8 +35,8 @@ fpfd32_bench_impl_expand(unsigned int trials)
     fpfd32_random(fp);
 
     ticks1 = ticks();
-    for (j = 0; j < bench_loops; ++j) {
-      __asm__ volatile (""); /* Ensure that the loop is not unrolled */
+    BENCH_LOOP(j) {
+      NO_UNROLL();
       fpfd32_impl_expand(&impl, fp);
     }
     ticks2 = ticks();

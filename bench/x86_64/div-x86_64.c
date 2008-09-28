@@ -20,43 +20,63 @@
 #include "bench.h"
 
 void
-x86_bench_mul(unsigned int trials)
+x86_64_bench_div(unsigned int trials)
 {
   unsigned int i, j;
   unsigned long ticks1, ticks2;
 
   for (i = 0; i < trials; ++i) {
-    /* mulb */
+    /* divb */
     ticks1 = ticks();
     BENCH_LOOP(j) {
-      __asm__ volatile ("mulb %%dl"
+      __asm__ volatile ("movb $0xFD, %%dl\n\t"
+                        "movb $0xFF, %%al\n\t"
+                        "divb %%al"
                         :
                         :
                         : "%al", "%dl");
     }
     ticks2 = ticks();
-    record_ticks("mulb", ticks2 - ticks1);
+    /* The two mov's take 2 cycles */
+    record_ticks("divb", ticks2 - ticks1 - (2 * bench_loops));
 
-    /* mulw */
+    /* divw */
     ticks1 = ticks();
     BENCH_LOOP(j) {
-      __asm__ volatile ("mulw %%dx"
+      __asm__ volatile ("movw $0xFFFD, %%dx\n\t"
+                        "movw $0xFFFF, %%ax\n\t"
+                        "divw %%ax"
                         :
                         :
                         : "%ax", "%dx");
     }
     ticks2 = ticks();
-    record_ticks("mulw", ticks2 - ticks1);
+    record_ticks("divw", ticks2 - ticks1 - (2 * bench_loops));
 
-    /* mull */
+    /* divl */
     ticks1 = ticks();
     BENCH_LOOP(j) {
-      __asm__ volatile ("mull %%edx"
+      __asm__ volatile ("movl $0xFFFFFFFD, %%edx\n\t"
+                        "movl $0xFFFFFFFF, %%eax\n\t"
+                        "divl %%eax"
                         :
                         :
                         : "%eax", "%edx");
     }
     ticks2 = ticks();
-    record_ticks("mull", ticks2 - ticks1);
+    record_ticks("divl", ticks2 - ticks1 - (2 * bench_loops));
+
+    /* divq */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      __asm__ volatile ("movq $0xFFFFFFFFFFFFFFFD, %%rdx\n\t"
+                        "movq $0xFFFFFFFFFFFFFFFF, %%rax\n\t"
+                        "divq %%rax"
+                        :
+                        :
+                        : "%rax", "%rdx");
+    }
+    ticks2 = ticks();
+    record_ticks("divq", ticks2 - ticks1 - (2 * bench_loops));
   }
 }

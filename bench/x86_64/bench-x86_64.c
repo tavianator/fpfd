@@ -54,6 +54,7 @@ void
 x86_64_bench(unsigned int trials)
 {
   x86_64_bench_mul(trials);
+  x86_64_bench_div(trials);
 }
 
 void
@@ -75,6 +76,22 @@ x86_64_bench_results()
 
   file = fopen("x86_64-mulq.dat", "w");
   write_ticks("mulq", file);
+  fclose(file);
+
+  file = fopen("x86_64-divb.dat", "w");
+  write_ticks("divb", file);
+  fclose(file);
+
+  file = fopen("x86_64-divw.dat", "w");
+  write_ticks("divw", file);
+  fclose(file);
+
+  file = fopen("x86_64-divl.dat", "w");
+  write_ticks("divl", file);
+  fclose(file);
+
+  file = fopen("x86_64-divq.dat", "w");
+  write_ticks("divq", file);
   fclose(file);
 
   file = fopen("x86_64-overhead.dat", "w");

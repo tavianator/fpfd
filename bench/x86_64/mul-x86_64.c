@@ -28,7 +28,7 @@ x86_64_bench_mul(unsigned int trials)
   for (i = 0; i < trials; ++i) {
     /* mulb */
     ticks1 = ticks();
-    for (j = 0; j < bench_loops; ++j) {
+    BENCH_LOOP(j) {
       __asm__ volatile ("mulb %%dl"
                         :
                         :
@@ -39,7 +39,7 @@ x86_64_bench_mul(unsigned int trials)
 
     /* mulw */
     ticks1 = ticks();
-    for (j = 0; j < bench_loops; ++j) {
+    BENCH_LOOP(j) {
       __asm__ volatile ("mulw %%dx"
                         :
                         :
@@ -50,7 +50,7 @@ x86_64_bench_mul(unsigned int trials)
 
     /* mull */
     ticks1 = ticks();
-    for (j = 0; j < bench_loops; ++j) {
+    BENCH_LOOP(j) {
       __asm__ volatile ("mull %%edx"
                         :
                         :
@@ -61,7 +61,7 @@ x86_64_bench_mul(unsigned int trials)
 
     /* mulq */
     ticks1 = ticks();
-    for (j = 0; j < bench_loops; ++j) {
+    BENCH_LOOP(j) {
       __asm__ volatile ("mulq %%rdx"
                         :
                         :

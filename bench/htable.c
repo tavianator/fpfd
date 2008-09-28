@@ -33,8 +33,8 @@ record_ticks(const char *key, unsigned long tick_count)
   unsigned long i, ticks1, ticks2;
 
   ticks1 = ticks();
-  for (i = 0; i < bench_loops; ++i) {
-    __asm__ volatile (""); /* Ensure that the loop is not unrolled */
+  BENCH_LOOP(i) {
+    NO_UNROLL();
   }
   ticks2 = ticks();
 
