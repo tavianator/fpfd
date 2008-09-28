@@ -32,7 +32,7 @@ EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
 benchmark_arch_LDADD = ./libfpfd-bench.la -lm
 
 if X86
-benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/mul-x86.c
+benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/div-x86.c x86/mul-x86.c
 endif
 if X86_64
 benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c
