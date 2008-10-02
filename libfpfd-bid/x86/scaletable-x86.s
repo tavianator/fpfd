@@ -110,3 +110,33 @@ fpfd_lsw_bsr2exp:
         .long 2         # fpfd_lsw_bsr2exp[29]
         .long 3         # fpfd_lsw_bsr2exp[30]
         .long 3         # fpfd_lsw_bsr2exp[31]
+
+.globl fpfd_lsw_exp2mul
+        .align 32
+        .type fpfd_lsw_exp2mul, @object
+        .size fpfd_lsw_exp2mul, 256
+fpfd_lsw_exp2mul:
+        .long 1         # fpfd_lsw_exp2mul[0] is undefined
+        .long 10        # fpfd_lsw_exp2mul[1]
+        .long 100       # fpfd_lsw_exp2mul[2]
+        .long 1000      # fpfd_lsw_exp2mul[3]
+
+.globl fpfd_lsw_exp2div
+        .align 32
+        .type fpfd_lsw_exp2div, @object
+        .size fpfd_lsw_exp2div, 256
+fpfd_lsw_exp2div:
+        .long 0                 # fpfd_lsw_exp2div[0] is undefined
+        .long 0xCCCCCCCD        # fpfd_lsw_exp2div[1] = (10 ** -1 << 35) + 1
+        .long 0xA3D70A3E        # fpfd_lsw_exp2div[2] = (10 ** -2 << 38) + 1
+        .long 0x83126E98        # fpfd_lsw_exp2div[3] = (10 ** -3 << 41) + 1
+
+.globl fpfd_lsw_exp2shr
+        .align 32
+        .type fpfd_lsw_exp2shr, @object
+        .size fpfd_lsw_exp2shr, 256
+fpfd_lsw_exp2shr:
+        .long 0         # fpfd_lsw_exp2shr[0] is undefined
+        .long 3         # fpfd_lsw_exp2shr[1]
+        .long 6         # fpfd_lsw_exp2shr[2]
+        .long 9         # fpfd_lsw_exp2shr[3]

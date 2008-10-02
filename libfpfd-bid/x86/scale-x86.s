@@ -28,11 +28,15 @@
 fpfd32_impl_scale:
         pushl %ebx
         pushl %esi
-        movl 12(%esp), %esi     # Put dest in esi
+        pushl %edi
+        pushl %ebp
+        movl 20(%esp), %esi     # Put dest in esi
         movl (%esi), %eax
         movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ebx         # Find the leading non-zero bit
         jz .LzeroMSW
+        popl %ebp
+        popl %edi
         popl %esi
         popl %ebx
         ret
@@ -60,30 +64,64 @@ fpfd32_impl_scale:
         subl $1, %ebx           # Correct the exponent again
         jmp .Lnorm
 .LoverLSW:
+        movl %eax, %edi
         movl fpfd_lsw_bsr2mul(,%ebx,4), %edx
         mull %edx
         movl fpfd_lsw_bsr2shr(,%ebx,4), %ecx
-        shrdl %cl, %edx, %eax
         shrl %cl, %edx
         movl fpfd_lsw_bsr2exp(,%ebx,4), %ebx
+        movl %edx, %ebp
+        movl %edx, %eax
+        movl fpfd_lsw_exp2mul(,%ebx,4), %edx
+        mull %edx
+        subl %eax, %edi
+        movl %edi, %eax
+        movl %ebp, %edx
+        subl $1, %ebx
+        jz .LexpcorrectLSW
+        movl fpfd_lsw_exp2div(,%ebx,4), %edx
+        mull %edx
+        movl fpfd_lsw_exp2shr(,%ebx,4), %ecx
+        shrl %cl, %edx
+        movl %edx, %eax
+        movl %ebp, %edx
+.LexpcorrectLSW:
+        addl $1, %ebx
         addl 8(%esi), %ebx      # Correct the exponent
         cmpl $10000000, %edx
         jb .Lnorm
-        movl %edx, %eax         # Mantissa still too large
+        movl %eax, %edi         # Mantissa still too large
+        movl %edx, %eax
+        movl %edx, %ecx
         movl $0xCCCCCCCD, %edx
         mull %edx
         shrl $3, %edx           # Divide by 10
         addl $1, %ebx           # Correct the exponent again
+        leal (%edx,%edx,4), %eax
+        shll %eax
+        subl %ecx, %eax
+        negl %eax               # Calculate the remainder
+        cmpl $0, %eax
+        jne .Lnorm
+        cmpl $5, %eax
+        jne .Lnorm
+        cmpl $0, %edi
+        je .Lnorm
+        addl $1, %edi           # Correct it with the last remainder
 .Lnorm:
         movl %edx, (%esi)
         movl $0, 4(%esi)
         movl %ebx, 8(%esi)
+        popl %ebp
+        popl %edi
         popl %esi
         popl %ebx
         ret
 .Lzero:
         movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0, %eax
+        popl %ebp
+        popl %edi
         popl %esi
         popl %ebx
         ret
