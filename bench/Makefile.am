@@ -43,7 +43,9 @@ benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libf
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
+TRIALS = 10000
+
 bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
-	(cd arch && ../benchmark-arch$(EXEEXT) 1000)
-	(cd dpd && ../benchmark-dpd$(EXEEXT) 1000)
-	(cd bid && ../benchmark-bid$(EXEEXT) 1000)
+	(cd arch && ../benchmark-arch$(EXEEXT) $(TRIALS))
+	(cd dpd && ../benchmark-dpd$(EXEEXT) $(TRIALS))
+	(cd bid && ../benchmark-bid$(EXEEXT) $(TRIALS))
