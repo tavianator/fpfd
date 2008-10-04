@@ -90,6 +90,10 @@ main()
   fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
 
+  /*
+   * These values use 64 bits of the unscaled mantissa.
+   */
+
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x1), UINT32_C(0x00000000));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 0);
@@ -108,6 +112,26 @@ main()
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x9), UINT32_C(0x99999999));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 9);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x10000000), UINT32_C(0x00000000));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x1000000));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x10000000), UINT32_C(0x00000001));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 1);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x1000000));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999995), UINT32_C(0x00000000));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 5);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999999), UINT32_C(0x99999999));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
 
   return exitstatus;
