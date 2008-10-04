@@ -90,6 +90,11 @@ main()
   fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
+  /*
+   * These values require an additional division by ten after the initial
+   * table look-up, and extra logic to keep the return value accurate.
+   */
+
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(100000000));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 0);
@@ -100,6 +105,21 @@ main()
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1000000000));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1000000001));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 1);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  /*
+   * These values do not require an additional division by ten after the initial
+   * table look-up.
+   */
+
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(999999950));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 5);
@@ -109,6 +129,79 @@ main()
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(3333333500));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 5);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(3333333));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(3333333999));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 9);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(3333333));
+
+  /*
+   * These values use 64 bits of the unscaled mantissa.
+   */
+
+  /* 10000000000 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x2), UINT32_C(0x540BE400));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  /* 10000000001 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x2), UINT32_C(0x540BE401));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 1);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  /* 99999995000 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x17), UINT32_C(0x4876D478));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 5);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
+
+  /* 99999999999 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x17), UINT32_C(0x4876E7FF));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 9);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
+
+  /* 1000000000000000 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x38D7E), UINT32_C(0xA4C68000));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  /* 1000000000000001 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x38D7E), UINT32_C(0xA4C68001));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 1);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
+
+  /* 9999999500000000 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x51F39B00));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 5);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
+
+  /* 9999999999999999 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 9);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
+
+  /*
+   * This value is larger than the largest value representable in the DPD
+   * encoding.
+   */
+
+  /* 18446744073709551615 */
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
+  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 13, FPFD_NUMBER, 4);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1844674));
 
   return exitstatus;
 }
