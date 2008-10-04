@@ -116,7 +116,7 @@ fpfd_lsw_bsr2exp:
         .type fpfd_lsw_exp2mul, @object
         .size fpfd_lsw_exp2mul, 256
 fpfd_lsw_exp2mul:
-        .long 1         # fpfd_lsw_exp2mul[0] is undefined
+        .long 1         # fpfd_lsw_exp2mul[0]
         .long 10        # fpfd_lsw_exp2mul[1]
         .long 100       # fpfd_lsw_exp2mul[2]
         .long 1000      # fpfd_lsw_exp2mul[3]
