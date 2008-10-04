@@ -20,7 +20,7 @@
 lib_LTLIBRARIES        = libfpfd-bid.la
 
 if X86
-libfpfd_bid_la_SOURCES = x86/compress-x86.s x86/expand-x86.s x86/inc-x86.s x86/mul-x86.s x86/scale-x86.s x86/scaletable-x86.s
+libfpfd_bid_la_SOURCES = x86/compress-x86.s x86/expand-x86.s x86/inc-x86.s x86/mul-x86.s x86/scale-x86.s
 endif
 
 if X86_64
