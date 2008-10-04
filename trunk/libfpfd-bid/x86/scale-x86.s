@@ -85,6 +85,19 @@ fpfd32_impl_scale:
         shrl %cl, %edx
         movl %edx, %eax
         movl %ebp, %edx
+        cmpl $0, %eax
+        je .LspecialLSW
+        cmpl $5, %eax
+        jne .LexpcorrectLSW
+.LspecialLSW:
+        movl %eax, %ecx
+        movl fpfd_lsw_exp2mul(,%ebx,4), %edx
+        mull %edx
+        movl %ebp, %edx
+        xchgl %eax, %ecx
+        cmpl %ecx, %edi
+        je .LexpcorrectLSW
+        addl $1, %eax
 .LexpcorrectLSW:
         addl $1, %ebx
         addl 8(%esi), %ebx      # Correct the exponent
@@ -102,12 +115,13 @@ fpfd32_impl_scale:
         subl %ecx, %eax
         negl %eax               # Calculate the remainder
         cmpl $0, %eax
-        jne .Lnorm
+        je .LspecialLSW2
         cmpl $5, %eax
         jne .Lnorm
+.LspecialLSW2:
         cmpl $0, %edi
         je .Lnorm
-        addl $1, %edi           # Correct it with the last remainder
+        addl $1, %eax           # Correct it with the last remainder
 .Lnorm:
         movl %edx, (%esi)
         movl $0, 4(%esi)
