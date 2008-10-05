@@ -24,5 +24,5 @@ libfpfd_bid_la_SOURCES = x86/compress-x86.s x86/expand-x86.s x86/inc-x86.s x86/m
 endif
 
 if X86_64
-libfpfd_bid_la_SOURCES = x86_64/compress-x86_64.s x86_64/expand-x86_64.s x86_64/inc-x86_64.s x86_64/mul-x86_64.s
+libfpfd_bid_la_SOURCES = x86_64/compress-x86_64.s x86_64/expand-x86_64.s x86_64/inc-x86_64.s x86_64/mul-x86_64.s x86_64/scale-x86_64.s
 endif

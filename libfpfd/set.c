@@ -65,12 +65,6 @@ fpfd32_impl_div(fpfd32_impl_t *dest,
   return 0;
 }
 
-int
-fpfd32_impl_scale(fpfd32_impl_t *dest)
-{
-  return 0;
-}
-
 /* --- END HACKS --- */
 
 void
