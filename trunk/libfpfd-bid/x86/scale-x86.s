@@ -141,11 +141,10 @@ fpfd32_impl_scale:
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
 
-        .data
-.globl fpfd32_scale_lsw_bsr2mul
+        .section .rodata
         .align 32
         .type fpfd32_scale_lsw_bsr2mul, @object
-        .size fpfd32_scale_lsw_bsr2mul, 256
+        .size fpfd32_scale_lsw_bsr2mul, 128
 fpfd32_scale_lsw_bsr2mul:
         .long 1000000           # fpfd32_scale_lsw_bsr2mul[0]
         .long 1000000           # fpfd32_scale_lsw_bsr2mul[1]
@@ -183,10 +182,9 @@ fpfd32_scale_lsw_bsr2mul:
                                 #   = (10 ** -3 << 41) + 1
         .long 0x83126E98        # fpfd32_scale_lsw_bsr2mul[31]
 
-.globl fpfd32_scale_lsw_bsr2shr
         .align 32
         .type fpfd32_scale_lsw_bsr2shr, @object
-        .size fpfd32_scale_lsw_bsr2shr, 256
+        .size fpfd32_scale_lsw_bsr2shr, 128
 fpfd32_scale_lsw_bsr2shr:
         .zero 92        # fpfd32_scale_lsw_bsr2shr[i], i < 23, is undefined
         .long 3         # fpfd32_scale_lsw_bsr2shr[23]
@@ -199,10 +197,9 @@ fpfd32_scale_lsw_bsr2shr:
         .long 9         # fpfd32_scale_lsw_bsr2shr[30]
         .long 9         # fpfd32_scale_lsw_bsr2shr[31]
 
-.globl fpfd32_scale_lsw_bsr2exp
         .align 32
         .type fpfd32_scale_lsw_bsr2exp, @object
-        .size fpfd32_scale_lsw_bsr2exp, 256
+        .size fpfd32_scale_lsw_bsr2exp, 128
 fpfd32_scale_lsw_bsr2exp:
         .long -6        # fpfd32_scale_lsw_bsr2exp[0]
         .long -6        # fpfd32_scale_lsw_bsr2exp[1]
@@ -237,20 +234,18 @@ fpfd32_scale_lsw_bsr2exp:
         .long 3         # fpfd32_scale_lsw_bsr2exp[30]
         .long 3         # fpfd32_scale_lsw_bsr2exp[31]
 
-.globl fpfd32_scale_lsw_exp2mul
         .align 32
         .type fpfd32_scale_lsw_exp2mul, @object
-        .size fpfd32_scale_lsw_exp2mul, 256
+        .size fpfd32_scale_lsw_exp2mul, 16
 fpfd32_scale_lsw_exp2mul:
         .long 1         # fpfd32_scale_lsw_exp2mul[0]
         .long 10        # fpfd32_scale_lsw_exp2mul[1]
         .long 100       # fpfd32_scale_lsw_exp2mul[2]
         .long 1000      # fpfd32_scale_lsw_exp2mul[3]
 
-.globl fpfd32_scale_lsw_exp2div
         .align 32
         .type fpfd32_scale_lsw_exp2div, @object
-        .size fpfd32_scale_lsw_exp2div, 256
+        .size fpfd32_scale_lsw_exp2div, 16
 fpfd32_scale_lsw_exp2div:
         .long 0                 # fpfd32_scale_lsw_exp2div[0] is undefined
         .long 0xCCCCCCCD        # fpfd32_scale_lsw_exp2div[1]
@@ -260,10 +255,9 @@ fpfd32_scale_lsw_exp2div:
         .long 0x83126E98        # fpfd32_scale_lsw_exp2div[3]
                                 #   = (10 ** -3 << 41) + 1
 
-.globl fpfd32_scale_lsw_exp2shr
         .align 32
         .type fpfd32_scale_lsw_exp2shr, @object
-        .size fpfd32_scale_lsw_exp2shr, 256
+        .size fpfd32_scale_lsw_exp2shr, 16
 fpfd32_scale_lsw_exp2shr:
         .long 0         # fpfd32_scale_lsw_exp2shr[0] is undefined
         .long 3         # fpfd32_scale_lsw_exp2shr[1]
