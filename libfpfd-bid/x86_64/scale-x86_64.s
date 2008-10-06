@@ -154,7 +154,7 @@ fpfd32_scale_bsr2mul:
 
         .align 32
         .type fpfd32_scale_bsr2div, @object
-        .size fpfd32_scale_bsr2div, 256
+        .size fpfd32_scale_bsr2div, 512
 fpfd32_scale_bsr2div:
         .zero 184                       # fpfd32_scale_bsr2mul[i], i < 23
         .quad 0xCCCCCCCCCCCCCCCD        # fpfd32_scale_bsr2div[23] = 10 ** -1
@@ -317,7 +317,7 @@ fpfd32_scale_bsr2exp:
 
         .align 32
         .type fpfd32_scale_exp2mul, @object
-        .size fpfd32_scale_exp2mul, 96
+        .size fpfd32_scale_exp2mul, 104
 fpfd32_scale_exp2mul:
         .quad 1                 # fpfd32_scale_exp2mul[0]
         .quad 10                # fpfd32_scale_exp2mul[1]
@@ -326,13 +326,12 @@ fpfd32_scale_exp2mul:
         .quad 10000             # fpfd32_scale_exp2mul[4]
         .quad 100000            # fpfd32_scale_exp2mul[5]
         .quad 1000000           # fpfd32_scale_exp2mul[6]
-        .quad 10000000          # fpfd32_scale_exp2mul[0]
-        .quad 100000000         # fpfd32_scale_exp2mul[1]
-        .quad 1000000000        # fpfd32_scale_exp2mul[2]
-        .quad 10000000000       # fpfd32_scale_exp2mul[3]
-        .quad 100000000000      # fpfd32_scale_exp2mul[4]
-        .quad 1000000000000     # fpfd32_scale_exp2mul[5]
-        .quad 10000000000000    # fpfd32_scale_exp2mul[6]
+        .quad 10000000          # fpfd32_scale_exp2mul[7]
+        .quad 100000000         # fpfd32_scale_exp2mul[8]
+        .quad 1000000000        # fpfd32_scale_exp2mul[9]
+        .quad 10000000000       # fpfd32_scale_exp2mul[10]
+        .quad 100000000000      # fpfd32_scale_exp2mul[11]
+        .quad 1000000000000     # fpfd32_scale_exp2mul[12]
 
         .align 32
         .type fpfd32_scale_exp2div, @object
@@ -350,11 +349,10 @@ fpfd32_scale_exp2div:
         .quad 0x89705F4136B4A598        # fpfd32_scale_exp2div[9]  = 10 ** -9
         .quad 0xDBE6FECEBDEDD5BF        # fpfd32_scale_exp2div[10] = 10 ** -10
         .quad 0xAFEBFF0BCB24AAFF        # fpfd32_scale_exp2div[11] = 10 ** -11
-        .quad 0x119799812DEA111A        # fpfd32_scale_exp2div[12] = 10 ** -12
 
         .align 32
         .type fpfd32_scale_exp2shr, @object
-        .size fpfd32_scale_exp2shr, 13
+        .size fpfd32_scale_exp2shr, 12
 fpfd32_scale_exp2shr:
         .byte 0         # fpfd32_scale_exp2shr[0] is undefined
         .byte 3         # fpfd32_scale_exp2shr[1]
@@ -368,4 +366,3 @@ fpfd32_scale_exp2shr:
         .byte 29        # fpfd32_scale_exp2shr[9]
         .byte 33        # fpfd32_scale_exp2shr[10]
         .byte 36        # fpfd32_scale_exp2shr[11]
-        .byte 36        # fpfd32_scale_exp2shr[12]
