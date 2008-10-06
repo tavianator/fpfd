@@ -132,7 +132,7 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lzero:
-        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
+        movl $-101, 8(%esi)     # Set dest->exp to the subnormal exponent
         movl $0, %eax
         popl %ebp
         popl %edi
