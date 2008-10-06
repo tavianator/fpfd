@@ -121,7 +121,7 @@ fpfd32_impl_scale:
         movl %esi, 8(%rdi)
         ret
 .Lzero:
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
         movl $0, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
