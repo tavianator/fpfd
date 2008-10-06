@@ -20,6 +20,8 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = libfpfd-dpd libfpfd-bid libfpfd check bench doc
 
+EXTRA_DIST = autogen.sh
+
 bench: all-recursive
 	cd bench && $(MAKE) $(AM_MAKEFLAGS) bench
 
