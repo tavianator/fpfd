@@ -69,7 +69,7 @@ fpfd32_impl_scale:
         movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
         movq %rax, %rcx
         movq $0x0FFFFFFFFFFFFFFF, %rdx
-        andq %rdx, %rcx  # Mask off the most significant nibble
+        andq %rdx, %rcx         # Mask off the most significant nibble
         shrq $60, %rax
         cmpl $0, %eax
         je .Lspecial
@@ -78,7 +78,7 @@ fpfd32_impl_scale:
         ret
 .Luflow:
         movq $0, (%rdi)
-        movl $0, 8(%rdi)
+        movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
         movq %rdx, %rcx
         movl $0, %eax
 .Lspecial:
@@ -92,8 +92,7 @@ fpfd32_impl_scale:
         movl $10, %eax          # Return the special 10 value
         ret
 .Lzero:
-        movl $0, 8(%rdi)        # Set dest->exp to zero
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
         movl $0, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale

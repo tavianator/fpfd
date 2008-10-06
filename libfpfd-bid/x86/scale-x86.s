@@ -132,7 +132,7 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lzero:
-        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
+        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
         movl $0, %eax
         popl %ebp
         popl %edi

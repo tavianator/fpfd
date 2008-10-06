@@ -91,7 +91,7 @@ fpfd32_impl_scale:
 .LuflowMSW:
         movl $0, (%esi)
         movl $0, 4(%esi)
-        movl $0, 8(%esi)
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
         movl %edx, %ebx
         movl %eax, %ecx
         movl $0, %eax
@@ -161,7 +161,7 @@ fpfd32_impl_scale:
 .LuflowLSW:
         movl $0, (%esi)
         movl $0, 4(%esi)
-        movl $0, 8(%esi)
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
         movl %eax, %edx
         movl $0, %eax
 .LspecialLSW:
@@ -179,7 +179,7 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lzero:
-        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
+        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
         movl $0, %eax
         popl %esi
         popl %ebx
