@@ -194,10 +194,10 @@ fpfd32_bsr2div:
         .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[57] = 10 ** -11
         .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[58] = 10 ** -11
         .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[59] = 10 ** -11
-        .quad 0x119799812DEA111A        # fpfd32_bsr2div[60] = 10 ** -12
-        .quad 0x119799812DEA111A        # fpfd32_bsr2div[61] = 10 ** -12
-        .quad 0x119799812DEA111A        # fpfd32_bsr2div[62] = 10 ** -12
-        .quad 0x119799812DEA111A        # fpfd32_bsr2div[63] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[60] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[61] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[62] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[63] = 10 ** -12
 
         .align 32
         .type fpfd32_bsr2shr, @object
@@ -241,10 +241,10 @@ fpfd32_bsr2shr:
         .byte 36        # fpfd32_bsr2shr[57]
         .byte 36        # fpfd32_bsr2shr[58]
         .byte 36        # fpfd32_bsr2shr[59]
-        .byte 36        # fpfd32_bsr2shr[60]
-        .byte 36        # fpfd32_bsr2shr[61]
-        .byte 36        # fpfd32_bsr2shr[62]
-        .byte 36        # fpfd32_bsr2shr[63]
+        .byte 39        # fpfd32_bsr2shr[60]
+        .byte 39        # fpfd32_bsr2shr[61]
+        .byte 39        # fpfd32_bsr2shr[62]
+        .byte 39        # fpfd32_bsr2shr[63]
 
         .align 32
         .type fpfd32_bsr2exp, @object
