@@ -156,7 +156,8 @@ fpfd32_bsr2mul:
         .type fpfd32_bsr2div, @object
         .size fpfd32_bsr2div, 512
 fpfd32_bsr2div:
-        .zero 184                       # fpfd32_bsr2mul[i], i < 23
+        .zero 184                       # fpfd32_bsr2mul[i], i < 23, is
+                                        # undefined
         .quad 0xCCCCCCCCCCCCCCCD        # fpfd32_bsr2div[23] = 10 ** -1
         .quad 0xCCCCCCCCCCCCCCCD        # fpfd32_bsr2div[24] = 10 ** -1
         .quad 0xCCCCCCCCCCCCCCCD        # fpfd32_bsr2div[25] = 10 ** -1

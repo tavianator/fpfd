@@ -31,16 +31,47 @@ fpfd32_impl_scale:
         pushl %edi
         pushl %ebp
         movl 20(%esp), %esi     # Put dest in esi
-        movl (%esi), %eax
+        movl (%esi), %eax        
         movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ebx         # Find the leading non-zero bit
-        jz .LzeroMSW
-        popl %ebp
-        popl %edi
-        popl %esi
-        popl %ebx
-        ret
-.LzeroMSW:
+        jz .LLSW
+        movl %eax, -4(%esp)
+        movl %edx, -8(%esp)
+        movl fpfd32_msw_bsr2div+4(,%ebx,8), %ecx
+        mull %ecx
+        movl %eax, %edi
+        movl %edx, %ebp
+        movl -8(%esp), %eax
+        mull %ecx
+        addl %eax, %ebp
+        adcl $0, %edx
+        movl %edx, %ecx
+        movl -8(%esp), %eax
+        mull fpfd32_msw_bsr2div(,%ebx,8)
+        addl %eax, %edi
+        adcl %edx, %ebp
+        adcl $0, %ecx
+        mull fpfd32_msw_bsr2div(,%ebx,8)
+        addl %edx, %edi
+        adcl $0, %ebp
+        adcl $0, %ecx
+        movl %ebp, %eax
+        movl %ecx, %edx
+        movb fpfd32_msw_bsr2shr(,%ebx,1), %cl
+        cmpb $32, %cl
+        jb .Lshrd
+        subb $32, %cl
+        shrl %cl, %edx
+        jmp .LexpcorrectMSW
+.Lshrd:
+        shrdl %cl, %edx, %eax
+        movl %eax, %edx
+.LexpcorrectMSW:
+        movl fpfd32_msw_bsr2exp(,%ebx,4), %ebx
+        subl $1, %ebx
+        movl $0, %eax
+        jmp .LexpcorrectLSW
+.LLSW:
         bsrl %eax, %ebx
         jz .Lzero
         cmpl $1000000, %eax
@@ -65,7 +96,7 @@ fpfd32_impl_scale:
         jmp .Lnorm
 .LoverLSW:
         movl %eax, %edi
-        movl fpfd32_lsw_bsr2mul(,%ebx,4), %edx
+        movl fpfd32_lsw_bsr2div(,%ebx,4), %edx
         mull %edx
         movb fpfd32_lsw_bsr2shr(,%ebx,1), %cl
         shrl %cl, %edx
@@ -144,7 +175,7 @@ fpfd32_impl_scale:
         .section .rodata
         .align 32
         .type fpfd32_lsw_bsr2mul, @object
-        .size fpfd32_lsw_bsr2mul, 128
+        .size fpfd32_lsw_bsr2mul, 92
 fpfd32_lsw_bsr2mul:
         .long 1000000           # fpfd32_lsw_bsr2mul[0]
         .long 1000000           # fpfd32_lsw_bsr2mul[1]
@@ -169,18 +200,24 @@ fpfd32_lsw_bsr2mul:
         .long 1                 # fpfd32_lsw_bsr2mul[20]
         .long 1                 # fpfd32_lsw_bsr2mul[21]
         .long 1                 # fpfd32_lsw_bsr2mul[22]
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2mul[23]
+
+        .align 32
+        .type fpfd32_lsw_bsr2div, @object
+        .size fpfd32_lsw_bsr2div, 128
+fpfd32_lsw_bsr2div:
+        .zero 92                # fpfd32_lsw_bsr2div[i], i < 23, is undefined
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[23]
                                 #   = (10 ** -1 << 35) + 1
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2mul[24]
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2mul[25]
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2mul[26]
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2mul[27]
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[24]
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[25]
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[26]
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[27]
                                 #   = (10 ** -2 << 38) + 1
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2mul[28]
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2mul[29]
-        .long 0x83126E98        # fpfd32_lsw_bsr2mul[30]
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[28]
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[29]
+        .long 0x83126E98        # fpfd32_lsw_bsr2div[30]
                                 #   = (10 ** -3 << 41) + 1
-        .long 0x83126E98        # fpfd32_lsw_bsr2mul[31]
+        .long 0x83126E98        # fpfd32_lsw_bsr2div[31]
 
         .align 32
         .type fpfd32_lsw_bsr2shr, @object
@@ -263,3 +300,114 @@ fpfd32_lsw_exp2shr:
         .byte 3         # fpfd32_lsw_exp2shr[1]
         .byte 6         # fpfd32_lsw_exp2shr[2]
         .byte 9         # fpfd32_lsw_exp2shr[3]
+
+        .align 32
+        .type fpfd32_msw_bsr2div, @object
+        .size fpfd32_msw_bsr2div, 256
+fpfd32_msw_bsr2div:
+        .quad 0x83126E978D4FDF3C        # fpfd32_bsr2div[0] = 10 ** -3
+        .quad 0x83126E978D4FDF3C        # fpfd32_bsr2div[1] = 10 ** -3
+        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[2] = 10 ** -4
+        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[3] = 10 ** -4
+        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[4] = 10 ** -4
+        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[5] = 10 ** -5
+        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[6] = 10 ** -5
+        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[7] = 10 ** -5
+        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[8] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[9] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[10] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[11] = 10 ** -6
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[12] = 10 ** -7
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[13] = 10 ** -7
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[14] = 10 ** -7
+        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[15] = 10 ** -8
+        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[16] = 10 ** -8
+        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[17] = 10 ** -8
+        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[18] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[19] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[20] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[21] = 10 ** -9
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[22] = 10 ** -10
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[23] = 10 ** -10
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[24] = 10 ** -10
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[25] = 10 ** -11
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[26] = 10 ** -11
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[27] = 10 ** -11
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[28] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[29] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[30] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[31] = 10 ** -12
+
+        .align 32
+        .type fpfd32_msw_bsr2shr, @object
+        .size fpfd32_msw_bsr2shr, 32
+fpfd32_msw_bsr2shr:
+        .byte 9         # fpfd32_msw_bsr2shr[0]
+        .byte 9         # fpfd32_msw_bsr2shr[1]
+        .byte 13        # fpfd32_msw_bsr2shr[2]
+        .byte 13        # fpfd32_msw_bsr2shr[3]
+        .byte 13        # fpfd32_msw_bsr2shr[4]
+        .byte 16        # fpfd32_msw_bsr2shr[5]
+        .byte 16        # fpfd32_msw_bsr2shr[6]
+        .byte 16        # fpfd32_msw_bsr2shr[7]
+        .byte 19        # fpfd32_msw_bsr2shr[8]
+        .byte 19        # fpfd32_msw_bsr2shr[9]
+        .byte 19        # fpfd32_msw_bsr2shr[10]
+        .byte 19        # fpfd32_msw_bsr2shr[11]
+        .byte 23        # fpfd32_msw_bsr2shr[12]
+        .byte 23        # fpfd32_msw_bsr2shr[13]
+        .byte 23        # fpfd32_msw_bsr2shr[14]
+        .byte 26        # fpfd32_msw_bsr2shr[15]
+        .byte 26        # fpfd32_msw_bsr2shr[16]
+        .byte 26        # fpfd32_msw_bsr2shr[17]
+        .byte 29        # fpfd32_msw_bsr2shr[18]
+        .byte 29        # fpfd32_msw_bsr2shr[19]
+        .byte 29        # fpfd32_msw_bsr2shr[20]
+        .byte 29        # fpfd32_msw_bsr2shr[21]
+        .byte 33        # fpfd32_msw_bsr2shr[22]
+        .byte 33        # fpfd32_msw_bsr2shr[23]
+        .byte 33        # fpfd32_msw_bsr2shr[24]
+        .byte 36        # fpfd32_msw_bsr2shr[25]
+        .byte 36        # fpfd32_msw_bsr2shr[26]
+        .byte 36        # fpfd32_msw_bsr2shr[27]
+        .byte 39        # fpfd32_msw_bsr2shr[28]
+        .byte 39        # fpfd32_msw_bsr2shr[29]
+        .byte 39        # fpfd32_msw_bsr2shr[30]
+        .byte 39        # fpfd32_msw_bsr2shr[31]
+
+        .align 32
+        .type fpfd32_msw_bsr2exp, @object
+        .size fpfd32_msw_bsr2exp, 128
+fpfd32_msw_bsr2exp:
+        .long 3         # fpfd32_msw_bsr2exp[0]
+        .long 3         # fpfd32_msw_bsr2exp[1]
+        .long 4         # fpfd32_msw_bsr2exp[2]
+        .long 4         # fpfd32_msw_bsr2exp[3]
+        .long 4         # fpfd32_msw_bsr2exp[4]
+        .long 5         # fpfd32_msw_bsr2exp[5]
+        .long 5         # fpfd32_msw_bsr2exp[6]
+        .long 5         # fpfd32_msw_bsr2exp[7]
+        .long 6         # fpfd32_msw_bsr2exp[8]
+        .long 6         # fpfd32_msw_bsr2exp[9]
+        .long 6         # fpfd32_msw_bsr2exp[10]
+        .long 6         # fpfd32_msw_bsr2exp[11]
+        .long 7         # fpfd32_msw_bsr2exp[12]
+        .long 7         # fpfd32_msw_bsr2exp[13]
+        .long 7         # fpfd32_msw_bsr2exp[14]
+        .long 8         # fpfd32_msw_bsr2exp[15]
+        .long 8         # fpfd32_msw_bsr2exp[16]
+        .long 8         # fpfd32_msw_bsr2exp[17]
+        .long 9         # fpfd32_msw_bsr2exp[18]
+        .long 9         # fpfd32_msw_bsr2exp[19]
+        .long 9         # fpfd32_msw_bsr2exp[20]
+        .long 9         # fpfd32_msw_bsr2exp[21]
+        .long 10        # fpfd32_msw_bsr2exp[22]
+        .long 10        # fpfd32_msw_bsr2exp[23]
+        .long 10        # fpfd32_msw_bsr2exp[24]
+        .long 11        # fpfd32_msw_bsr2exp[25]
+        .long 11        # fpfd32_msw_bsr2exp[26]
+        .long 11        # fpfd32_msw_bsr2exp[27]
+        .long 12        # fpfd32_msw_bsr2exp[28]
+        .long 12        # fpfd32_msw_bsr2exp[29]
+        .long 12        # fpfd32_msw_bsr2exp[30]
+        .long 12        # fpfd32_msw_bsr2exp[31]
