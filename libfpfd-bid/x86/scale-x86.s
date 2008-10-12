@@ -51,6 +51,7 @@ fpfd32_impl_scale:
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
+        movl -4(%esp), %eax
         mull fpfd32_msw_bsr2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
