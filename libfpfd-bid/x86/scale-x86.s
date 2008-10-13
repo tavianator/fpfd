@@ -35,23 +35,23 @@ fpfd32_impl_scale:
         movl 4(%esi), %edx      # Put dest->mant in edx:eax
         bsrl %edx, %ebx         # Find the leading non-zero bit
         jz .LLSW
-        movl %eax, -4(%esp)
-        movl %edx, -8(%esp)
+        movl %eax, -8(%esp)
+        movl %edx, -4(%esp)
         movl fpfd32_msw_bsr2div+4(,%ebx,8), %ecx
         mull %ecx
         movl %eax, %edi
         movl %edx, %ebp
-        movl -8(%esp), %eax
+        movl -4(%esp), %eax
         mull %ecx
         addl %eax, %ebp
         adcl $0, %edx
         movl %edx, %ecx
-        movl -8(%esp), %eax
+        movl -4(%esp), %eax
         mull fpfd32_msw_bsr2div(,%ebx,8)
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
-        movl -4(%esp), %eax
+        movl -8(%esp), %eax
         mull fpfd32_msw_bsr2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
@@ -60,17 +60,56 @@ fpfd32_impl_scale:
         movl %ecx, %edx
         movb fpfd32_msw_bsr2shr(,%ebx,1), %cl
         cmpb $32, %cl
-        jb .Lshrd
+        jb .LshrdMSW
         subb $32, %cl
         shrl %cl, %edx
-        jmp .LexpcorrectMSW
-.Lshrd:
+        movl %edx, %eax
+        movb $0, %cl
+.LshrdMSW:
         shrdl %cl, %edx, %eax
-        movl %eax, %edx
-.LexpcorrectMSW:
         movl fpfd32_msw_bsr2exp(,%ebx,4), %ebx
+        movl %eax, -12(%esp)
+        mull fpfd32_msw_exp2mul(,%ebx,8)
+        movl %eax, %ebp
+        movl %edx, %ecx
+        movl %edi, %eax
+        mull fpfd32_msw_exp2mul+4(,%ebx,8)
+        addl %ecx, %eax
+        subl %ebp, -8(%esp)
+        sbbl %eax, -4(%esp)
+        movl -8(%esp), %eax
         subl $1, %ebx
-        movl $0, %eax
+        movl fpfd32_msw_exp2div+4(,%ebx,8), %ecx
+        mull %ecx
+        movl %eax, %edi
+        movl %edx, %ebp
+        movl -4(%esp), %eax
+        mull %ecx
+        addl %eax, %ebp
+        adcl $0, %edx
+        movl %edx, %ecx
+        movl -4(%esp), %eax
+        mull fpfd32_msw_exp2div(,%ebx,8)
+        addl %eax, %edi
+        adcl %edx, %ebp
+        adcl $0, %ecx
+        movl -8(%esp), %eax
+        mull fpfd32_msw_exp2div(,%ebx,8)
+        addl %edx, %edi
+        adcl $0, %ebp
+        adcl $0, %ecx
+        movl %ebp, %eax
+        movl %ecx, %edx
+        movb fpfd32_msw_exp2shr(,%ebx,1), %cl
+        cmpb $32, %cl
+        jb .LshrdremMSW
+        subb $32, %cl
+        shrl %cl, %edx
+        movl %edx, %eax
+        movb $0, %cl
+.LshrdremMSW:
+        shrdl %cl, %edx, %eax
+        movl -12(%esp), %edx
         jmp .LexpcorrectLSW
 .LLSW:
         bsrl %eax, %ebx
@@ -412,3 +451,49 @@ fpfd32_msw_bsr2exp:
         .long 12        # fpfd32_msw_bsr2exp[29]
         .long 12        # fpfd32_msw_bsr2exp[30]
         .long 12        # fpfd32_msw_bsr2exp[31]
+
+        .align 32
+        .type fpfd32_msw_exp2mul, @object
+        .size fpfd32_msw_exp2mul, 104
+fpfd32_msw_exp2mul:
+        .zero 24                # fpfd32_msw_exp2mul[i], i < 3, is undefined
+        .quad 1000              # fpfd32_msw_exp2mul[3]
+        .quad 10000             # fpfd32_msw_exp2mul[4]
+        .quad 100000            # fpfd32_msw_exp2mul[5]
+        .quad 1000000           # fpfd32_msw_exp2mul[6]
+        .quad 10000000          # fpfd32_msw_exp2mul[7]
+        .quad 100000000         # fpfd32_msw_exp2mul[8]
+        .quad 1000000000        # fpfd32_msw_exp2mul[9]
+        .quad 10000000000       # fpfd32_msw_exp2mul[10]
+        .quad 100000000000      # fpfd32_msw_exp2mul[11]
+        .quad 1000000000000     # fpfd32_msw_exp2mul[12]
+
+        .align 32
+        .type fpfd32_msw_exp2div, @object
+        .size fpfd32_msw_exp2div, 96
+fpfd32_msw_exp2div:
+        .zero 24                        # fpfd32_msw_exp2div[i], i < 3
+        .quad 0x83126E978D4FDF3C        # fpfd32_msw_exp2div[3]  = 10 ** -3
+        .quad 0xD1B71758E219652C        # fpfd32_msw_exp2div[4]  = 10 ** -4
+        .quad 0xA7C5AC471B478424        # fpfd32_msw_exp2div[5]  = 10 ** -5
+        .quad 0x8637BD05AF6C69B6        # fpfd32_msw_exp2div[6]  = 10 ** -6
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_msw_exp2div[7]  = 10 ** -7
+        .quad 0xABCC77118461CEFD        # fpfd32_msw_exp2div[8]  = 10 ** -8
+        .quad 0x89705F4136B4A598        # fpfd32_msw_exp2div[9]  = 10 ** -9
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_msw_exp2div[10] = 10 ** -10
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_msw_exp2div[11] = 10 ** -11
+
+        .align 32
+        .type fpfd32_msw_exp2shr, @object
+        .size fpfd32_msw_exp2shr, 12
+fpfd32_msw_exp2shr:
+        .zero 3         # fpfd32_msw_exp2shr[i], i < 3, is undefined
+        .byte 9         # fpfd32_msw_exp2shr[3]
+        .byte 13        # fpfd32_msw_exp2shr[4]
+        .byte 16        # fpfd32_msw_exp2shr[5]
+        .byte 19        # fpfd32_msw_exp2shr[6]
+        .byte 23        # fpfd32_msw_exp2shr[7]
+        .byte 26        # fpfd32_msw_exp2shr[8]
+        .byte 29        # fpfd32_msw_exp2shr[9]
+        .byte 33        # fpfd32_msw_exp2shr[10]
+        .byte 36        # fpfd32_msw_exp2shr[11]
