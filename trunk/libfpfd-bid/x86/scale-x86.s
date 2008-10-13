@@ -110,6 +110,26 @@ fpfd32_impl_scale:
 .LshrdremMSW:
         shrdl %cl, %edx, %eax
         movl -12(%esp), %edx
+        cmpl $0, %eax
+        je .LspecialMSW
+        cmpl $5, %eax
+        jne .LexpcorrectLSW
+.LspecialMSW:
+        movl %eax, %edi
+        mull fpfd32_msw_exp2mul(,%ebx,8)
+        movl %eax, %ebp
+        movl %edx, %ecx
+        movl %edi, %eax
+        mull fpfd32_msw_exp2mul+4(,%ebx,8)
+        addl %eax, %ecx
+        movl %edi, %eax
+        movl -12(%esp), %edx
+        cmpl %ebp, -8(%esp)
+        jne .LremcorrectMSW
+        cmpl %ecx, -4(%esp)
+        je .LexpcorrectLSW
+.LremcorrectMSW:
+        addl $1, %eax
         jmp .LexpcorrectLSW
 .LLSW:
         bsrl %eax, %ebx
@@ -136,22 +156,19 @@ fpfd32_impl_scale:
         jmp .Lnorm
 .LoverLSW:
         movl %eax, %edi
-        movl fpfd32_lsw_bsr2div(,%ebx,4), %edx
-        mull %edx
+        mull fpfd32_lsw_bsr2div(,%ebx,4)
         movb fpfd32_lsw_bsr2shr(,%ebx,1), %cl
         shrl %cl, %edx
         movl fpfd32_lsw_bsr2exp(,%ebx,4), %ebx
         movl %edx, %ebp
         movl %edx, %eax
-        movl fpfd32_lsw_exp2mul(,%ebx,4), %edx
-        mull %edx
+        mull fpfd32_lsw_exp2mul(,%ebx,4)
         subl %eax, %edi
         movl %edi, %eax
         movl %ebp, %edx
         subl $1, %ebx
         jz .LexpcorrectLSW
-        movl fpfd32_lsw_exp2div(,%ebx,4), %edx
-        mull %edx
+        mull fpfd32_lsw_exp2div(,%ebx,4)
         movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
         shrl %cl, %edx
         movl %edx, %eax
@@ -162,8 +179,7 @@ fpfd32_impl_scale:
         jne .LexpcorrectLSW
 .LspecialLSW:
         movl %eax, %ecx
-        movl fpfd32_lsw_exp2mul(,%ebx,4), %edx
-        mull %edx
+        mull fpfd32_lsw_exp2mul(,%ebx,4)
         movl %ebp, %edx
         xchgl %eax, %ecx
         cmpl %ecx, %edi

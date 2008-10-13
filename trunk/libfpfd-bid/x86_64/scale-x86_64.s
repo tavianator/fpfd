@@ -53,8 +53,7 @@ fpfd32_impl_scale:
 .Lover:
         movq %rax, %r9
         leaq fpfd32_bsr2div(%rip), %r10
-        movq (%r10,%r8,8), %rdx
-        mulq %rdx
+        mulq (%r10,%r8,8)
         leaq fpfd32_bsr2shr(%rip), %r10
         movb (%r10,%r8,1), %cl
         shrq %cl, %rdx
@@ -63,16 +62,14 @@ fpfd32_impl_scale:
         movl %edx, %r8d
         movl %edx, %eax
         leaq fpfd32_exp2mul(%rip), %r10
-        movq (%r10,%rsi,8), %rdx
-        mulq %rdx
+        mulq (%r10,%rsi,8)
         subq %rax, %r9
         movq %r9, %rax
         movl %r8d, %edx
         subl $1, %esi
         jz .Lexpcorrect
         leaq fpfd32_exp2div(%rip), %r10
-        movq (%r10,%rsi,8), %rdx
-        mulq %rdx
+        mulq (%r10,%rsi,8)
         leaq fpfd32_exp2shr(%rip), %r10
         movb (%r10,%rsi,1), %cl
         shrq %cl, %rdx
@@ -85,8 +82,7 @@ fpfd32_impl_scale:
 .Lspecial:
         movl %eax, %ecx
         leaq fpfd32_exp2mul(%rip), %r10
-        movq (%r10,%rsi,8), %rdx
-        mulq %rdx
+        mulq (%r10,%rsi,8)
         movl %r8d, %edx
         xchgq %rax, %rcx
         cmpq %rcx, %r9
