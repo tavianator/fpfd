@@ -25,7 +25,8 @@
 #include <string.h> /* For memset */
 
 int
-fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd)
+fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
+              fpfd_flags_t *flags)
 {
   fpfd32_impl_t impl;
 
@@ -45,7 +46,7 @@ fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd)
   return 0;
 }
 
-int
+unsigned int
 fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
                    const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
 {
@@ -58,7 +59,7 @@ fpfd32_impl_mul(fpfd32_impl_t *dest,
 {
 }
 
-int
+unsigned int
 fpfd32_impl_div(fpfd32_impl_t *dest,
                 const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
 {
@@ -77,11 +78,11 @@ fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src)
 }
 
 void fpfd32_set_zero(fpfd32_ptr dest) {
-  fpfd32_set_ui(dest, 0, FPFD_RNDNA);
+  fpfd32_set_ui(dest, 0, FPFD_RNDNA, NULL);
 }
 
 void fpfd32_set_one(fpfd32_ptr dest) {
-  fpfd32_set_ui(dest, 1, FPFD_RNDNA);
+  fpfd32_set_ui(dest, 1, FPFD_RNDNA, NULL);
 }
 
 void fpfd32_set_inf(fpfd32_ptr dest) {

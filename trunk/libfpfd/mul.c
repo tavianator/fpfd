@@ -21,11 +21,12 @@
 #include "fpfd_impl.h"
 
 static fpfd_action_t fpfd_mul_action(fpfd_impl_t *rop,
-                                     fpfd_impl_t *op1, fpfd_impl_t *op2);
+                                     fpfd_impl_t *op1, fpfd_impl_t *op2,
+                                     fpfd_flags_t *flags);
 
 int
 fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-           fpfd_rnd_t rnd)
+           fpfd_rnd_t rnd, fpfd_flags_t *flags)
 {
   int tern = 0;
   int rem;
@@ -34,7 +35,7 @@ fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
   fpfd32_impl_expand(&op1, lhs);
   fpfd32_impl_expand(&op2, rhs);
 
-  switch (fpfd_mul_action(&rop.fields, &op1.fields, &op2.fields)) {
+  switch (fpfd_mul_action(&rop.fields, &op1.fields, &op2.fields, flags)) {
   case FPFD_RET:
     fpfd32_impl_compress(dest, &rop);
     break;
@@ -46,8 +47,8 @@ fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
     break;
   case FPFD_OPERATE:
     fpfd32_impl_mul(&rop, &op1, &op2);
-    rem  = fpfd32_impl_scale(&rop);
-    tern = fpfd32_impl_tern(&rop, rem, rnd);
+    rem = fpfd32_impl_scale(&rop);
+    tern = fpfd32_impl_round(&rop, rem, rnd, flags);
     fpfd32_impl_compress(dest, &rop);
     break;
   }
@@ -66,9 +67,10 @@ fpfd_mul_sign(fpfd_impl_t *op1, fpfd_impl_t *op2) {
 }
 
 static fpfd_action_t
-fpfd_mul_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2)
+fpfd_mul_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
+                fpfd_flags_t *flags)
 {
-  fpfd_action_t action = fpfd_impl_nanprop(op1, op2);
+  fpfd_action_t action = fpfd_impl_nanprop(op1, op2, flags);
 
   if (action == FPFD_OPERATE) { /* a NaN was not propagated */
     switch (op1->special) {
@@ -83,6 +85,7 @@ fpfd_mul_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2)
       case FPFD_INF:
         rop->special = FPFD_QNAN;
         action = FPFD_RET;
+        if (flags) *flags |= FPFD_INVALID;
         break;
       }
       break;
@@ -110,6 +113,8 @@ fpfd_mul_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2)
       case FPFD_ZERO:
         rop->special = FPFD_QNAN;
         action = FPFD_RET;
+        if (flags) *flags |= FPFD_INVALID;
+        break;
       case FPFD_NUMBER:
       case FPFD_INF:
         rop->sign = fpfd_mul_sign(op1, op2);

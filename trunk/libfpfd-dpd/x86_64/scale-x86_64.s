@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# int fpfd32_impl_scale(fpfd32_impl_t *dest);
+# unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 #
 # Scale the value in dest, to fit in the compressed format
 
@@ -28,7 +28,7 @@
 fpfd32_impl_scale:
         movq (%rdi), %rdx       # Put dest->mant in rdx
         bsrq %rdx, %rcx         # Find the leading non-zero bit
-        jz .Lzero
+        jz .Luflow
         addl $4, %ecx
         andl $0x7C, %ecx        # Add one and round up to a multiple of 4
         subl $64, %ecx
@@ -40,7 +40,7 @@ fpfd32_impl_scale:
         addl 8(%rdi), %ecx      # Add (32 + 4 - ecx)/4 to the exponent
         cmpl $90, %ecx
         jg .Loflow
-        cmpl $-107, %ecx
+        cmpl $-108, %ecx
         jl .Luflow
         cmpl $-101, %ecx
         jl .Lsubnorm
@@ -71,16 +71,12 @@ fpfd32_impl_scale:
         movq $0x0FFFFFFFFFFFFFFF, %rdx
         andq %rdx, %rcx         # Mask off the most significant nibble
         shrq $60, %rax
-        cmpl $0, %eax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
         je .Lspecial
-        cmpl $5, %eax
+        cmpl $0x15, %eax
         je .Lspecial
         ret
-.Luflow:
-        movq $0, (%rdi)
-        movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
-        movq %rdx, %rcx
-        movl $0, %eax
 .Lspecial:
         cmpq $0, %rcx
         je .Lspecial2
@@ -88,11 +84,11 @@ fpfd32_impl_scale:
 .Lspecial2:
         ret
 .Loflow:
-        movl $3, 16(%rdi)       # Set the special flag to FPFD_INF
+        movq $0x9999999, (%rdi) # Set to the highest significand possible
         movl $10, %eax          # Return the special 10 value
         ret
-.Lzero:
-        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
-        movl $0, %eax
+.Luflow:
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0x1A, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale

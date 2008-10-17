@@ -18,8 +18,9 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-#                        const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+# unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
+#                                 const fpfd32_impl_t *lhs,
+#                                 const fpfd32_impl_t *rhs);
 
         .text
 .globl fpfd32_impl_addsub

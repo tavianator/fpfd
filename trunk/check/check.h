@@ -69,8 +69,9 @@
    * fpfd128_##op(dest##128, src##128)
    */
 
-#define fpfd_op3m(op, dest, op1, op2, rnd)      \
-  fpfd32_##op(dest##32, op1##32, op2##32, rnd)
+#define fpfd_op3mx(op, dest, op1, op2, rnd)             \
+  flags = FPFD_NONE;                                    \
+  fpfd32_##op(dest##32, op1##32, op2##32, rnd, &flags)
   /*
    * fpfd64_##op(dest##64, op1##64, op2##64, rnd)
    * fpfd128_##op(dest##128, op1##128, op2##128, rnd)
@@ -102,20 +103,23 @@
  *        to be equal to it.
  *   f  - The next argument is an fpfd_special_t, and the special flag of the
  *        result is asserted to be equal to it.
+ *   x  - The next argument is an fpfd_flags_t, and flags is asserted to be
+ *        equal to it.
  *   v  - The next argument is an int, and the return value of the function is
  *        asserted to be equal to it.
  *
  * To save space here, only those macros actually used by tests are defined.
  */
 
-#define fpfd_assert_ora2msf(op, res, arg1, arg2, rnd, sign, special)    \
-  fpfd_op3m(op, res, arg1, arg2, rnd);                                  \
-  fpfd32_assert_ora2msf(#op, res##32, arg1##32, arg2##32, rnd, sign, special)
+#define fpfd_assert_ora2msfx(op, res, arg1, arg2, rnd, sign, special, flagsex) \
+  fpfd_op3mx(op, res, arg1, arg2, rnd);                                        \
+  fpfd32_assert_ora2msfx(#op, res##32, arg1##32, arg2##32, rnd, sign, special, \
+                         flags, flagsex)
   /*
-   * fpfd64_assert_ora2msf(#op, res##64, arg1##64, arg2##64, rnd,
-   *                       sign, special)
-   * fpfd128_assert_ora2msf(#op, res##128, arg1##128, arg2##128, rnd,
-   *                        sign, special)
+   * fpfd64_assert_ora2msfx(#op, res##64, arg1##64, arg2##64, rnd,
+   *                        sign, special, flags)
+   * fpfd128_assert_ora2msfx(#op, res##128, arg1##128, arg2##128, rnd,
+   *                         sign, special, flags)
    */
 
 #define fpfd_assert_rf(res, special)            \
@@ -125,19 +129,22 @@
    * fpfd128_assert_rf(res##128, special)
    */
 
-#define fpfd_impl_assert_orefv(op, res, exp, special, rval)             \
-  fpfd32_impl_assert_orefv(#op, res##32, exp, special, rval, fpfd32_##op(res##32))
+#define fpfd_impl_assert_orfv(op, res, special, rval)                   \
+  fpfd32_impl_assert_orfv(#op, res##32, special, rval, fpfd32_##op(res##32))
   /*
-   * fpfd64_impl_assert_orev(#op, res##64, exp, rval, fpfd64_#op(res##64))
-   * fpfd128_impl_assert_orev(#op, res##128, exp, rval, fpfd128_#op(res##128))
+   * fpfd64_impl_assert_orfv(#op, res##64, special, rval, fpfd64_#op(res##64))
+   * fpfd128_impl_assert_orfv(#op, res##128, special, rval,
+   *                           fpfd128_#op(res##128))
    */
 
-#define fpfd_impl_assert_orf(op, res, special)  \
-  fpfd_op1(op, res);                            \
-  fpfd32_impl_assert_orf(#op, res##32, special)
+#define fpfd_impl_assert_orefv(op, res, exp, special, rval)             \
+  fpfd32_impl_assert_orefv(#op, res##32, exp, special, rval,            \
+                           fpfd32_##op(res##32))
   /*
-   * fpfd64_impl_assert_orf(#op, res##64, special)
-   * fpfd128_impl_assert_orf(#op, res##128, special)
+   * fpfd64_impl_assert_orefv(#op, res##64, exp, special, rval,
+   *                          fpfd64_#op(res##64))
+   * fpfd128_impl_assert_orefv(#op, res##128, exp, special, rval,
+   *                           fpfd128_#op(res##128))
    */
 
 /* main() should return this. */
@@ -147,15 +154,17 @@ extern int exitstatus;
  * Assertion functions, usually called by assertion macros.
  */
 
-void fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
-                           fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
-                           fpfd_special_t special);
+void fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res,
+                            fpfd32_srcptr op1, fpfd32_srcptr op2,
+                            fpfd_rnd_t rnd, int sign,
+                            fpfd_special_t special,
+                            fpfd_flags_t flags, fpfd_flags_t flagsex);
 void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
+void fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
+                             fpfd_special_t special, int rexp, int rval);
 void fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
                               fpfd_special_t special, int rexp, int rval);
-void fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
-                            fpfd_special_t special);
 
 /*
  * For more manual checking, call these directly.
@@ -181,5 +190,6 @@ void fpfd32_impl_assert_mant(const fpfd32_impl_t *res, uint32_t h, uint32_t l);
 /* Display-related functions */
 const char *fpfd_rnd_str(fpfd_rnd_t rnd);
 const char *fpfd_special_str(fpfd_special_t special);
+const char *fpfd_flags_str(fpfd_flags_t flags);
 void fpfd32_dump(FILE *file, fpfd32_srcptr fp);
 void fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *fp);

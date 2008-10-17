@@ -55,8 +55,8 @@ typedef enum {
 
 /*
  * Factor out elements common to all fpfd*_impl_t's. This enables a single
- * helper function to handle each permutation of flags for each operation; one
- * such function for fpfd*_add, another for fpfd*_mul, etc.
+ * helper function to handle each permutation of special flags for each
+ * operation; one such function for fpfd*_add, another for fpfd*_mul, etc.
  */
 typedef struct {
   int exp;
@@ -77,12 +77,22 @@ typedef struct {
 
 /*
  * These routines work on expanded fpfdX_t's. A void return type signifies that
- * the result is always exact. Otherwise, the functions return a remainder equal
- * to the truncated portion of the result. In general, this value is rounded
- * down, but a value of 0 or 5 means that the remainder was exactly 0 or 5, so
- * 0.01 rounds to 1, and 5.01 rounds to 6. A value of 10 signifies that an
- * infinity was returned. The fpfdX_*_ternN functions convert these values to
- * correct ternary values, and round the result correctly.
+ * the result is always exact. Functions which return an unsigned int return a
+ * special kind of "remainder" from the operation:
+ *
+ * 0        - Computation was exact.
+ * [1, 4]   - The real result is closer to the this one than to the next
+ *            representable value.
+ * 5        - The real result is exactly in between the current value and the
+ *            next representable one 
+ * [6, 9]   - The real result is closer to the next representable value than
+ *            it is to this one.
+ * 10       - Total overflow.
+ *
+ * If the 0x10 bit is set, then the value has been subnormalized. 10 | 0x10
+ * indicates total underflow to zero. The fpfdX_*_roundN functions convert these
+ * values to correct status flags and ternary values, and round the result
+ * correctly.
  *
  * These functions are implemented in assembly by the implementation library
  * for each encoding.
@@ -93,20 +103,23 @@ void fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src);
 
 void fpfd32_impl_inc(fpfd32_impl_t *dest);
 
-int  fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-                        const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
+                                const fpfd32_impl_t *lhs,
+                                const fpfd32_impl_t *rhs);
 void fpfd32_impl_mul(fpfd32_impl_t *dest,
                      const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
-int  fpfd32_impl_div(fpfd32_impl_t *dest,
-                     const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+unsigned int fpfd32_impl_div(fpfd32_impl_t *dest, const fpfd32_impl_t *lhs,
+                             const fpfd32_impl_t *rhs);
 
-int fpfd32_impl_scale(fpfd32_impl_t *dest);
+unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 
 /* Help with correct rounding */
 
-int fpfd32_impl_tern(fpfd32_impl_t *dest, int rem, fpfd_rnd_t rnd);
-int fpfd32_impl_tern2(fpfd32_impl_t *dest, int rem1, int rem2,
-                      fpfd_rnd_t rnd);
+int fpfd32_impl_round(fpfd32_impl_t *dest, unsigned int rem, fpfd_rnd_t rnd,
+                      fpfd_flags_t *flags);
+int fpfd32_impl_round2(fpfd32_impl_t *dest,
+                       unsigned int rem1, unsigned int rem2,
+                       fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
 /* 
  * Propogate NaNs correctly.
@@ -115,7 +128,8 @@ int fpfd32_impl_tern2(fpfd32_impl_t *dest, int rem1, int rem2,
  * lhs->special to FPFD_QNAN, and return FPFD_LHS. Otherwise, if rhs is NaN,
  * behave analogously for rhs, returning FPFD_RHS.
  */
-fpfd_action_t fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs);
+fpfd_action_t fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs,
+                                fpfd_flags_t *flags);
 
 #ifdef __cplusplus
 }

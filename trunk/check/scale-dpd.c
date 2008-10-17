@@ -34,7 +34,7 @@ main()
    */
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 0);
+  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 0x1A);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0));
 
   /*

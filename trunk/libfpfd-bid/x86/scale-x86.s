@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# int fpfd32_impl_scale(fpfd32_impl_t *dest);
+# unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 #
 # Scale dest, so it can be compressed.
 
@@ -133,7 +133,7 @@ fpfd32_impl_scale:
         jmp .LexpcorrectLSW
 .LLSW:
         bsrl %eax, %ebx
-        jz .Lzero
+        jz .Luflow
         cmpl $1000000, %eax
         jb .LunderLSW           # The mantissa is too small
         cmpl $10000000, %eax
@@ -218,9 +218,9 @@ fpfd32_impl_scale:
         popl %esi
         popl %ebx
         ret
-.Lzero:
-        movl $-101, 8(%esi)     # Set dest->exp to the subnormal exponent
-        movl $0, %eax
+.Luflow:
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0x1A, %eax
         popl %ebp
         popl %edi
         popl %esi

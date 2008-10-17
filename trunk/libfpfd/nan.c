@@ -21,9 +21,13 @@
 #include "fpfd_impl.h"
 
 fpfd_action_t
-fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs)
+fpfd_impl_nanprop(fpfd_impl_t *lhs, fpfd_impl_t *rhs, fpfd_flags_t *flags)
 {
   fpfd_action_t action = FPFD_OPERATE;
+
+  if (flags && (lhs->special == FPFD_SNAN || rhs->special == FPFD_SNAN)) {
+    *flags |= FPFD_INVALID;
+  }
 
   if (lhs->special == FPFD_SNAN || lhs->special == FPFD_QNAN) {
     lhs->special = FPFD_QNAN;

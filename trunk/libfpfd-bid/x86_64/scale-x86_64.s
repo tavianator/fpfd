@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# int fpfd32_impl_scale(fpfd32_impl_t *dest);
+# unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 #
 # Scale dest, so it can be compressed.
 
@@ -28,7 +28,7 @@
 fpfd32_impl_scale:
         movq (%rdi), %rax       # Put dest->mant in rax
         bsrq %rax, %r8          # Find the leading non-zero bit
-        jz .Lzero
+        jz .Luflow
         cmpq $1000000, %rax
         jb .Lunder              # The mantissa is too small
         cmpq $10000000, %rax
@@ -116,9 +116,9 @@ fpfd32_impl_scale:
         movq %rdx, (%rdi)
         movl %esi, 8(%rdi)
         ret
-.Lzero:
-        movl $-101, 8(%rdi)     # Set dest->exp to the subnormal exponent
-        movl $0, %eax
+.Luflow:
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0x1A, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
 

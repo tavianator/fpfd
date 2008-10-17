@@ -37,6 +37,24 @@ typedef enum {
   FPFD_RNDN, FPFD_RNDNA, FPFD_RNDZ, FPFD_RNDU, FPFD_RNDD
 } fpfd_rnd_t;
 
+/*
+ * Exception flags:
+ *   FPFD_NONE      - No flags were raised
+ *   FPFD_INVALID   - Invalid operation, such as sqrt(-1)
+ *   FPFD_DIVBYZERO - Division by zero
+ *   FPFD_OVERFLOW  - Overflow
+ *   FPFD_UNDERFLOW - Non-zero underflow
+ *   FPFD_INEXACT   - Inexact result
+ */
+typedef enum {
+  FPFD_NONE      = 0,
+  FPFD_INVALID   = 1 << 0,
+  FPFD_DIVBYZERO = 1 << 1,
+  FPFD_OVERFLOW  = 1 << 2,
+  FPFD_UNDERFLOW = 1 << 3,
+  FPFD_INEXACT   = 1 << 4
+} fpfd_flags_t;
+
 /* Struct wrapper for the actual data of the decimal types. */
 
 typedef struct {
@@ -58,8 +76,10 @@ typedef const fpfd32_struct_t *fpfd32_srcptr;
 /* --- Assignment --- */
 
 void fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src);
-int  fpfd32_set_si(fpfd32_ptr dest, long src, fpfd_rnd_t rnd);
-int  fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd);
+int fpfd32_set_si(fpfd32_ptr dest, long src, fpfd_rnd_t rnd,
+                  fpfd_flags_t *flags);
+int fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
+                  fpfd_flags_t *flags);
 
 void fpfd32_set_zero(fpfd32_ptr dest);
 void fpfd32_set_one(fpfd32_ptr dest);
@@ -75,24 +95,19 @@ void fpfd32_copysign(fpfd32_ptr dest,
 
 /* --- Addition --- */
 int fpfd32_add(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-               fpfd_rnd_t rnd);
+               fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
 /* --- Subtraction --- */
 int fpfd32_sub(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-               fpfd_rnd_t rnd);
+               fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
 /* --- Multiplication --- */
 int fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-               fpfd_rnd_t rnd);
+               fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
 /* --- Division --- */
 int fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
-               fpfd_rnd_t rnd);
-
-/* --- Trigonometric functions --- */
-int fpfd32_sin(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
-int fpfd32_cos(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
-int fpfd32_tan(fpfd32_ptr dest, fpfd32_srcptr theta, fpfd_rnd_t rnd);
+               fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
 /* --- General comparison. Returns an integer with the sign of lhs - rhs. --- */
 int fpfd32_cmp(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
