@@ -29,15 +29,17 @@ int exitstatus = EXIT_SUCCESS;
 /* Assertions */
 
 void
-fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
-                      fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
-                      fpfd_special_t special)
+fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
+                       fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
+                       fpfd_special_t special,
+                       fpfd_flags_t flags, fpfd_flags_t flagsex)
 {
   fpfd32_impl_t res_impl, op1_impl, op2_impl;
 
   fpfd32_impl_expand(&res_impl, res);
 
-  if (res_impl.fields.sign != sign || res_impl.fields.special != special) {
+  if (res_impl.fields.sign != sign || res_impl.fields.special != special
+      || flags != flagsex) {
     fpfd32_impl_expand(&op1_impl, op1);
     fpfd32_impl_expand(&op2_impl, op2);
 
@@ -53,9 +55,11 @@ fpfd32_assert_ora2msf(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
     fpfd32_impl_dump(stderr, &op2_impl);
-    fprintf(stderr, ", %s)\n", fpfd_rnd_str(rnd));
-    fprintf(stderr, "\n--- ERROR: Expected sign == %d, special == %s ---\n\n",
-            sign, fpfd_special_str(special));
+    fprintf(stderr, ", %s)\n\nflags = %s\n",
+            fpfd_rnd_str(rnd), fpfd_flags_str(flags));
+    fprintf(stderr, "\n--- ERROR: Expected sign == %d, special == %s,"
+                    " flags == %s ---\n\n",
+            sign, fpfd_special_str(special), fpfd_flags_str(flagsex));
     exitstatus = EXIT_FAILURE;
   }
 }
@@ -79,6 +83,21 @@ fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special)
 }
 
 void
+fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
+                        fpfd_special_t special, int rexp, int rval)
+{
+  if (res->fields.special != special || rexp != rval) {
+    fprintf(stderr, "\nfpfd32_%s(", op);
+    fpfd32_impl_dump(stderr, res);
+    fprintf(stderr, ") = %d\n", rval);
+    fprintf(stderr, "\n--- ERROR: Expected special == %s,"
+                    " fpfd32_%s() == %d ---\n\n",
+            fpfd_special_str(special), op, rexp);
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+void
 fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
                          fpfd_special_t special, int rexp, int rval)
 {
@@ -90,19 +109,6 @@ fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
     fprintf(stderr, "\n--- ERROR: Expected exp == %d, special == %s, "
                     "fpfd32_%s() == %d ---\n\n",
             exp, fpfd_special_str(special), op, rexp);
-    exitstatus = EXIT_FAILURE;
-  }
-}
-
-void
-fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
-                       fpfd_special_t special)
-{
-  if (res->fields.special != special) {
-    fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ")\n\n--- ERROR: Expected special == %s ---\n\n",
-            fpfd_special_str(special));
     exitstatus = EXIT_FAILURE;
   }
 }
@@ -252,6 +258,51 @@ fpfd_special_str(fpfd_special_t special)
     return "FPFD_INF";
   }
   return NULL;
+}
+
+const char *
+fpfd_flags_str(fpfd_flags_t flags)
+{
+  static char flagstr[80];
+  int addor = 0;
+
+  strcpy(flagstr, "");
+
+  if (flags & FPFD_INVALID) {
+    if (addor) strcat(flagstr, " | ");
+    strcat(flagstr, "FPFD_INVALID");
+    addor = 1;
+  }
+
+  if (flags & FPFD_DIVBYZERO) {
+    if (addor) strcat(flagstr, " | ");
+    strcat(flagstr, "FPFD_DIVBYZERO");
+    addor = 1;
+  }
+
+  if (flags & FPFD_OVERFLOW) {
+    if (addor) strcat(flagstr, " | ");
+    strcat(flagstr, "FPFD_OVERFLOW");
+    addor = 1;
+  }
+
+  if (flags & FPFD_UNDERFLOW) {
+    if (addor) strcat(flagstr, " | ");
+    strcat(flagstr, "FPFD_UNDERFLOW");
+    addor = 1;
+  }
+
+  if (flags & FPFD_INEXACT) {
+    if (addor) strcat(flagstr, " | ");
+    strcat(flagstr, "FPFD_INEXACT");
+    addor = 1;
+  }
+
+  if (strlen(flagstr) == 0) {
+    strcpy(flagstr, "FPFD_NONE");
+  }
+
+  return flagstr;
 }
 
 void
