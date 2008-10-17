@@ -219,7 +219,7 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Luflow:
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0x1A, %eax
         popl %ebp
         popl %edi

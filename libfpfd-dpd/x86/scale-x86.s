@@ -106,7 +106,7 @@ fpfd32_impl_scale:
         ret
 .LzeroMSW:
         bsrl %eax, %ecx
-        jz .Lzero
+        jz .Luflow
         addl $4, %ecx
         andl $0x3C, %ecx        # Add one and round up to a multiple of 4
         subl $32, %ecx
@@ -169,7 +169,9 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Luflow:
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0x1A, %eax
+        popl %esi
+        popl %ebx
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
