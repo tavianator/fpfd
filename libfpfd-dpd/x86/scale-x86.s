@@ -47,6 +47,7 @@ fpfd32_impl_scale:
         jg .Loflow
         cmpl $-108, %ecx
         jl .Luflow
+        je .LpuflowMSW
         cmpl $-101, %ecx
         jl .LsubnormMSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
@@ -89,6 +90,24 @@ fpfd32_impl_scale:
         popl %esi
         popl %ebx
         ret
+.LpuflowMSW:
+        movl %eax, %ebx
+        movl %ebx, %ecx
+        movl %edx, %eax
+        movl $0, %edx
+        movl $0, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to zero
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
+        andl $0x0FFFFFFF, %ebx  # Mask off the most significant nibble
+        shrl $28, %eax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
+        je .LspecialMSW
+        cmpl $0x15, %eax
+        je .LspecialMSW
+        popl %esi
+        popl %ebx
+        ret
 .LspecialMSW:
         cmpl $0, %ebx
         je .LspecialMSW2
@@ -120,6 +139,7 @@ fpfd32_impl_scale:
         jg .Loflow
         cmpl $-108, %ecx
         jl .Luflow
+        je .LpuflowLSW
         cmpl $-101, %ecx
         jl .LsubnormLSW
         movl %ecx, 8(%esi)      # Set dest->exp to the adjusted exponent
@@ -134,15 +154,29 @@ fpfd32_impl_scale:
         ret
 .LsubnormLSW:
         negl %ecx
-        subl $101, %ecx
+        subl $100, %ecx
         shll $2, %ecx
-        addl $4, %ecx
         shrdl %cl, %eax, %edx
         shrl %cl, %eax          # Shift eax.edx to the correct bit
         movl %eax, (%esi)
-        movl $0, 4(%esi)        # Set dest->mant to the subscaled mantissa
-        movl $-101, 8(%esi)     # Set the exponent to the sumnormal exponent
+        movl $0, 4(%esi)        # Set dest->mant to the subnormal mantissa
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
         movl %edx, %eax
+        andl $0x0FFFFFFF, %edx
+        shrl $28, %eax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
+        je .LspecialLSW
+        cmpl $0x15, %eax
+        je .LspecialLSW
+        popl %esi
+        popl %ebx
+        ret
+.LpuflowLSW:
+        movl %eax, %edx
+        movl $0, (%esi)
+        movl $0, 4(%esi)        # Set dest->mant to zero
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax
         orl $0x10, %eax
@@ -164,6 +198,7 @@ fpfd32_impl_scale:
 .Loflow:
         movl $0x9999999, (%esi)
         movl $0, 4(%esi)        # Set to the highest possible significand
+        movl $90, 8(%esi)       # Set the exponent to the maximum exponent
         movl $10, %eax          # Return the special 10 value
         popl %esi
         popl %ebx
