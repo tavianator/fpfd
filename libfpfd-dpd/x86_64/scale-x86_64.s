@@ -42,6 +42,7 @@ fpfd32_impl_scale:
         jg .Loflow
         cmpl $-108, %ecx
         jl .Luflow
+        je .Lpuflow
         cmpl $-101, %ecx
         jl .Lsubnorm
         movl %ecx, 8(%rdi)      # Set dest->exp to the adjusted exponent
@@ -60,12 +61,35 @@ fpfd32_impl_scale:
         ret
 .Lsubnorm:
         negl %ecx
-        subl $91, %ecx
+        subl $92, %ecx
         shll $2, %ecx
-        movl $0, %ebx
+        movq $0, %rax
         shrdq %cl, %rdx, %rax
-        shrq %cl, %rax          # Shift rdx.rax to the correct bit
+        shrq %cl, %rdx          # Shift rdx.rax to the correct bit
         movq %rdx, (%rdi)       # Set dest->mant to the subnormal mantissa
+        movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
+        movq %rax, %rcx
+        movq $0x0FFFFFFFFFFFFFFF, %rdx
+        andq %rdx, %rcx         # Mask off the most significant nibble
+        shrq $60, %rax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
+        je .Lspecial
+        cmpl $0x15, %eax
+        je .Lspecial
+        ret
+.Loflow:
+        movq $0x9999999, (%rdi) # Set to the highest significand possible
+        movl $90, 8(%rdi)       # Set the exponent to the maximum exponent
+        movl $10, %eax          # Return the special 10 value
+        ret
+.Luflow:
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
+        movl $0x1A, %eax
+        ret
+.Lpuflow:
+        movq %rdx, %rax
+        movq $0, (%rdi)         # Set dest->mant to the subnormal mantissa
         movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
         movq %rax, %rcx
         movq $0x0FFFFFFFFFFFFFFF, %rdx
@@ -82,13 +106,5 @@ fpfd32_impl_scale:
         je .Lspecial2
         addl $1, %eax
 .Lspecial2:
-        ret
-.Loflow:
-        movq $0x9999999, (%rdi) # Set to the highest significand possible
-        movl $10, %eax          # Return the special 10 value
-        ret
-.Luflow:
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
-        movl $0x1A, %eax
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale

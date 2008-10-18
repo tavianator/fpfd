@@ -34,7 +34,7 @@ main()
    */
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 0x1A);
+  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0));
 
   /*
@@ -134,6 +134,56 @@ main()
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999999), UINT32_C(0x99999999));
   fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 9);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
+
+  /*
+   * These values need to be subnormalized.
+   */
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x10000000));
+  fpfd_impl_set_ef(&impl, -109, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 1 | 0x10);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x10000001));
+  fpfd_impl_set_ef(&impl, -107, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 1 | 0x10);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x10));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99995000), UINT32_C(0x00000000));
+  fpfd_impl_set_ef(&impl, -113, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 5 | 0x10);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999999), UINT32_C(0x99999999));
+  fpfd_impl_set_ef(&impl, -111, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 9 | 0x10);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x999999));
+
+  /*
+   * These values should underflow
+   */
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x10000000));
+  fpfd_impl_set_ef(&impl, -110, FPFD_NUMBER);
+  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999999), UINT32_C(0x99999999));
+  fpfd_impl_set_ef(&impl, -118, FPFD_NUMBER);
+  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
+
+  /*
+   * These values should overflow
+   */
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x10000000));
+  fpfd_impl_set_ef(&impl, 90, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 90, FPFD_NUMBER, 10);
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
+
+  fpfd32_impl_set_manually(&impl32, UINT32_C(0x99999999), UINT32_C(0x99999999));
+  fpfd_impl_set_ef(&impl, 82, FPFD_NUMBER);
+  fpfd_impl_assert_orefv(impl_scale, &impl, 90, FPFD_NUMBER, 10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
 
   return exitstatus;
