@@ -113,12 +113,59 @@ fpfd32_impl_scale:
         je .Lnorm
         addl $1, %eax           # Correct it with the last remainder
 .Lnorm:
+        cmpl $90, %esi
+        jg .Loflow
+        cmpl $-108, %esi
+        jl .Luflow
+        je .Lpuflow
+        cmpl $-101, %esi
+#        jl .Lsubnorm
         movq %rdx, (%rdi)
         movl %esi, 8(%rdi)
+        ret
+.Loflow:
+        movq $9999999, (%rdi)   # Set to the highest significand possible
+        movl $90, 8(%rdi)       # Set the exponent to the maximum exponent
+        movl $10, %eax          # Return the special 10 value
         ret
 .Luflow:
         movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
         movl $0x1A, %eax
+        ret
+.Lpuflow:
+        movl %eax, %r8d
+        movl %edx, %eax
+        movl %edx, %ecx
+        movl $0x8637BD06, %edx
+        mull %edx
+        shrl $19, %edx
+        movl %edx, %eax
+        movl %edx, %esi
+        movl $1000000, %edx
+        mull %edx
+        subl %eax, %ecx
+        movl %esi, %eax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
+        je .Lspecial4
+        cmpl $0x15, %eax
+        je .Lspecial4
+        ret
+.Lspecial4:
+        cmpl $0, %esi
+        je .Lspecial5
+        addl $1, %eax           # Correct it with the last remainder
+.Lspecial5:
+        cmpl $0x10, %eax
+        je .Lspecial6
+        cmpl $0x15, %eax
+        je .Lspecial6
+        ret
+.Lspecial6:
+        cmpl $0, %r8d
+        je .Lspecial7
+        addl $1, %eax
+.Lspecial7:
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
 
