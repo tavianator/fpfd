@@ -210,6 +210,13 @@ fpfd32_impl_scale:
         je .Lnorm
         addl $1, %eax           # Correct it with the last remainder
 .Lnorm:
+        cmpl $90, %ebx
+        jg .Loflow
+        cmpl $-108, %ebx
+        jl .Luflow
+        je .Lpuflow
+        cmpl $-101, %ebx
+#        jl .Lsubnorm
         movl %edx, (%esi)
         movl $0, 4(%esi)
         movl %ebx, 8(%esi)
@@ -218,9 +225,69 @@ fpfd32_impl_scale:
         popl %esi
         popl %ebx
         ret
+.Loflow:
+        movl $9999999, (%esi)
+        movl $0, 4(%esi)        # Set to the highest significand possible
+        movl $90, 8(%esi)       # Set the exponent to the maximum exponent
+        movl $10, %eax          # Return the special 10 value
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
 .Luflow:
         movl $0, 16(%esi)       # Set the special flag to FPFD_ZERO
         movl $0x1A, %eax
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lpuflow:
+        movl $0, (%esi)
+        movl $0, 4(%esi)        # Set the significand to zero
+        movl $-101, 8(%esi)     # Set the exponent to the subnormal exponent
+        movl %eax, %ebp
+        movl %edx, %eax
+        movl %edx, %ecx
+        movl $0x8637BD06, %edx
+        mull %edx
+        shrl $19, %edx
+        movl %edx, %eax
+        movl %edx, %ebx
+        movl $1000000, %edx
+        mull %edx
+        subl %eax, %ecx
+        movl %ebx, %eax
+        orl $0x10, %eax
+        cmpl $0x10, %eax
+        je .Lspecial4
+        cmpl $0x15, %eax
+        je .Lspecial4
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lspecial4:
+        cmpl $0, %ebx
+        je .Lspecial5
+        addl $1, %eax           # Correct it with the last remainder
+.Lspecial5:
+        cmpl $0x10, %eax
+        je .Lspecial6
+        cmpl $0x15, %eax
+        je .Lspecial6
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lspecial6:
+        cmpl $0, %ebp
+        je .Lspecial7
+        addl $1, %eax
+.Lspecial7:
         popl %ebp
         popl %edi
         popl %esi

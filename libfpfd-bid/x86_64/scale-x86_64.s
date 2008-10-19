@@ -133,6 +133,8 @@ fpfd32_impl_scale:
         movl $0x1A, %eax
         ret
 .Lpuflow:
+        movq $0, (%rdi)         # Set the significand to zero
+        movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
         movl %eax, %r8d
         movl %edx, %eax
         movl %edx, %ecx
