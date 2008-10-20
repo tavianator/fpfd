@@ -69,6 +69,7 @@ fpfd32_impl_scale:
         shrdl %cl, %edx, %eax
         movl fpfd32_msw_bsr2exp(,%ebx,4), %ebx
         movl %eax, -12(%esp)
+        movl %eax, %edi
         mull fpfd32_msw_exp2mul(,%ebx,8)
         movl %eax, %ebp
         movl %edx, %ecx
@@ -428,38 +429,38 @@ fpfd32_lsw_exp2shr:
         .type fpfd32_msw_bsr2div, @object
         .size fpfd32_msw_bsr2div, 256
 fpfd32_msw_bsr2div:
-        .quad 0x83126E978D4FDF3C        # fpfd32_bsr2div[0] = 10 ** -3
-        .quad 0x83126E978D4FDF3C        # fpfd32_bsr2div[1] = 10 ** -3
-        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[2] = 10 ** -4
-        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[3] = 10 ** -4
-        .quad 0xD1B71758E219652C        # fpfd32_bsr2div[4] = 10 ** -4
-        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[5] = 10 ** -5
-        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[6] = 10 ** -5
-        .quad 0xA7C5AC471B478424        # fpfd32_bsr2div[7] = 10 ** -5
-        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[8] = 10 ** -6
-        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[9] = 10 ** -6
-        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[10] = 10 ** -6
-        .quad 0x8637BD05AF6C69B6        # fpfd32_bsr2div[11] = 10 ** -6
-        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[12] = 10 ** -7
-        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[13] = 10 ** -7
-        .quad 0xD6BF94D5E57A42BD        # fpfd32_bsr2div[14] = 10 ** -7
-        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[15] = 10 ** -8
-        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[16] = 10 ** -8
-        .quad 0xABCC77118461CEFD        # fpfd32_bsr2div[17] = 10 ** -8
-        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[18] = 10 ** -9
-        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[19] = 10 ** -9
-        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[20] = 10 ** -9
-        .quad 0x89705F4136B4A598        # fpfd32_bsr2div[21] = 10 ** -9
-        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[22] = 10 ** -10
-        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[23] = 10 ** -10
-        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_bsr2div[24] = 10 ** -10
-        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[25] = 10 ** -11
-        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[26] = 10 ** -11
-        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_bsr2div[27] = 10 ** -11
-        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[28] = 10 ** -12
-        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[29] = 10 ** -12
-        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[30] = 10 ** -12
-        .quad 0x8CBCCC096F5088CC        # fpfd32_bsr2div[31] = 10 ** -12
+        .quad 0x83126E978D4FDF3C        # fpfd32_msw_bsr2div[0] = 10 ** -3
+        .quad 0x83126E978D4FDF3C        # fpfd32_msw_bsr2div[1] = 10 ** -3
+        .quad 0xD1B71758E219652C        # fpfd32_msw_bsr2div[2] = 10 ** -4
+        .quad 0xD1B71758E219652C        # fpfd32_msw_bsr2div[3] = 10 ** -4
+        .quad 0xD1B71758E219652C        # fpfd32_msw_bsr2div[4] = 10 ** -4
+        .quad 0xA7C5AC471B478424        # fpfd32_msw_bsr2div[5] = 10 ** -5
+        .quad 0xA7C5AC471B478424        # fpfd32_msw_bsr2div[6] = 10 ** -5
+        .quad 0xA7C5AC471B478424        # fpfd32_msw_bsr2div[7] = 10 ** -5
+        .quad 0x8637BD05AF6C69B6        # fpfd32_msw_bsr2div[8] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_msw_bsr2div[9] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_msw_bsr2div[10] = 10 ** -6
+        .quad 0x8637BD05AF6C69B6        # fpfd32_msw_bsr2div[11] = 10 ** -6
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_msw_bsr2div[12] = 10 ** -7
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_msw_bsr2div[13] = 10 ** -7
+        .quad 0xD6BF94D5E57A42BD        # fpfd32_msw_bsr2div[14] = 10 ** -7
+        .quad 0xABCC77118461CEFD        # fpfd32_msw_bsr2div[15] = 10 ** -8
+        .quad 0xABCC77118461CEFD        # fpfd32_msw_bsr2div[16] = 10 ** -8
+        .quad 0xABCC77118461CEFD        # fpfd32_msw_bsr2div[17] = 10 ** -8
+        .quad 0x89705F4136B4A598        # fpfd32_msw_bsr2div[18] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_msw_bsr2div[19] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_msw_bsr2div[20] = 10 ** -9
+        .quad 0x89705F4136B4A598        # fpfd32_msw_bsr2div[21] = 10 ** -9
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_msw_bsr2div[22] = 10 ** -10
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_msw_bsr2div[23] = 10 ** -10
+        .quad 0xDBE6FECEBDEDD5BF        # fpfd32_msw_bsr2div[24] = 10 ** -10
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_msw_bsr2div[25] = 10 ** -11
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_msw_bsr2div[26] = 10 ** -11
+        .quad 0xAFEBFF0BCB24AAFF        # fpfd32_msw_bsr2div[27] = 10 ** -11
+        .quad 0x8CBCCC096F5088CC        # fpfd32_msw_bsr2div[28] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_msw_bsr2div[29] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_msw_bsr2div[30] = 10 ** -12
+        .quad 0x8CBCCC096F5088CC        # fpfd32_msw_bsr2div[31] = 10 ** -12
 
         .align 32
         .type fpfd32_msw_bsr2shr, @object
