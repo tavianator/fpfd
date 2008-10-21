@@ -229,13 +229,13 @@ main()
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x23867E), UINT32_C(0x056E7800));
   fpfd_impl_set_ef(&impl, -113, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 5 | 0x10);
-  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999));
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999));
 
   /* 9999999999999999 */
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
   fpfd_impl_set_ef(&impl, -111, FPFD_NUMBER);
   fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 9 | 0x10);
-  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x999999));
+  fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(999999));
 
   /*
    * These values should underflow
