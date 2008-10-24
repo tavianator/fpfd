@@ -29,7 +29,7 @@ fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
            fpfd_rnd_t rnd, fpfd_flags_t *flags)
 {
   int tern = 0;
-  int rem1, rem2;
+  unsigned int rem1, rem2;
   fpfd32_impl_t rop, op1, op2;
 
   fpfd32_impl_expand(&op1, lhs);
