@@ -38,12 +38,12 @@ if X86_64
 benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c
 endif
 
-benchmark_dpd_SOURCES = bench-fpfd.h bench-fpfd.c impl_compress.c impl_expand.c impl_inc.c
+benchmark_dpd_SOURCES = bench-fpfd.h bench-fpfd.c impl_compress.c impl_expand.c impl_inc.c impl_mul.c mul.c
 benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
-EXTRA_DIST   = plot.sh
+EXTRA_DIST = plot.sh
 
 TRIALS = 10000
 
