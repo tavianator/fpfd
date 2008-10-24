@@ -28,19 +28,18 @@
 fpfd32_impl_inc:
         movl 4(%esp), %eax
         movl (%eax), %edx
-        andl $0xFFFFFF, %edx
         addl $1, %edx
         cmpl $10000000, %edx
         je .Lrollover
         movl %edx, (%eax)
         ret
 .Lrollover:
-        cmpl $90, 8(%ecx)
+        cmpl $90, 8(%eax)
         jge .Loflow             # Test for overflow
-        addl $1, 8(%ecx)        # Increment the exponent
+        addl $1, 8(%eax)        # Increment the exponent
         movl $1000000, (%eax)
         ret
 .Loflow:
-        movl $3, 16(%ecx)       # Set the special flag to FPFD_INF
+        movl $3, 16(%eax)       # Set the special flag to FPFD_INF
         ret
         .size fpfd32_impl_inc, .-fpfd32_impl_inc
