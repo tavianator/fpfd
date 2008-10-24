@@ -34,23 +34,3 @@ ticks:
         popl %ebx
         ret
         .size ticks, .-ticks
-
-# uint64_t ticks64();
-#
-# Return the time stamp counter as a 64-bit value, used in arch_init().
-
-        .text
-.globl ticks64
-        .type ticks64, @function
-ticks64:
-        pushl %ebx              # Callee-save register, clobbered by cpuid
-        cpuid                   # Serialize
-        rdtsc                   # Read time stamp counter
-        movl %edx, -8(%esp)
-        movl %eax, -4(%esp)     # Store tsc
-        cpuid                   # Serialize again
-        movl -4(%esp), %eax
-        movl -8(%esp), %edx
-        popl %ebx
-        ret
-        .size ticks64, .-ticks64

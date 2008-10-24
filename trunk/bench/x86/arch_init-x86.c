@@ -22,9 +22,6 @@
 
 unsigned int bench_loops;
 
-uint64_t ticks64();
-static uint64_t gcd(uint64_t a, uint64_t b);
-
 /*
  * AMD chips seem to update the TSC every clock cycle, which is good. Old Intel
  * chips (PIII, Pentium-M, and earlier) do this also. However, new ones, with
@@ -32,42 +29,11 @@ static uint64_t gcd(uint64_t a, uint64_t b);
  * run at its highest multiplier, even when it isn't, and furthermore only
  * increment the TSC at FSB ticks, not CPU ticks. Thus, every TSC returned by
  * rdtsc will be a multiple of the highest multiplier supported by the CPU. To
- * detect this, we do a lot of rdtsc's, and find their greatest common
- * denominator. If it's > 1, we set bench_loops equal to twice it, to support
- * overclocked CPUs; otherwise, set bench_loops to 1.
+ * support this, we set bench_loops to 1024, which has a small remainder when
+ * divided into any concievable clock multiplier.
  */
 void
 arch_init()
 {
-  #define COUNT 100
-  unsigned int i;
-  uint64_t mult, rdtsc[COUNT];
-
-  for (i = 0; i < COUNT; ++i) {
-    do {
-      rdtsc[i] = ticks64();
-    } while (ticks64() == rdtsc[i]);
-  }
-
-  for (i = 1; i < COUNT - 1; ++i) {
-    mult = gcd(rdtsc[i] - rdtsc[0], rdtsc[i + 1] - rdtsc[0]);
-  }
-
-  if (mult > UINT64_C(1)) {
-    bench_loops = 2 * mult;
-  } else {
-    bench_loops = 1;
-  }
-
-  #undef COUNT
-}
-
-static uint64_t
-gcd(uint64_t a, uint64_t b)
-{
-  if (b == UINT64_C(0)) {
-    return a;
-  } else {
-    return gcd(b, a % b);
-  }
+  bench_loops = 1024;
 }
