@@ -27,7 +27,6 @@
         .type fpfd32_impl_inc, @function
 fpfd32_impl_inc:
         movl (%rdi), %edx
-        andl $0xFFFFFF, %edx
         addl $1, %edx
         cmpl $10000000, %edx
         je .Lrollover
