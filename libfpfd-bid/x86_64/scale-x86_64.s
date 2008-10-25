@@ -40,8 +40,8 @@ fpfd32_impl_scale:
 .Lunder:
         leaq fpfd32_bsr2mul(%rip), %r9
         imull (%r9,%r8,4), %eax # Scale the mantissa to within normalized range
-        leaq fpfd32_bsr2exp(%rip), %r9
-        movl (%r9,%r8,4), %esi
+        leaq fpfd32_bsr2exp(%rip), %rsi
+        movl (%rsi,%r8,4), %esi
         addl 8(%rdi), %esi      # Correct the exponent
         movl %eax, %edx
         movl $0, %eax
@@ -52,26 +52,26 @@ fpfd32_impl_scale:
         jmp .Lnorm
 .Lover:
         movq %rax, %r9
-        leaq fpfd32_bsr2div(%rip), %r10
-        mulq (%r10,%r8,8)
-        leaq fpfd32_bsr2shr(%rip), %r10
-        movb (%r10,%r8,1), %cl
+        leaq fpfd32_bsr2div(%rip), %rdx
+        mulq (%rdx,%r8,8)
+        leaq fpfd32_bsr2shr(%rip), %rcx
+        movb (%rcx,%r8,1), %cl
         shrq %cl, %rdx
-        leaq fpfd32_bsr2exp(%rip), %r10
-        movl (%r10,%r8,4), %esi
+        leaq fpfd32_bsr2exp(%rip), %rsi
+        movl (%rsi,%r8,4), %esi
         movl %edx, %r8d
         movl %edx, %eax
-        leaq fpfd32_exp2mul(%rip), %r10
-        mulq (%r10,%rsi,8)
+        leaq fpfd32_exp2mul(%rip), %rdx
+        mulq (%rdx,%rsi,8)
         subq %rax, %r9
         movq %r9, %rax
         movl %r8d, %edx
         subl $1, %esi
         jz .Lexpcorrect
-        leaq fpfd32_exp2div(%rip), %r10
-        mulq (%r10,%rsi,8)
-        leaq fpfd32_exp2shr(%rip), %r10
-        movb (%r10,%rsi,1), %cl
+        leaq fpfd32_exp2div(%rip), %rdx
+        mulq (%rdx,%rsi,8)
+        leaq fpfd32_exp2shr(%rip), %rcx
+        movb (%rcx,%rsi,1), %cl
         shrq %cl, %rdx
         movl %edx, %eax
         movl %r8d, %edx
@@ -81,8 +81,8 @@ fpfd32_impl_scale:
         jne .Lexpcorrect
 .Lspecial:
         movl %eax, %ecx
-        leaq fpfd32_exp2mul(%rip), %r10
-        mulq (%r10,%rsi,8)
+        leaq fpfd32_exp2mul(%rip), %rdx
+        mulq (%rdx,%rsi,8)
         movl %r8d, %edx
         xchgq %rax, %rcx
         cmpq %rcx, %r9
@@ -119,9 +119,63 @@ fpfd32_impl_scale:
         jl .Luflow
         je .Lpuflow
         cmpl $-101, %esi
-#        jl .Lsubnorm
+        jl .Lsubnorm
         movq %rdx, (%rdi)
         movl %esi, 8(%rdi)
+        ret
+.Lsubnorm:
+        negl %esi
+        subl $101, %esi
+        movl %eax, %r8d
+        movl %edx, %r9d
+        movl %edx, %eax
+        leaq fpfd32_exp2div(%rip), %rdx
+        mulq (%rdx,%rsi,8)
+        leaq fpfd32_exp2shr(%rip), %rcx
+        movb (%rcx,%rsi,1), %cl
+        shrq %cl, %rdx
+        movl %edx, %r10d
+        movl %edx, %eax
+        leaq fpfd32_exp2mul(%rip), %rdx
+        mulq (%rdx,%rsi,8)
+        subl %eax, %r9d
+        movl %r9d, %eax
+        movl %r10d, %edx
+        subl $1, %esi
+        jz .Lsubnormret
+        leaq fpfd32_exp2div(%rip), %rdx
+        mulq (%rdx,%rsi,8)
+        leaq fpfd32_exp2shr(%rip), %rcx
+        movb (%rcx,%rsi,1), %cl
+        shrq %cl, %rdx
+        movl %edx, %eax
+        movl %r10d, %edx
+        cmpl $0, %eax
+        je .Lspecial3
+        cmpl $5, %eax
+        jne .Lsubnormret
+.Lspecial3:
+        movl %eax, %ecx
+        leaq fpfd32_exp2mul(%rip), %rdx
+        mulq (%rdx,%rsi,8)
+        movl %r10d, %edx
+        xchgq %rax, %rcx
+        cmpq %rcx, %r9
+        je .Lspecial4
+        addl $1, %eax
+.Lspecial4:
+        cmpl $0, %eax
+        je .Lspecial5
+        cmpl $5, %eax
+        jne .Lsubnormret
+.Lspecial5:
+        cmpl $0, %r8d
+        je .Lsubnormret
+        addl $1, %eax
+.Lsubnormret:
+        orl $0x10, %eax
+        movq %rdx, (%rdi)
+        movl $-101, 8(%rdi)     # Set the exponent to the subnormal exponent
         ret
 .Loflow:
         movq $9999999, (%rdi)   # Set to the highest significand possible
@@ -130,7 +184,7 @@ fpfd32_impl_scale:
         ret
 .Luflow:
         movl $0, 16(%rdi)       # Set the special flag to FPFD_ZERO
-        movl $0x1A, %eax
+        movl $0x1A, %eax        # Return 10 | 0x10
         ret
 .Lpuflow:
         movq $0, (%rdi)         # Set the significand to zero
@@ -153,21 +207,21 @@ fpfd32_impl_scale:
         cmpl $0x15, %eax
         je .Lspecial4
         ret
-.Lspecial4:
-        cmpl $0, %esi
-        je .Lspecial5
-        addl $1, %eax           # Correct it with the last remainder
-.Lspecial5:
-        cmpl $0x10, %eax
-        je .Lspecial6
-        cmpl $0x15, %eax
-        je .Lspecial6
-        ret
 .Lspecial6:
-        cmpl $0, %r8d
+        cmpl $0, %esi
         je .Lspecial7
-        addl $1, %eax
+        addl $1, %eax           # Correct it with the last remainder
 .Lspecial7:
+        cmpl $0x10, %eax
+        je .Lspecial8
+        cmpl $0x15, %eax
+        je .Lspecial8
+        ret
+.Lspecial8:
+        cmpl $0, %r8d
+        je .Lspecial9
+        addl $1, %eax
+.Lspecial9:
         ret
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
 
