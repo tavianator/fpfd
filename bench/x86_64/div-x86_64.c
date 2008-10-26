@@ -29,16 +29,15 @@ x86_64_bench_div(unsigned int trials)
     /* divb */
     ticks1 = ticks();
     BENCH_LOOP(j) {
-      __asm__ volatile ("movb $0xFD, %%dl\n\t"
-                        "movb $0xFF, %%al\n\t"
+      __asm__ volatile ("movw $0xFDFF, %%ax\n\t"
                         "divb %%al"
                         :
                         :
-                        : "%al", "%dl");
+                        : "%ax");
     }
     ticks2 = ticks();
-    /* The two mov's take 2 cycles */
-    record_ticks("divb", ticks2 - ticks1 - (2 * bench_loops));
+    /* The mov takes 1 cycle */
+    record_ticks("divb", ticks2 - ticks1 - bench_loops);
 
     /* divw */
     ticks1 = ticks();
@@ -51,6 +50,7 @@ x86_64_bench_div(unsigned int trials)
                         : "%ax", "%dx");
     }
     ticks2 = ticks();
+    /* The two mov's take 2 cycles */
     record_ticks("divw", ticks2 - ticks1 - (2 * bench_loops));
 
     /* divl */
