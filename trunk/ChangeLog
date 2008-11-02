@@ -1,74 +1,149 @@
+Version 0.0.1 (October 5, 2008, Revision 133)
+
+        This release is also not functional or complete; it has been released
+        because the fpfd32_impl_scale routines are complete for all encodings
+        and architectures. As a result, fpfd32_mul should work completely for
+        the binary encoding, though this has not been well tested. The other
+        major change affects the API of nearly every function; fpfd now supports
+        an enumerated type, fpfd_flags_t, which represents the IEEE 754-2008
+        exception flags. A pointer to an fpfd_flags_t may be passed to almost
+        every fpfd function as the last parameter, or NULL if an application
+        does not wish to deal with these flags. Below is a summary of
+        implementation status of various components.
+
+        =======
+        x86 DPD
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
+
+        Missing:
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
+
+        =======
+        x86 BID
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_inc
+         - fpfd32_impl_mul
+         - fpfd32_impl_scale
+
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_div
+
+        ==========
+        x86_64 DPD
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
+
+        ==========
+        x86_64 BID
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_inc
+         - fpfd32_impl_mul
+         - fpfd32_impl_scale
+
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_div
+
 Version 0.0.0 (October 5, 2008, Revision 110)
 
-	This release is not nearly functional or complete; it is being released
-	because the fpfd32_impl_scale algorithms are nearly complete for each
-	architecture, and a stable implementation which is guaranteed to
-	compile may be of some value. The implementation status of various
-	components follows:
+        This release is not nearly functional or complete; it is being released
+        because the fpfd32_impl_scale algorithms are nearly complete for each
+        architecture, and a stable implementation which is guaranteed to
+        compile may be of some value. The implementation status of various
+        components follows:
 
-	=======
-	x86 DPD
-	=======
+        =======
+        x86 DPD
+        =======
 
-	Implemented:
-	 - fpfd32_impl_expand
-	 - fpfd32_impl_compress
-	 - fpfd32_impl_scale
-	 - fpfd32_impl_inc
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
 
-	Partially implemented:
-	 - fpfd32_impl_addsub: Non-functional stub.
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
 
-	Missing:
-	 - fpfd32_impl_mul
-	 - fpfd32_impl_div
+        Missing:
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
 
-	=======
-	x86 BID
-	=======
+        =======
+        x86 BID
+        =======
 
-	Implemented:
-	 - fpfd32_impl_expand
-	 - fpfd32_impl_compress
-	 - fpfd32_impl_inc
-	 - fpfd32_impl_mul
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_inc
+         - fpfd32_impl_mul
 
-	Partially implemented:
-	 - fpfd32_impl_scale: Only handles 32-bit values, doesn't subnormalize
-	                      correctly.
+        Partially implemented:
+         - fpfd32_impl_scale: Only handles 32-bit values, doesn't subnormalize
+                              correctly.
 
-	Missing:
-	 - fpfd32_impl_addsub
-	 - fpfd32_impl_div
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_div
 
-	==========
-	x86_64 DPD
-	==========
+        ==========
+        x86_64 DPD
+        ==========
 
-	Implemented:
-	 - fpfd32_impl_expand
-	 - fpfd32_impl_compress
-	 - fpfd32_impl_scale
-	 - fpfd32_impl_inc
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
 
-	Missing:
-	 - fpfd32_impl_addsub
-	 - fpfd32_impl_mul
-	 - fpfd32_impl_div
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
 
-	==========
-	x86_64 BID
-	==========
+        ==========
+        x86_64 BID
+        ==========
 
-	Implemented:
-	 - fpfd32_impl_expand
-	 - fpfd32_impl_compress
-	 - fpfd32_impl_inc
-	 - fpfd32_impl_mul
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_compress
+         - fpfd32_impl_inc
+         - fpfd32_impl_mul
 
-	Partially implemented:
-	 - fpfd32_impl_scale: Doesn't subnormalize correctly.
+        Partially implemented:
+         - fpfd32_impl_scale: Doesn't subnormalize correctly.
 
-	Missing:
-	 - fpfd32_impl_addsub
-	 - fpfd32_impl_div
+        Missing:
+         - fpfd32_impl_addsub
+         - fpfd32_impl_div
