@@ -45,7 +45,7 @@ benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libf
 
 EXTRA_DIST = plot.sh
 
-TRIALS = 10000
+TRIALS = 1000
 
 bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
 	mkdir -p arch dpd bid

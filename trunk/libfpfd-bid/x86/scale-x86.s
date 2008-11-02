@@ -217,10 +217,34 @@ fpfd32_impl_scale:
         jl .Luflow
         je .Lpuflow
         cmpl $-101, %ebx
-#        jl .Lsubnorm
+        jl .Lsubnorm
         movl %edx, (%esi)
         movl $0, 4(%esi)
         movl %ebx, 8(%esi)
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lsubnorm:
+        negl %ebx
+        subl $101, %ebx
+        movl %eax, %edi
+        movl %edx, %ebp
+        movl %edx, %eax
+        mull fpfd32_lsw_exp2div(,%ebx,4)
+        movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
+        shrl %cl, %edx
+        movl %edx, %ecx
+        movl %edx, %eax
+        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        subl %eax, %ebp
+        movl %ebp, %eax
+        movl %ecx, %edx
+        orl $0x10, %eax
+        movl %edx, (%esi)
+        movl $0, 4(%esi)
+        movl $-101, 8(%esi)
         popl %ebp
         popl %edi
         popl %esi
@@ -297,134 +321,6 @@ fpfd32_impl_scale:
         .size fpfd32_impl_scale, .-fpfd32_impl_scale
 
         .section .rodata
-        .align 32
-        .type fpfd32_lsw_bsr2mul, @object
-        .size fpfd32_lsw_bsr2mul, 92
-fpfd32_lsw_bsr2mul:
-        .long 1000000           # fpfd32_lsw_bsr2mul[0]
-        .long 1000000           # fpfd32_lsw_bsr2mul[1]
-        .long 1000000           # fpfd32_lsw_bsr2mul[2]
-        .long 100000            # fpfd32_lsw_bsr2mul[3]
-        .long 100000            # fpfd32_lsw_bsr2mul[4]
-        .long 100000            # fpfd32_lsw_bsr2mul[5]
-        .long 10000             # fpfd32_lsw_bsr2mul[6]
-        .long 10000             # fpfd32_lsw_bsr2mul[7]
-        .long 10000             # fpfd32_lsw_bsr2mul[8]
-        .long 1000              # fpfd32_lsw_bsr2mul[9]
-        .long 1000              # fpfd32_lsw_bsr2mul[10]
-        .long 1000              # fpfd32_lsw_bsr2mul[11]
-        .long 1000              # fpfd32_lsw_bsr2mul[12]
-        .long 100               # fpfd32_lsw_bsr2mul[13]
-        .long 100               # fpfd32_lsw_bsr2mul[14]
-        .long 100               # fpfd32_lsw_bsr2mul[15]
-        .long 10                # fpfd32_lsw_bsr2mul[16]
-        .long 10                # fpfd32_lsw_bsr2mul[17]
-        .long 10                # fpfd32_lsw_bsr2mul[18]
-        .long 1                 # fpfd32_lsw_bsr2mul[19]
-        .long 1                 # fpfd32_lsw_bsr2mul[20]
-        .long 1                 # fpfd32_lsw_bsr2mul[21]
-        .long 1                 # fpfd32_lsw_bsr2mul[22]
-
-        .align 32
-        .type fpfd32_lsw_bsr2div, @object
-        .size fpfd32_lsw_bsr2div, 128
-fpfd32_lsw_bsr2div:
-        .zero 92                # fpfd32_lsw_bsr2div[i], i < 23, is undefined
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[23]
-                                #   = (10 ** -1 << 35) + 1
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[24]
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[25]
-        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[26]
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[27]
-                                #   = (10 ** -2 << 38) + 1
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[28]
-        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[29]
-        .long 0x83126E98        # fpfd32_lsw_bsr2div[30]
-                                #   = (10 ** -3 << 41) + 1
-        .long 0x83126E98        # fpfd32_lsw_bsr2div[31]
-
-        .align 32
-        .type fpfd32_lsw_bsr2shr, @object
-        .size fpfd32_lsw_bsr2shr, 32
-fpfd32_lsw_bsr2shr:
-        .zero 23        # fpfd32_lsw_bsr2shr[i], i < 23, is undefined
-        .byte 3         # fpfd32_lsw_bsr2shr[23]
-        .byte 3         # fpfd32_lsw_bsr2shr[24]
-        .byte 3         # fpfd32_lsw_bsr2shr[25]
-        .byte 3         # fpfd32_lsw_bsr2shr[26]
-        .byte 6         # fpfd32_lsw_bsr2shr[27]
-        .byte 6         # fpfd32_lsw_bsr2shr[28]
-        .byte 6         # fpfd32_lsw_bsr2shr[29]
-        .byte 9         # fpfd32_lsw_bsr2shr[30]
-        .byte 9         # fpfd32_lsw_bsr2shr[31]
-
-        .align 32
-        .type fpfd32_lsw_bsr2exp, @object
-        .size fpfd32_lsw_bsr2exp, 128
-fpfd32_lsw_bsr2exp:
-        .long -6        # fpfd32_lsw_bsr2exp[0]
-        .long -6        # fpfd32_lsw_bsr2exp[1]
-        .long -6        # fpfd32_lsw_bsr2exp[2]
-        .long -5        # fpfd32_lsw_bsr2exp[3]
-        .long -5        # fpfd32_lsw_bsr2exp[4]
-        .long -5        # fpfd32_lsw_bsr2exp[5]
-        .long -4        # fpfd32_lsw_bsr2exp[6]
-        .long -4        # fpfd32_lsw_bsr2exp[7]
-        .long -4        # fpfd32_lsw_bsr2exp[8]
-        .long -3        # fpfd32_lsw_bsr2exp[9]
-        .long -3        # fpfd32_lsw_bsr2exp[10]
-        .long -3        # fpfd32_lsw_bsr2exp[11]
-        .long -3        # fpfd32_lsw_bsr2exp[12]
-        .long -2        # fpfd32_lsw_bsr2exp[13]
-        .long -2        # fpfd32_lsw_bsr2exp[14]
-        .long -2        # fpfd32_lsw_bsr2exp[15]
-        .long -1        # fpfd32_lsw_bsr2exp[16]
-        .long -1        # fpfd32_lsw_bsr2exp[17]
-        .long -1        # fpfd32_lsw_bsr2exp[18]
-        .long 0         # fpfd32_lsw_bsr2exp[19]
-        .long 0         # fpfd32_lsw_bsr2exp[20]
-        .long 0         # fpfd32_lsw_bsr2exp[21]
-        .long 0         # fpfd32_lsw_bsr2exp[22]
-        .long 1         # fpfd32_lsw_bsr2exp[23]
-        .long 1         # fpfd32_lsw_bsr2exp[24]
-        .long 1         # fpfd32_lsw_bsr2exp[25]
-        .long 1         # fpfd32_lsw_bsr2exp[26]
-        .long 2         # fpfd32_lsw_bsr2exp[27]
-        .long 2         # fpfd32_lsw_bsr2exp[28]
-        .long 2         # fpfd32_lsw_bsr2exp[29]
-        .long 3         # fpfd32_lsw_bsr2exp[30]
-        .long 3         # fpfd32_lsw_bsr2exp[31]
-
-        .align 32
-        .type fpfd32_lsw_exp2mul, @object
-        .size fpfd32_lsw_exp2mul, 16
-fpfd32_lsw_exp2mul:
-        .long 1         # fpfd32_lsw_exp2mul[0]
-        .long 10        # fpfd32_lsw_exp2mul[1]
-        .long 100       # fpfd32_lsw_exp2mul[2]
-        .long 1000      # fpfd32_lsw_exp2mul[3]
-
-        .align 32
-        .type fpfd32_lsw_exp2div, @object
-        .size fpfd32_lsw_exp2div, 16
-fpfd32_lsw_exp2div:
-        .long 0                 # fpfd32_lsw_exp2div[0] is undefined
-        .long 0xCCCCCCCD        # fpfd32_lsw_exp2div[1]
-                                #   = (10 ** -1 << 35) + 1
-        .long 0xA3D70A3E        # fpfd32_lsw_exp2div[2]
-                                #   = (10 ** -2 << 38) + 1
-        .long 0x83126E98        # fpfd32_lsw_exp2div[3]
-                                #   = (10 ** -3 << 41) + 1
-
-        .align 32
-        .type fpfd32_lsw_exp2shr, @object
-        .size fpfd32_lsw_exp2shr, 4
-fpfd32_lsw_exp2shr:
-        .byte 0         # fpfd32_lsw_exp2shr[0] is undefined
-        .byte 3         # fpfd32_lsw_exp2shr[1]
-        .byte 6         # fpfd32_lsw_exp2shr[2]
-        .byte 9         # fpfd32_lsw_exp2shr[3]
-
         .align 32
         .type fpfd32_msw_bsr2div, @object
         .size fpfd32_msw_bsr2div, 256
@@ -581,3 +477,137 @@ fpfd32_msw_exp2shr:
         .byte 29        # fpfd32_msw_exp2shr[9]
         .byte 33        # fpfd32_msw_exp2shr[10]
         .byte 36        # fpfd32_msw_exp2shr[11]
+
+        .align 32
+        .type fpfd32_lsw_bsr2mul, @object
+        .size fpfd32_lsw_bsr2mul, 92
+fpfd32_lsw_bsr2mul:
+        .long 1000000           # fpfd32_lsw_bsr2mul[0]
+        .long 1000000           # fpfd32_lsw_bsr2mul[1]
+        .long 1000000           # fpfd32_lsw_bsr2mul[2]
+        .long 100000            # fpfd32_lsw_bsr2mul[3]
+        .long 100000            # fpfd32_lsw_bsr2mul[4]
+        .long 100000            # fpfd32_lsw_bsr2mul[5]
+        .long 10000             # fpfd32_lsw_bsr2mul[6]
+        .long 10000             # fpfd32_lsw_bsr2mul[7]
+        .long 10000             # fpfd32_lsw_bsr2mul[8]
+        .long 1000              # fpfd32_lsw_bsr2mul[9]
+        .long 1000              # fpfd32_lsw_bsr2mul[10]
+        .long 1000              # fpfd32_lsw_bsr2mul[11]
+        .long 1000              # fpfd32_lsw_bsr2mul[12]
+        .long 100               # fpfd32_lsw_bsr2mul[13]
+        .long 100               # fpfd32_lsw_bsr2mul[14]
+        .long 100               # fpfd32_lsw_bsr2mul[15]
+        .long 10                # fpfd32_lsw_bsr2mul[16]
+        .long 10                # fpfd32_lsw_bsr2mul[17]
+        .long 10                # fpfd32_lsw_bsr2mul[18]
+        .long 1                 # fpfd32_lsw_bsr2mul[19]
+        .long 1                 # fpfd32_lsw_bsr2mul[20]
+        .long 1                 # fpfd32_lsw_bsr2mul[21]
+        .long 1                 # fpfd32_lsw_bsr2mul[22]
+
+        .align 32
+        .type fpfd32_lsw_bsr2div, @object
+        .size fpfd32_lsw_bsr2div, 128
+fpfd32_lsw_bsr2div:
+        .zero 92                # fpfd32_lsw_bsr2div[i], i < 23, is undefined
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[23]
+                                #   = (10 ** -1 << 35) + 1
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[24]
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[25]
+        .long 0xCCCCCCCD        # fpfd32_lsw_bsr2div[26]
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[27]
+                                #   = (10 ** -2 << 38) + 1
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[28]
+        .long 0xA3D70A3E        # fpfd32_lsw_bsr2div[29]
+        .long 0x83126E98        # fpfd32_lsw_bsr2div[30]
+                                #   = (10 ** -3 << 41) + 1
+        .long 0x83126E98        # fpfd32_lsw_bsr2div[31]
+
+        .align 32
+        .type fpfd32_lsw_bsr2shr, @object
+        .size fpfd32_lsw_bsr2shr, 32
+fpfd32_lsw_bsr2shr:
+        .zero 23        # fpfd32_lsw_bsr2shr[i], i < 23, is undefined
+        .byte 3         # fpfd32_lsw_bsr2shr[23]
+        .byte 3         # fpfd32_lsw_bsr2shr[24]
+        .byte 3         # fpfd32_lsw_bsr2shr[25]
+        .byte 3         # fpfd32_lsw_bsr2shr[26]
+        .byte 6         # fpfd32_lsw_bsr2shr[27]
+        .byte 6         # fpfd32_lsw_bsr2shr[28]
+        .byte 6         # fpfd32_lsw_bsr2shr[29]
+        .byte 9         # fpfd32_lsw_bsr2shr[30]
+        .byte 9         # fpfd32_lsw_bsr2shr[31]
+
+        .align 32
+        .type fpfd32_lsw_bsr2exp, @object
+        .size fpfd32_lsw_bsr2exp, 128
+fpfd32_lsw_bsr2exp:
+        .long -6        # fpfd32_lsw_bsr2exp[0]
+        .long -6        # fpfd32_lsw_bsr2exp[1]
+        .long -6        # fpfd32_lsw_bsr2exp[2]
+        .long -5        # fpfd32_lsw_bsr2exp[3]
+        .long -5        # fpfd32_lsw_bsr2exp[4]
+        .long -5        # fpfd32_lsw_bsr2exp[5]
+        .long -4        # fpfd32_lsw_bsr2exp[6]
+        .long -4        # fpfd32_lsw_bsr2exp[7]
+        .long -4        # fpfd32_lsw_bsr2exp[8]
+        .long -3        # fpfd32_lsw_bsr2exp[9]
+        .long -3        # fpfd32_lsw_bsr2exp[10]
+        .long -3        # fpfd32_lsw_bsr2exp[11]
+        .long -3        # fpfd32_lsw_bsr2exp[12]
+        .long -2        # fpfd32_lsw_bsr2exp[13]
+        .long -2        # fpfd32_lsw_bsr2exp[14]
+        .long -2        # fpfd32_lsw_bsr2exp[15]
+        .long -1        # fpfd32_lsw_bsr2exp[16]
+        .long -1        # fpfd32_lsw_bsr2exp[17]
+        .long -1        # fpfd32_lsw_bsr2exp[18]
+        .long 0         # fpfd32_lsw_bsr2exp[19]
+        .long 0         # fpfd32_lsw_bsr2exp[20]
+        .long 0         # fpfd32_lsw_bsr2exp[21]
+        .long 0         # fpfd32_lsw_bsr2exp[22]
+        .long 1         # fpfd32_lsw_bsr2exp[23]
+        .long 1         # fpfd32_lsw_bsr2exp[24]
+        .long 1         # fpfd32_lsw_bsr2exp[25]
+        .long 1         # fpfd32_lsw_bsr2exp[26]
+        .long 2         # fpfd32_lsw_bsr2exp[27]
+        .long 2         # fpfd32_lsw_bsr2exp[28]
+        .long 2         # fpfd32_lsw_bsr2exp[29]
+        .long 3         # fpfd32_lsw_bsr2exp[30]
+        .long 3         # fpfd32_lsw_bsr2exp[31]
+
+        .align 32
+        .type fpfd32_lsw_exp2mul, @object
+        .size fpfd32_lsw_exp2mul, 16
+fpfd32_lsw_exp2mul:
+        .long 1         # fpfd32_lsw_exp2mul[0]
+        .long 10        # fpfd32_lsw_exp2mul[1]
+        .long 100       # fpfd32_lsw_exp2mul[2]
+        .long 1000      # fpfd32_lsw_exp2mul[3]
+        .long 10000     # fpfd32_lsw_exp2mul[4]
+        .long 100000    # fpfd32_lsw_exp2mul[5]
+        .long 1000000   # fpfd32_lsw_exp2mul[6]
+
+        .align 32
+        .type fpfd32_lsw_exp2div, @object
+        .size fpfd32_lsw_exp2div, 16
+fpfd32_lsw_exp2div:
+        .long 0                 # fpfd32_lsw_exp2div[0] is undefined
+        .long 0xCCCCCCCD        # fpfd32_lsw_exp2div[1] = 10 ** -1
+        .long 0xA3D70A3E        # fpfd32_lsw_exp2div[2] = 10 ** -2
+        .long 0x83126E98        # fpfd32_lsw_exp2div[3] = 10 ** -3
+        .long 0xD1B71759        # fpfd32_lsw_exp2div[4] = 10 ** -4
+        .long 0xA7C5AC48        # fpfd32_lsw_exp2div[5] = 10 ** -5
+        .long 0x8637BD06        # fpfd32_lsw_exp2div[6] = 10 ** -6
+
+        .align 32
+        .type fpfd32_lsw_exp2shr, @object
+        .size fpfd32_lsw_exp2shr, 4
+fpfd32_lsw_exp2shr:
+        .byte 0         # fpfd32_lsw_exp2shr[0] is undefined
+        .byte 3         # fpfd32_lsw_exp2shr[1]
+        .byte 6         # fpfd32_lsw_exp2shr[2]
+        .byte 9         # fpfd32_lsw_exp2shr[3]
+        .byte 13        # fpfd32_lsw_exp2shr[4]
+        .byte 16        # fpfd32_lsw_exp2shr[5]
+        .byte 19        # fpfd32_lsw_exp2shr[6]
