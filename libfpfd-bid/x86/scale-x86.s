@@ -229,8 +229,8 @@ fpfd32_impl_scale:
 .Lsubnorm:
         negl %ebx
         subl $101, %ebx
-        movl %eax, %edi
-        movl %edx, %ebp
+        movl %eax, -4(%esp)
+        movl %edx, %edi
         movl %edx, %eax
         mull fpfd32_lsw_exp2div(,%ebx,4)
         movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
@@ -238,9 +238,39 @@ fpfd32_impl_scale:
         movl %edx, %ecx
         movl %edx, %eax
         mull fpfd32_lsw_exp2mul(,%ebx,4)
-        subl %eax, %ebp
-        movl %ebp, %eax
+        subl %eax, %edi
+        movl %edi, %eax
         movl %ecx, %edx
+        subl $1, %ebx
+        jz .Lsubnormret
+        movl %edx, %ebp
+        mull fpfd32_lsw_exp2div(,%ebx,4)
+        movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
+        shrl %cl, %edx
+        movl %edx, %eax
+        movl %ebp, %edx
+        cmpl $0, %eax
+        je .Lspecial
+        cmpl $5, %eax
+        jne .Lsubnormret
+.Lspecial:
+        movl %eax, %ecx
+        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        movl %ebp, %edx
+        xchgl %eax, %ecx
+        cmpl %ecx, %edi
+        je .Lspecial2
+        addl $1, %eax
+.Lspecial2:
+        cmpl $0, %eax
+        je .Lspecial3
+        cmpl $5, %eax
+        jne .Lsubnormret
+.Lspecial3:
+        cmpl $0, -4(%esp)
+        je .Lsubnormret
+        addl $1, %eax
+.Lsubnormret:
         orl $0x10, %eax
         movl %edx, (%esi)
         movl $0, 4(%esi)
