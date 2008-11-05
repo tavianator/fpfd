@@ -80,14 +80,14 @@ typedef struct {
  * the result is always exact. Functions which return an unsigned int return a
  * special kind of "remainder" from the operation:
  *
- * 0        - Computation was exact.
- * [1, 4]   - The real result is closer to the this one than to the next
- *            representable value.
- * 5        - The real result is exactly in between the current value and the
- *            next representable one 
- * [6, 9]   - The real result is closer to the next representable value than
- *            it is to this one.
- * 10       - Total overflow.
+ * 0      - Computation was exact.
+ * [1, 4] - The real result is closer to the this one than to the next
+ *          representable value.
+ * 5      - The real result is exactly in between the current value and the next
+ *          representable one 
+ * [6, 9] - The real result is closer to the next representable value than it is
+ *          to this one.
+ * 10     - Total overflow.
  *
  * If the 0x10 bit is set, then the value has been subnormalized. 10 | 0x10
  * indicates total underflow to zero. The fpfdX_*_roundN functions convert these
@@ -115,11 +115,15 @@ unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 
 /* Help with correct rounding */
 
+/* Round dest according to rem and rnd, and set *flags correctly */
 int fpfd32_impl_round(fpfd32_impl_t *dest, unsigned int rem, fpfd_rnd_t rnd,
                       fpfd_flags_t *flags);
 int fpfd32_impl_round2(fpfd32_impl_t *dest,
                        unsigned int rem1, unsigned int rem2,
                        fpfd_rnd_t rnd, fpfd_flags_t *flags);
+
+/* Return nonzero if the mantissa is odd */
+int fpfd32_impl_odd(const fpfd32_impl_t *src);
 
 /* 
  * Propogate NaNs correctly.
