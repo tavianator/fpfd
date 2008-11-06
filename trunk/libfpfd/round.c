@@ -30,7 +30,7 @@
  */
 
 typedef enum {
-  FPFD_RZERO = 0, FPFD_RSIGN = 1, FPFD_RMSIGN = 2, FPFD_RMSIGNO = 3
+  FPFD_RZERO, FPFD_RSIGN, FPFD_RMSIGN, FPFD_RMSIGNO
 } fpfd_round_action_t;
 
 static fpfd_round_action_t fpfd_round(int sign, unsigned int rem,
