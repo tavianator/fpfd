@@ -40,31 +40,35 @@ int
 fpfd32_impl_round(fpfd32_impl_t *dest, unsigned int rem, fpfd_rnd_t rnd,
                   fpfd_flags_t *flags)
 {
-  int sign;
+  int tern;
   fpfd_round_action_t action;
 
-  sign = dest->fields.sign;
-  action = fpfd_round(sign, rem, rnd, flags);
+  action = fpfd_round(dest->fields.sign, rem, rnd, flags);
 
   switch (action) {
   case FPFD_RZERO:
-    return 0;
+    tern = 0;
+    break;
 
   case FPFD_RSIGN:
-    return sign;
+    tern = dest->fields.sign;
 
   case FPFD_RMSIGN:
     fpfd32_impl_inc(dest);
-    return -sign;
+    tern = -dest->fields.sign;
+    break;
 
   case FPFD_RMSIGNO:
     if (fpfd32_impl_odd(dest)) {
       fpfd32_impl_inc(dest);
-      return -sign;
+      tern = -dest->fields.sign;
     } else {
-      return sign;
+      tern = dest->fields.sign;
     }
+    break;
   }
+
+  return tern;
 }
 
 int
@@ -79,6 +83,8 @@ fpfd32_impl_round2(fpfd32_impl_t *dest,
 static fpfd_round_action_t
 fpfd_round(int sign, unsigned int rem, fpfd_rnd_t rnd, fpfd_flags_t *flags)
 {
+  fpfd_round_action_t action = FPFD_RZERO;
+
   if (flags) {
     if ((rem & 0xF) != 0 && (rem & 0xF) != 10) *flags |= FPFD_INEXACT;
     if ((rem | 0x10) && rem != (10 | 0x10)) *flags |= FPFD_UNDERFLOW;
@@ -86,65 +92,78 @@ fpfd_round(int sign, unsigned int rem, fpfd_rnd_t rnd, fpfd_flags_t *flags)
   }
 
   if ((rem & 0xF) == 0) {
-    return FPFD_RZERO;
+    action = FPFD_RZERO;
   } else if (rem == 10) {
     switch (rnd) {
     case FPFD_RNDN:
     case FPFD_RNDNA:
-      return FPFD_RMSIGN;
+      action = FPFD_RMSIGN;
+      break;
 
     case FPFD_RNDZ:
-      return FPFD_RSIGN;
+      action = FPFD_RSIGN;
+      break;
 
     case FPFD_RNDU:
-      if (sign > 0)
-        return FPFD_RMSIGN;
-      else
-        return FPFD_RSIGN;
+      if (sign > 0) {
+        action = FPFD_RMSIGN;
+      } else {
+        action = FPFD_RSIGN;
+      }
+      break;
 
     case FPFD_RNDD:
-      if (sign < 0)
-        return FPFD_RMSIGN;
-      else
-        return FPFD_RSIGN;
+      if (sign < 0) {
+        action = FPFD_RMSIGN;
+      } else {
+        action = FPFD_RSIGN;
+      }
+      break;
     }
   } else if (rem == (10 | 0x10)) {
-    return FPFD_RSIGN;
+    action = FPFD_RSIGN;
   } else {
     rem &= 0xF;
 
     switch (rnd) {
     case FPFD_RNDN:
       if (rem < 5) {
-        return FPFD_RSIGN;
+        action = FPFD_RSIGN;
       } else if (rem == 5) {
-        return FPFD_RMSIGNO;
+        action = FPFD_RMSIGNO;
       } else {
-        return FPFD_RMSIGN;
+        action = FPFD_RMSIGN;
       }
+      break;
 
     case FPFD_RNDNA:
       if (rem < 5) {
-        return FPFD_RSIGN;
+        action = FPFD_RSIGN;
       } else {
-        return FPFD_RMSIGN;
+        action = FPFD_RMSIGN;
       }
 
     case FPFD_RNDZ:
-      return FPFD_RSIGN;
+      action = FPFD_RSIGN;
       break;
 
     case FPFD_RNDU:
-      if (sign > 0)
-        return FPFD_RMSIGN;
-      else
-        return FPFD_RSIGN;
+      if (sign > 0) {
+        action = FPFD_RMSIGN;
+      } else {
+        action = FPFD_RSIGN;
+      }
+      break;
 
     case FPFD_RNDD:
-      if (sign < 0)
-        return FPFD_RMSIGN;
-      else
-        return FPFD_RSIGN;
+      if (sign < 0) {
+        action = FPFD_RMSIGN;
+      } else {
+        action = FPFD_RSIGN;
+      }
+      break;
     }
   }
+
+  return action;
 }
