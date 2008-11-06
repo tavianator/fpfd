@@ -26,7 +26,7 @@ void
 fpfd32_random(fpfd32_ptr dest)
 {
   fpfd32_impl_t impl;
-  long bits, bits_left = 0;
+  long bits = 0, bits_left = 0;
   unsigned int i;
 
   do {

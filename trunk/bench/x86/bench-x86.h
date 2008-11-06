@@ -24,3 +24,4 @@
  */
 
 void x86_bench_mul(unsigned int trials);
+void x86_bench_div(unsigned int trials);

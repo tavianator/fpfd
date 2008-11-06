@@ -136,7 +136,7 @@ stddev_ticks(const char *key)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
-  double ticks, ticks_sq, mean;
+  double ticks, ticks_sq = 0.0, mean;
   size_t i;
 
   e.key = (char *)key;
