@@ -33,9 +33,7 @@ fpfd32_impl_addsub:
         movl 8(%rcx), %eax
         subl 8(%rdx), %eax      # lhs->fields.exp - rhs->fields.sign
         
-        popl %ebx
         ret
 .Lsub:
-        popl %ebx
         ret
         .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
