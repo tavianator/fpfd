@@ -35,9 +35,8 @@ fpfd32_impl_mul:
         addl 8(%rdx), %r8d      # Add the exponents
         movl (%rsi), %eax
         movl (%rdx), %edx
-        mull %edx               # Multiply the mantissas
-        movl %eax, (%rdi)
-        movl %edx, 4(%rdi)      # Store the mantissa
+        mulq %rdx               # Multiply the mantissas
+        movq %rax, (%rdi)       # Store the mantissa
         movl %r8d, 8(%rdi)      # Store the exponent
         movl %ecx, 12(%rdi)     # Store the sign
         movl $0, 16(%rdi)       # Set the special flag to FPFD_NUMBER

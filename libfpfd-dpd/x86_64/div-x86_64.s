@@ -18,24 +18,24 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-#                                 const fpfd32_impl_t *lhs,
-#                                 const fpfd32_impl_t *rhs);
+# unsigned int fpfd32_impl_div(fpfd32_impl_t *dest,
+#                              const fpfd32_impl_t *lhs,
+#                              const fpfd32_impl_t *rhs);
 #
-# Add lhs and rhs if sign == 1, or subtract lhs and rhs if sign == -1, and store
-# the result in dest.
+# Divide lhs by rhs, and put the result in dest.
 
         .text
-.globl fpfd32_impl_addsub
-        .type fpfd32_impl_addsub, @function
-fpfd32_impl_addsub:
-        xorl 12(%rdx), %esi
-        xorl 12(%rcx), %esi     # Calculate
-                                # (sign ^ lhs->fields.sign ^ rhs->fields.sign)
-        js .Lsub                # If the result is -1, we are subtracting
-        movl 8(%rcx), %eax
-        subl 8(%rdx), %eax      # lhs->fields.exp - rhs->fields.sign
+.globl fpfd32_impl_div
+        .type fpfd32_impl_div, @function
+fpfd32_impl_div:
+        movl 12(%rsi), %ecx
+        xorl 12(%rdx), %ecx     # XOR the signs: 1 (...0001) xor -1 (...1111)
+                                # gives -2 (...1110), X xor X gives 0
+        addl $1, %ecx           # Add one to go from (-2, 0) to (-1, 1)
+        movl 8(%rsi), %r8d
+        subl 8(%rdx), %r8d      # Subtract the exponents
+        movl %r8d, 8(%rdi)      # Store the exponent
+        movl %ecx, 12(%rdi)     # Store the sign
+        movl $0, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
-.Lsub:
-        ret
-        .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
+        .size fpfd32_impl_div, .-fpfd32_impl_div
