@@ -46,26 +46,6 @@ fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
   return 0;
 }
 
-unsigned int
-fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-                   const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
-{
-  return 0;
-}
-
-void
-fpfd32_impl_mul(fpfd32_impl_t *dest,
-                const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
-{
-}
-
-unsigned int
-fpfd32_impl_div(fpfd32_impl_t *dest,
-                const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs)
-{
-  return 0;
-}
-
 /* --- END HACKS --- */
 
 void

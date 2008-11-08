@@ -18,24 +18,34 @@
 # <http://www.gnu.org/licenses/>.                                       #
 #########################################################################
 
-# unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-#                                 const fpfd32_impl_t *lhs,
-#                                 const fpfd32_impl_t *rhs);
+# void fpfd32_impl_mul(fpfd32_impl_t *dest,
+#                      const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
 #
-# Add lhs and rhs if sign == 1, or subtract lhs and rhs if sign == -1, and store
-# the result in dest.
+# Multiply lhs and rhs, and put the result in dest.
 
         .text
-.globl fpfd32_impl_addsub
-        .type fpfd32_impl_addsub, @function
-fpfd32_impl_addsub:
-        xorl 12(%rdx), %esi
-        xorl 12(%rcx), %esi     # Calculate
-                                # (sign ^ lhs->fields.sign ^ rhs->fields.sign)
-        js .Lsub                # If the result is -1, we are subtracting
-        movl 8(%rcx), %eax
-        subl 8(%rdx), %eax      # lhs->fields.exp - rhs->fields.sign
+.globl fpfd32_impl_mul
+        .type fpfd32_impl_mul, @function
+fpfd32_impl_mul:
+        pushl %ebx
+        pushl %esi
+        pushl %edi              # Callee-save registers
+        movl 20(%esp), %esi
+        movl 24(%esp), %edi
+        movl 8(%esi), %ebx
+        addl 8(%edi), %ebx      # Add the exponents
+        movl 12(%esi), %ecx
+        xorl 12(%edi), %ecx     # XOR the signs: 1 (...0001) xor -1 (...1111)
+                                # gives -2 (...1110), X xor X gives 0
+        addl $1, %ecx           # Add one to go from (-2, 0) to (-1, 1)
+        movl 16(%esp), %esi
+        movl %eax, (%esi)
+        movl %edx, 4(%esi)      # Store the mantissa
+        movl %ebx, 8(%esi)      # Store the exponent
+        movl %ecx, 12(%esi)     # Store the sign
+        movl $0, 16(%esi)       # Set the special flag to FPFD_NUMBER
+        popl %edi
+        popl %esi
+        popl %ebx
         ret
-.Lsub:
-        ret
-        .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
+        .size fpfd32_impl_mul, .-fpfd32_impl_mul
