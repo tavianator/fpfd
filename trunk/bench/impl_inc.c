@@ -24,7 +24,7 @@ fpfd32_bench_impl_inc(unsigned int trials)
 {
   fpfd32_t fp;
   fpfd32_impl_t impl;
-  unsigned long ticks1, ticks2;
+  long ticks1, ticks2;
   unsigned int i, j;
 
   /* Warm up cache */

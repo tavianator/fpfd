@@ -34,7 +34,7 @@
  */
 typedef struct {
   unsigned int trials;
-  unsigned long *list;
+  long *list;
   size_t size, capacity;
 } ticklist_t;
 
@@ -57,7 +57,7 @@ ENTRY *xhsearch(ENTRY item, ACTION action);
  * counter, this is an extremely high-resolution timer, accurate to one clock
  * tick, or sometimes, one FSB tick.
  */
-unsigned long ticks();
+long ticks();
 
 /*
  * This function is architecture-specific. It sets bench_loops correctly.
@@ -79,5 +79,5 @@ extern unsigned int bench_loops;
  *     standard deviation above and below it, to file, in a format readable by
  *     plotutils' graph, gnuplot, or similar.
  */
-void record_ticks(const char *key, unsigned long tick_count);
+void record_ticks(const char *key, long tick_count);
 void write_ticks(const char *key, FILE *file);

@@ -23,7 +23,7 @@ void
 fpfd32_bench_mul(unsigned int trials)
 {
   fpfd32_t fp, lhs, rhs;
-  unsigned long ticks1, ticks2;
+  long ticks1, ticks2;
   unsigned int i, j;
   fpfd_flags_t flags = FPFD_NONE;
 

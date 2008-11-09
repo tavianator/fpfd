@@ -29,11 +29,11 @@ unsigned int bench_loops;
  * run at its highest multiplier, even when it isn't, and furthermore only
  * increment the TSC at FSB ticks, not CPU ticks. Thus, every TSC returned by
  * rdtsc will be a multiple of the highest multiplier supported by the CPU. To
- * support this, we set bench_loops to 1024, which has a small remainder when
+ * support this, we set bench_loops to 256, which has a small remainder when
  * divided into any concievable clock multiplier.
  */
 void
 arch_init()
 {
-  bench_loops = 1024;
+  bench_loops = 256;
 }
