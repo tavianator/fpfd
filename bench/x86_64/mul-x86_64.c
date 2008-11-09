@@ -23,7 +23,7 @@ void
 x86_64_bench_mul(unsigned int trials)
 {
   unsigned int i, j;
-  unsigned long ticks1, ticks2;
+  long ticks1, ticks2;
 
   for (i = 0; i < trials; ++i) {
     /* mulb */

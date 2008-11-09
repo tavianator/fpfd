@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-# unsigned long ticks();
+# long ticks();
 #
 # Return the time stamp counter, and serialize the instruction
 

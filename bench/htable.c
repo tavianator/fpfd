@@ -23,14 +23,14 @@
 #include <stdio.h>  /* For perror       */
 #include <math.h>   /* For sqrt         */
 
-static void save_ticks(const char *key, unsigned long ticks);
+static void save_ticks(const char *key, long ticks);
 static double mean_ticks(const char *key);
 static double stddev_ticks(const char *key);
 
 void
-record_ticks(const char *key, unsigned long tick_count)
+record_ticks(const char *key, long tick_count)
 {
-  unsigned long i, ticks1, ticks2;
+  long i, ticks1, ticks2;
 
   ticks1 = ticks();
   BENCH_LOOP(i) {
@@ -61,23 +61,23 @@ write_ticks(const char *key, FILE *file)
 
   /* Each trial */
   for (i = 0; i < tl->size; ++i) {
-    fprintf(file, "%lu\t%g\n", (unsigned long)i,
+    fprintf(file, "%ld\t%g\n", (long)i,
             ((double)tl->list[i] / bench_loops) - overhead);
   }
 
   /* Mean */
-  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
-          mean, (unsigned long)tl->size - 1, mean);
+  fprintf(file, "\n\n0\t%g\n%ld\t%g\n",
+          mean, (long)tl->size - 1, mean);
 
   /* One standard deviation above and below the mean */
-  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
-          mean + stddev, (unsigned long)tl->size - 1, mean + stddev);
-  fprintf(file, "\n\n0\t%g\n%lu\t%g\n",
-          mean - stddev, (unsigned long)tl->size - 1, mean - stddev);
+  fprintf(file, "\n\n0\t%g\n%ld\t%g\n",
+          mean + stddev, (long)tl->size - 1, mean + stddev);
+  fprintf(file, "\n\n0\t%g\n%ld\t%g\n",
+          mean - stddev, (long)tl->size - 1, mean - stddev);
 }
 
 static void
-save_ticks(const char *key, unsigned long tick_count)
+save_ticks(const char *key, long tick_count)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -89,7 +89,7 @@ save_ticks(const char *key, unsigned long tick_count)
     tl = xmalloc(sizeof(ticklist_t));
 
     tl->trials = 0;
-    tl->list = xmalloc(sizeof(unsigned long));
+    tl->list = xmalloc(sizeof(long));
     tl->size = 0;
     tl->capacity = 1;
 
@@ -104,7 +104,7 @@ save_ticks(const char *key, unsigned long tick_count)
 
   if (tl->size == tl->capacity) {
     tl->capacity *= 2;
-    tl->list = xrealloc(tl->list, tl->capacity * sizeof(unsigned long));
+    tl->list = xrealloc(tl->list, tl->capacity * sizeof(long));
   }
 
   tl->list[tl->size] = tick_count;
