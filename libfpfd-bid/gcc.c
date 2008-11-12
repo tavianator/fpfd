@@ -42,3 +42,46 @@ __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs)
   fpfd32_add(ret_cast.fpfd, lhs_cast.fpfd, rhs_cast.fpfd, FPFD_RNDN, NULL);
   return ret_cast.dec;
 }
+
+_Decimal32
+__bid_subsd3(_Decimal32 lhs, _Decimal32 rhs)
+{
+  fpfd32_union_t ret_cast, lhs_cast, rhs_cast;
+  lhs_cast.dec = lhs;
+  rhs_cast.dec = rhs;
+
+  fpfd32_sub(ret_cast.fpfd, lhs_cast.fpfd, rhs_cast.fpfd, FPFD_RNDN, NULL);
+  return ret_cast.dec;
+}
+
+_Decimal32
+__bid_mulsd3(_Decimal32 lhs, _Decimal32 rhs)
+{
+  fpfd32_union_t ret_cast, lhs_cast, rhs_cast;
+  lhs_cast.dec = lhs;
+  rhs_cast.dec = rhs;
+
+  fpfd32_mul(ret_cast.fpfd, lhs_cast.fpfd, rhs_cast.fpfd, FPFD_RNDN, NULL);
+  return ret_cast.dec;
+}
+
+_Decimal32
+__bid_divsd3(_Decimal32 lhs, _Decimal32 rhs)
+{
+  fpfd32_union_t ret_cast, lhs_cast, rhs_cast;
+  lhs_cast.dec = lhs;
+  rhs_cast.dec = rhs;
+
+  fpfd32_div(ret_cast.fpfd, lhs_cast.fpfd, rhs_cast.fpfd, FPFD_RNDN, NULL);
+  return ret_cast.dec;
+}
+
+_Decimal32
+__bid_negsd2(_Decimal32 src)
+{
+  fpfd32_union_t cast;
+  cast.dec = src;
+
+  fpfd32_neg(cast.fpfd, cast.fpfd);
+  return cast.dec;
+}
