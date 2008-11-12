@@ -15,7 +15,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ(2.62)
+AC_PREREQ(2.63)
 AC_INIT(The FPFD Library, 0.0.1, tavianator@gmail.com, fpfd)
 AM_INIT_AUTOMAKE(fpfd, 0.0.1)
 
@@ -37,9 +37,19 @@ AC_TYPE_SIZE_T
 dnl Find out which assembly files to compile
 AC_CANONICAL_HOST
 
-AM_CONDITIONAL([X86], [echo $host_cpu | grep '.*86$' > /dev/null])
-AM_CONDITIONAL([X86_64], [echo $host_cpu | grep 'x86_64$' > /dev/null])
+AM_CONDITIONAL([X86], [echo $host_cpu | grep '.*86$' >/dev/null])
+AM_CONDITIONAL([X86_64], [echo $host_cpu | grep 'x86_64$' >/dev/null])
 
+dnl Use FPFD for _Decimal* types?
+AC_ARG_ENABLE([gcc-override],
+              [AS_HELP_STRING([--enable-gcc-override],
+                              [Use FPFD for _Decimal* types])],
+              [],
+              [enable_gcc_override=no])
+
+AM_CONDITIONAL([GCC_OVERRIDE], [test "x$enable_gcc_override" != "xno"])
+
+dnl Generate Makefiles
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile
                  libfpfd-dpd/Makefile
