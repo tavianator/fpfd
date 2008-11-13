@@ -36,6 +36,6 @@ fpfd32_impl_div:
         subl 8(%rdx), %r8d      # Subtract the exponents
         movl %r8d, 8(%rdi)      # Store the exponent
         movl %ecx, 12(%rdi)     # Store the sign
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
         .size fpfd32_impl_div, .-fpfd32_impl_div

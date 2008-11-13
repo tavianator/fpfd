@@ -42,7 +42,7 @@ fpfd32_impl_div:
         movl 16(%esp), %esi
         movl %ebx, 8(%esi)      # Store the exponent
         movl %ecx, 12(%esi)     # Store the sign
-        movl $0, 16(%esi)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%esi)       # Set the special flag to FPFD_NUMBER
         popl %edi
         popl %esi
         popl %ebx

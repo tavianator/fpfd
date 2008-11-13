@@ -39,6 +39,6 @@ fpfd32_impl_mul:
         movq %rax, (%rdi)       # Store the mantissa
         movl %r8d, 8(%rdi)      # Store the exponent
         movl %ecx, 12(%rdi)     # Store the sign
-        movl $0, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
         .size fpfd32_impl_mul, .-fpfd32_impl_mul
