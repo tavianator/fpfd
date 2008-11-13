@@ -34,7 +34,6 @@ fpfd32_bench_mul(unsigned int trials)
   fpfd32_mul(fp, lhs, rhs, FPFD_RNDN, &flags);
 
   for (i = 0; i < trials; ++i) {
-    fpfd32_random(fp);
     fpfd32_random(lhs);
     fpfd32_random(rhs);
 
