@@ -20,11 +20,11 @@
 #include "bench.h"
 
 void
-fpfd32_bench_impl_mul(unsigned int trials)
+fpfd32_bench_impl_scale(unsigned int trials)
 {
   fpfd32_t fp, lhs, rhs;
   fpfd32_impl_t impl, lhs_impl, rhs_impl;
-  long ticks1, ticks2;
+  long ticks1, ticks2, ticks3;
   unsigned int i, j;
 
   /* Warm up cache */
@@ -33,6 +33,7 @@ fpfd32_bench_impl_mul(unsigned int trials)
   fpfd32_impl_expand(&lhs_impl, lhs);
   fpfd32_impl_expand(&rhs_impl, rhs);
   fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
+  fpfd32_impl_scale(&impl);
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
@@ -45,8 +46,16 @@ fpfd32_bench_impl_mul(unsigned int trials)
       NO_UNROLL();
       fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
     }
+
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_mul", ticks2 - ticks1);
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+      fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
+      fpfd32_impl_scale(&impl);
+    }
+    ticks3 = ticks();
+
+    record_ticks("fpfd32_impl_scale", (ticks3 - ticks2) - (ticks2 - ticks1));
   }
 }
