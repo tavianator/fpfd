@@ -34,7 +34,7 @@ fpfd32_impl_addsub:
                                 # (sign ^ lhs->fields.sign ^ rhs->fields.sign)
         js .Lsub                # If the result is -1, we are subtracting
         movl 8(%rcx), %eax
-        subl 8(%rdx), %eax      # lhs->fields.exp - rhs->fields.sign
+        subl 8(%rdx), %eax      # lhs->fields.exp - rhs->fields.exp
         ret
 .Lsub:
         ret
