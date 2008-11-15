@@ -109,6 +109,11 @@ int fpfd32_mul(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
 int fpfd32_div(fpfd32_ptr dest, fpfd32_srcptr lhs, fpfd32_srcptr rhs,
                fpfd_rnd_t rnd, fpfd_flags_t *flags);
 
+/* --- Fused-Multiply-Add: Store a*b + c in dest --- */
+int fpfd32_fma(fpfd32_ptr dest,
+               fpfd32_srcptr a, fpfd32_srcptr b, fpfd32_srcptr c,
+               fpfd_rnd_t rnd, fpfd_flags_t *flags);
+
 /* --- General comparison. Returns an integer with the sign of lhs - rhs. --- */
 int fpfd32_cmp(fpfd32_srcptr lhs, fpfd32_srcptr rhs);
 
