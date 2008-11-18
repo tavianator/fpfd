@@ -28,7 +28,6 @@ fpfd32_bench_mul(unsigned int trials)
   fpfd_flags_t flags = FPFD_NONE;
 
   /* Warm up cache */
-  fpfd32_random(fp);
   fpfd32_random(lhs);
   fpfd32_random(rhs);
   fpfd32_mul(fp, lhs, rhs, FPFD_RNDN, &flags);
