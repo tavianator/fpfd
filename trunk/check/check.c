@@ -65,18 +65,13 @@ fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
 }
 
 void
-fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special)
+fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
+                       fpfd_special_t special)
 {
-  fpfd32_impl_t res_impl;
-
-  fpfd32_impl_expand(&res_impl, res);
-
-  if (res_impl.fields.special != special) {
-    fprintf(stderr, "\n");
-    fpfd32_dump(stderr, res);
-    fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
-    fprintf(stderr, "\n\n--- ERROR: Expected special == %s ---\n\n",
+  if (res->fields.special != special) {
+    fprintf(stderr, "\nfpfd32_%s(", op);
+    fpfd32_impl_dump(stderr, res);
+    fprintf(stderr, ")\n\n--- ERROR: Expected special == %s ---\n\n",
             fpfd_special_str(special));
     exitstatus = EXIT_FAILURE;
   }
