@@ -17,21 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "noncanonical.h"
+#include "check.h"
 #include <stdio.h>  /* For fprintf, stderr            */
 #include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
 
 /*
- * Check cases where a non-canonical value should be handled specially.
+ * Check that fpfd*_impl_compress is behaving correctly.
  */
 int
 main()
 {
-  fpfd_check_independent();
-
-  /*
-   * Encoding-dependant tests
-   */
-
   return exitstatus;
 }

@@ -73,8 +73,8 @@
   flags = FPFD_NONE;                                    \
   fpfd32_##op(dest##32, op1##32, op2##32, rnd, &flags)
   /*
-   * fpfd64_##op(dest##64, op1##64, op2##64, rnd)
-   * fpfd128_##op(dest##128, op1##128, op2##128, rnd)
+   * fpfd64_##op(dest##64, op1##64, op2##64, rnd, &flags)
+   * fpfd128_##op(dest##128, op1##128, op2##128, rnd, &flags)
    */
 
 /*
@@ -122,11 +122,13 @@
    *                         sign, special, flags)
    */
 
-#define fpfd_assert_rf(res, special)            \
-  fpfd32_assert_rf(res##32, special)
+#define fpfd_impl_assert_ora1f(op, res, arg1, special)  \
+  fpfd_op2(op, res, arg1);                              \
+  fpfd32_impl_assert_orf(#op, res##32, special)
   /*
-   * fpfd64_assert_rf(res##64, special)
-   * fpfd128_assert_rf(res##128, special)
+   * fpfd64_impl_assert_orfv(#op, res##64, special, rval, fpfd64_#op(res##64))
+   * fpfd128_impl_assert_orfv(#op, res##128, special, rval,
+   *                           fpfd128_#op(res##128))
    */
 
 #define fpfd_impl_assert_orfv(op, res, special, rval)                   \
@@ -161,6 +163,8 @@ void fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res,
                             fpfd_flags_t flags, fpfd_flags_t flagsex);
 void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
+void fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
+                            fpfd_special_t special);
 void fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
                              fpfd_special_t special, int rexp, int rval);
 void fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,

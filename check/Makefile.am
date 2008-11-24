@@ -18,7 +18,7 @@
 #########################################################################
 
 check_LTLIBRARIES = libfpfd-check.la
-check_PROGRAMS    = signedzero-dpd signedzero-bid noncanonical-dpd noncanonical-bid scale-dpd scale-bid
+check_PROGRAMS    = signedzero-dpd signedzero-bid impl_compress-dpd impl_compress-bid impl_expand-dpd impl_expand-bid impl_scale-dpd impl_scale-bid
 TESTS             = $(check_PROGRAMS)
 
 libfpfd_check_la_SOURCES = check.c check.h
@@ -28,12 +28,17 @@ signedzero_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../lib
 signedzero_bid_SOURCES = signedzero.c
 signedzero_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 
-noncanonical_dpd_SOURCES = noncanonical.c noncanonical.h noncanonical-dpd.c
-noncanonical_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
-noncanonical_bid_SOURCES = noncanonical.c noncanonical.h noncanonical-bid.c
-noncanonical_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+impl_compress_dpd_SOURCES = impl_compress-dpd.c
+impl_compress_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+impl_compress_bid_SOURCES = impl_compress-bid.c
+impl_compress_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 
-scale_dpd_SOURCES = scale-dpd.c
-scale_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
-scale_bid_SOURCES = scale-bid.c
-scale_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+impl_expand_dpd_SOURCES = impl_expand-dpd.c
+impl_expand_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+impl_expand_bid_SOURCES = impl_expand-bid.c
+impl_expand_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+
+impl_scale_dpd_SOURCES = impl_scale-dpd.c
+impl_scale_dpd_LDADD   = ./libfpfd-check.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+impl_scale_bid_SOURCES = impl_scale-bid.c
+impl_scale_bid_LDADD   = ./libfpfd-check.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la

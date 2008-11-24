@@ -17,39 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "noncanonical.h"
-#include <stdio.h>  /* For fprintf, stderr            */
-#include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
+#include "check.h"
 
 /*
- * Check cases where a non-canonical value should be handled specially.
+ * Check that fpfd*_impl_compress is behaving correctly.
  */
 int
 main()
 {
-  fpfd_declare(big_mant_num);
-  fpfd_declare(big_mant_sNaN);
-  fpfd_declare(big_mant_qNaN);
-
-  fpfd_check_independent();
-
-  /*
-   * Encoding-dependant tests
-   *
-   * Mantissas with numerical value greater than the maximum representable by
-   * the DPD encoding are non-canonical and evaluate to zero, even for NaN
-   * payloads.
-   */
-  fpfd32_set_manually(big_mant_num32, UINT32_C(0x77FFFFFF));
-  fpfd_assert_rf(big_mant_num, FPFD_ZERO);
-
-  fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
-  fpfd32_assert_mant(big_mant_sNaN32, UINT32_C(0));
-  fpfd_assert_rf(big_mant_sNaN, FPFD_SNAN);
-
-  fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
-  fpfd32_assert_mant(big_mant_qNaN32, UINT32_C(0));
-  fpfd_assert_rf(big_mant_qNaN, FPFD_QNAN);
-
   return exitstatus;
 }

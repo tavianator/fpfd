@@ -19,5 +19,11 @@
 
 #include "check.h"
 
-/* Encoding-independent tests */
-void fpfd_check_independent();
+/*
+ * Check that fpfd*_impl_expand is behaving correctly
+ */
+int
+main()
+{
+  return exitstatus;
+}

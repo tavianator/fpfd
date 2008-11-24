@@ -19,10 +19,9 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
+#include <string.h> /* For memmove */
 
 /* ---   HACKS   --- */
-
-#include <string.h> /* For memset */
 
 int
 fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
@@ -51,10 +50,7 @@ fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
 void
 fpfd32_set(fpfd32_ptr dest, fpfd32_srcptr src)
 {
-  /* Don't just memmove, because we should canonicalize non-canonical inputs */
-  fpfd32_impl_t rop;
-  fpfd32_impl_expand(&rop, src);
-  fpfd32_impl_compress(dest, &rop);
+  memmove(dest, src, sizeof(fpfd32_struct_t));
 }
 
 void fpfd32_set_zero(fpfd32_ptr dest) {
