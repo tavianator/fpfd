@@ -52,11 +52,11 @@ fpfd32_impl_expand:
         movl %ecx, %edx
         andl $0x600, %edx
         cmpl $0x600, %edx
-        je .L1i                 # If the combination field begins with 11,
-                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        je .Lc1i                # If the combination field begins with 11,
+                                # follow 754-2008, S3.5.2, p11, c.1.i
         movl %ecx, %edx
         andl $0x1C0, %edx
-        shll $19, %edx
+        shll $18, %edx
         orl %edx, %ebx
         jz .Lzero
         movl %ebx, (%eax)       # Get the leading significand digit
@@ -71,7 +71,7 @@ fpfd32_impl_expand:
         movl $1, 16(%eax)       # Set the special flag to FPFD_NUMBER
         popl %ebx
         ret
-.L1i:
+.Lc1i:
         movl %ecx, %edx
         andl $0x7E0, %edx
         cmpl $0x7E0, %edx

@@ -29,6 +29,7 @@ main()
 
   fpfd_declare(zero);
   fpfd_declare(one);
+  fpfd_declare(ones);
   fpfd_declare(nines);
   fpfd_declare(inf);
   fpfd_declare(sNaN);
@@ -36,13 +37,15 @@ main()
 
   fpfd_impl_declare(zero_impl);
   fpfd_impl_declare(one_impl);
+  fpfd_impl_declare(ones_impl);
   fpfd_impl_declare(nines_impl);
   fpfd_impl_declare(inf_impl);
   fpfd_impl_declare(sNaN_impl);
   fpfd_impl_declare(qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_expand works for 0, 1, 9999999, +inf, sNan, and qNaN.
+   * Test that fpfd*_impl_expand works for 0, 1, 1111111, 9999999, +inf, sNan,
+   * and qNaN.
    */
 
   fpfd32_set_manually(zero32, UINT32_C(0x21400000));
@@ -54,7 +57,12 @@ main()
                            0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(0x1));
 
-  fpfd32_set_manually(nines32, UINT32_C(0x6853FCFF));
+  fpfd32_set_manually(ones32, UINT32_C(0x26524491));
+  fpfd_impl_assert_ora1esf(impl_expand, &ones_impl, ones,
+                           0, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(0x1111111));
+
+  fpfd32_set_manually(nines32, UINT32_C(0x6E53FCFF));
   fpfd_impl_assert_ora1esf(impl_expand, &nines_impl, nines,
                            0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(0x9999999));
