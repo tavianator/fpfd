@@ -49,7 +49,7 @@ main()
   fpfd_impl_assert_ora1sf(impl_expand, &zero_impl, zero,
                           1, FPFD_ZERO);
 
-  fpfd32_set_manually(one32, UINT32_C(0x26500001));
+  fpfd32_set_manually(one32, UINT32_C(0x22500001));
   fpfd_impl_assert_ora1esf(impl_expand, &one_impl, one,
                            0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(0x1));
