@@ -50,11 +50,11 @@ fpfd32_impl_expand:
         movl %eax, %ecx
         andl $0x600, %ecx
         cmpl $0x600, %ecx
-        je .L1i                 # If the combination field begins with 11,
-                                # follow 754r DRAFT 1.5.0, S3.5, p19, 1.i
+        je .Lc1i                # If the combination field begins with 11,
+                                # follow 754-2008, S3.5.2, p11, c.1.i
         movl %eax, %ecx
         andl $0x1C0, %ecx
-        shll $19, %ecx
+        shll $18, %ecx
         orl %ecx, %edx
         jz .Lzero
         movl %edx, (%rdi)       # Get the leading significand digit
@@ -68,7 +68,7 @@ fpfd32_impl_expand:
         movl %ecx, 8(%rdi)      # Subtract the bias and store the exponent
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         ret
-.L1i:
+.Lc1i:
         movl %eax, %ecx
         andl $0x7E0, %ecx
         cmpl $0x7E0, %ecx

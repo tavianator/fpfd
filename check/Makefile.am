@@ -18,7 +18,7 @@
 #########################################################################
 
 check_LTLIBRARIES = libfpfd-check.la
-check_PROGRAMS    = signedzero-dpd signedzero-bid impl_compress-dpd impl_compress-bid impl_expand-dpd impl_expand-bid impl_scale-dpd impl_scale-bid
+check_PROGRAMS    = impl_expand-dpd impl_expand-bid impl_compress-dpd impl_compress-bid impl_scale-dpd impl_scale-bid signedzero-dpd signedzero-bid
 TESTS             = $(check_PROGRAMS)
 
 libfpfd_check_la_SOURCES = check.c check.h
