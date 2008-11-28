@@ -25,6 +25,24 @@
 int
 main()
 {
+  /* Canonical inputs */
+
+  fpfd_declare(zero);
+  fpfd_declare(one);
+  fpfd_declare(nines);
+  fpfd_declare(inf);
+  fpfd_declare(sNaN);
+  fpfd_declare(qNaN);
+
+  fpfd_impl_declare(zero_impl);
+  fpfd_impl_declare(one_impl);
+  fpfd_impl_declare(nines_impl);
+  fpfd_impl_declare(inf_impl);
+  fpfd_impl_declare(sNaN_impl);
+  fpfd_impl_declare(qNaN_impl);
+
+  /* Non-canonical inputs */
+
   fpfd_declare(big_mant_num);
   fpfd_declare(big_mant_sNaN);
   fpfd_declare(big_mant_qNaN);
@@ -34,22 +52,55 @@ main()
   fpfd_impl_declare(big_mant_qNaN_impl);
 
   /*
+   * Test that fpfd*_impl_expand works for 0, 1, 9999999, +inf, sNan, and qNaN.
+   */
+
+  fpfd32_set_manually(zero32, UINT32_C(0x32800000));
+  fpfd_impl_assert_ora1sf(impl_expand, &zero_impl, zero,
+                          1, FPFD_ZERO);
+
+  fpfd32_set_manually(one32, UINT32_C(0x32800001));
+  fpfd_impl_assert_ora1esf(impl_expand, &one_impl, one,
+                           0, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(1));
+
+  fpfd32_set_manually(nines32, UINT32_C(0x6CB8967F));
+  fpfd_impl_assert_ora1esf(impl_expand, &nines_impl, nines,
+                           0, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(9999999));
+
+  fpfd32_set_manually(inf32, UINT32_C(0x78000000));
+  fpfd_impl_assert_ora1sf(impl_expand, &inf_impl, inf,
+                          1, FPFD_INF);
+
+  fpfd32_set_manually(sNaN32, UINT32_C(0x7E01E240));
+  fpfd_impl_assert_ora1sf(impl_expand, &sNaN_impl, sNaN,
+                          1, FPFD_SNAN);
+  fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(123456));
+
+  fpfd32_set_manually(qNaN32, UINT32_C(0x7C01E240));
+  fpfd_impl_assert_ora1sf(impl_expand, &qNaN_impl, qNaN,
+                          1, FPFD_QNAN);
+  fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(123456));
+
+  /*
    * Mantissas with numerical value greater than the maximum representable by
    * the DPD encoding are non-canonical and evaluate to zero, even for NaN
    * payloads.
    */
+
   fpfd32_set_manually(big_mant_num32, UINT32_C(0x77FFFFFF));
-  fpfd_impl_assert_ora1f(impl_expand, &big_mant_num_impl, big_mant_num,
-                         FPFD_ZERO);
+  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_num_impl, big_mant_num,
+                          1, FPFD_ZERO);
 
   fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
-  fpfd_impl_assert_ora1f(impl_expand, &big_mant_sNaN_impl, big_mant_sNaN,
-                         FPFD_SNAN);
+  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_sNaN_impl, big_mant_sNaN,
+                          1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&big_mant_sNaN_impl32, UINT32_C(0), UINT32_C(0));
 
   fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
-  fpfd_impl_assert_ora1f(impl_expand, &big_mant_qNaN_impl, big_mant_qNaN,
-                         FPFD_QNAN);
+  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_qNaN_impl, big_mant_qNaN,
+                          1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&big_mant_qNaN_impl32, UINT32_C(0), UINT32_C(0));
 
   return exitstatus;

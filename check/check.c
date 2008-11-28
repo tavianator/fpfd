@@ -65,14 +65,29 @@ fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
 }
 
 void
-fpfd32_impl_assert_orf(const char *op, const fpfd32_impl_t *res,
-                       fpfd_special_t special)
+fpfd32_impl_assert_orsf(const char *op, const fpfd32_impl_t *res,
+                        int sign, fpfd_special_t special)
 {
-  if (res->fields.special != special) {
+  if (res->fields.sign != sign || res->fields.special != special) {
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ")\n\n--- ERROR: Expected special == %s ---\n\n",
-            fpfd_special_str(special));
+    fprintf(stderr, ")\n\n--- ERROR: Expected sign == %d,"
+                    " special == %s ---\n\n",
+            sign, fpfd_special_str(special));
+    exitstatus = EXIT_FAILURE;
+  }
+}
+
+void
+fpfd32_impl_assert_oresf(const char *op, const fpfd32_impl_t *res,
+                         int exp, int sign, fpfd_special_t special)
+{
+  if (res->fields.exp != exp || res->fields.special != special) {
+    fprintf(stderr, "\nfpfd32_%s(", op);
+    fpfd32_impl_dump(stderr, res);
+    fprintf(stderr, ")\n\n--- ERROR: Expected exp == %d, sign == %d,"
+                    " special == %s ---\n\n",
+            exp, sign, fpfd_special_str(special));
     exitstatus = EXIT_FAILURE;
   }
 }
