@@ -55,6 +55,19 @@
    * (dest##128)->fields.special = speciala
    */
 
+#define fpfd_impl_set_esf(dest, expa, signa, speciala)  \
+  (dest##32)->fields.exp = expa;                        \
+  (dest##32)->fields.sign = signa;                      \
+  (dest##32)->fields.special = speciala
+  /*
+   * (dest##64)->fields.exp = expa
+   * (dest##64)->fields.sign = signa
+   * (dest##64)->fields.special = speciala
+   * (dest##128)->fields.exp = expa
+   * (dest##128)->fields.sign = signa
+   * (dest##128)->fields.special = speciala
+   */
+
 #define fpfd_op1(op, dest)                      \
   fpfd32_##op(dest##32)
   /*
@@ -73,8 +86,8 @@
   flags = FPFD_NONE;                                    \
   fpfd32_##op(dest##32, op1##32, op2##32, rnd, &flags)
   /*
-   * fpfd64_##op(dest##64, op1##64, op2##64, rnd)
-   * fpfd128_##op(dest##128, op1##128, op2##128, rnd)
+   * fpfd64_##op(dest##64, op1##64, op2##64, rnd, &flags)
+   * fpfd128_##op(dest##128, op1##128, op2##128, rnd, &flags)
    */
 
 /*
@@ -111,6 +124,20 @@
  * To save space here, only those macros actually used by tests are defined.
  */
 
+#define fpfd_assert_rsf(res, sign, special)     \
+  fpfd32_assert_rsf(res##32, sign, special)
+  /*
+   * fpfd64_assert_ora1esf(res##64, sign, special)
+   * fpfd128_assert_ora1esf(res##128, sign, special)
+   */
+
+#define fpfd_assert_resf(res, exp, sign, special)  \
+  fpfd32_assert_resf(res##32, exp, sign, special)
+  /*
+   * fpfd64_assert_ora1esf(res##64, exp, sign, special)
+   * fpfd128_assert_ora1esf(res##128,exp, sign, special)
+   */
+
 #define fpfd_assert_ora2msfx(op, res, arg1, arg2, rnd, sign, special, flagsex) \
   fpfd_op3mx(op, res, arg1, arg2, rnd);                                        \
   fpfd32_assert_ora2msfx(#op, res##32, arg1##32, arg2##32, rnd, sign, special, \
@@ -122,11 +149,18 @@
    *                         sign, special, flags)
    */
 
-#define fpfd_assert_rf(res, special)            \
-  fpfd32_assert_rf(res##32, special)
+#define fpfd_impl_assert_rsf(res, sign, special)      \
+  fpfd32_impl_assert_rsf(res##32, sign, special)
   /*
-   * fpfd64_assert_rf(res##64, special)
-   * fpfd128_assert_rf(res##128, special)
+   * fpfd64_impl_assert_rsf(res##64, sign, special)
+   * fpfd128_impl_assert_rsf(res##128, sign, special)
+   */
+
+#define fpfd_impl_assert_resf(res, exp, sign, special)        \
+  fpfd32_impl_assert_resf(res##32, exp, sign, special)
+  /*
+   * fpfd64_impl_assert_rfv(res##64, exp, sign, special)
+   * fpfd128_impl_assert_rfv(res##128, exp, sign, special)
    */
 
 #define fpfd_impl_assert_orfv(op, res, special, rval)                   \
@@ -134,7 +168,7 @@
   /*
    * fpfd64_impl_assert_orfv(#op, res##64, special, rval, fpfd64_#op(res##64))
    * fpfd128_impl_assert_orfv(#op, res##128, special, rval,
-   *                           fpfd128_#op(res##128))
+   *                          fpfd128_#op(res##128))
    */
 
 #define fpfd_impl_assert_orefv(op, res, exp, special, rval)             \
@@ -154,13 +188,19 @@ extern int exitstatus;
  * Assertion functions, usually called by assertion macros.
  */
 
+void fpfd32_assert_rsf(fpfd32_srcptr res, int sign, fpfd_special_t special);
+void fpfd32_assert_resf(fpfd32_srcptr res, int exp, int sign,
+                        fpfd_special_t special);
 void fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res,
                             fpfd32_srcptr op1, fpfd32_srcptr op2,
                             fpfd_rnd_t rnd, int sign,
                             fpfd_special_t special,
                             fpfd_flags_t flags, fpfd_flags_t flagsex);
-void fpfd32_assert_rf(fpfd32_srcptr res, fpfd_special_t special);
 
+void fpfd32_impl_assert_rsf(const fpfd32_impl_t *res, int sign,
+                            fpfd_special_t special);
+void fpfd32_impl_assert_resf(const fpfd32_impl_t *res, int exp, int sign,
+                             fpfd_special_t special);
 void fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
                              fpfd_special_t special, int rexp, int rval);
 void fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
