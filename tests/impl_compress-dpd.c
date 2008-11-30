@@ -48,18 +48,49 @@ main()
    * sNaN, and qNaN.
    */
 
-  fpfd_impl_set_esf(&zero_impl, 0, 1, FPFD_ZERO);
+  fpfd_impl_set_esf(&zero_impl, 0, -1, FPFD_ZERO);
   fpfd32_impl_set_manually(&zero_impl32,
-                           UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
+                           UINT32_C(0x99999999), UINT32_C(0x99999999));
   fpfd_op2(impl_compress, zero, &zero_impl);
-  fpfd_assert_rsf(zero, 1, FPFD_ZERO);
-  fpfd32_assert_mask(zero32, UINT32_C(0x1C0FFFFF), UINT32_C(0x00000000));
+  fpfd_assert_rsf(zero, -1, FPFD_ZERO);
+  fpfd32_assert_mask(zero32, UINT32_C(0x9C0FFFFF), UINT32_C(0x80000000));
 
   fpfd_impl_set_esf(&one_impl, 0, 1, FPFD_NUMBER);
-  fpfd32_impl_set_manually(&one_impl32, UINT32_C(0), UINT32_C(1));
+  fpfd32_impl_set_manually(&one_impl32, UINT32_C(0), UINT32_C(0x00000001));
   fpfd_op2(impl_compress, one, &one_impl);
   fpfd_assert_rsf(one, 1, FPFD_NUMBER);
-  fpfd32_assert_manually(zero32, UINT32_C(0x22500001));
+  fpfd32_assert_manually(one32, UINT32_C(0x22500001));
+
+  fpfd_impl_set_esf(&ones_impl, 0, -1, FPFD_NUMBER);
+  fpfd32_impl_set_manually(&ones_impl32, UINT32_C(0), UINT32_C(0x01111111));
+  fpfd_op2(impl_compress, ones, &ones_impl);
+  fpfd_assert_rsf(ones, -1, FPFD_NUMBER);
+  fpfd32_assert_manually(ones32, UINT32_C(0xA6524491));
+
+  fpfd_impl_set_esf(&nines_impl, 0, 1, FPFD_NUMBER);
+  fpfd32_impl_set_manually(&nines_impl32, UINT32_C(0), UINT32_C(0x09999999));
+  fpfd_op2(impl_compress, nines, &nines_impl);
+  fpfd_assert_rsf(nines, 1, FPFD_NUMBER);
+  fpfd32_assert_manually(nines32, UINT32_C(0x6E53FCFF));
+
+  fpfd_impl_set_esf(&inf_impl, 0, -1, FPFD_INF);
+  fpfd32_impl_set_manually(&inf_impl32,
+                           UINT32_C(0x99999999), UINT32_C(0x99999999));
+  fpfd_op2(impl_compress, inf, &inf_impl);
+  fpfd_assert_rsf(inf, -1, FPFD_INF);
+  fpfd32_assert_manually(inf32, UINT32_C(0xF8000000));
+
+  fpfd_impl_set_esf(&sNaN_impl, 0, 1, FPFD_SNAN);
+  fpfd32_impl_set_manually(&sNaN_impl32, UINT32_C(0), UINT32_C(0x00123456));
+  fpfd_op2(impl_compress, sNaN, &sNaN_impl);
+  fpfd_assert_rsf(sNaN, 1, FPFD_SNAN);
+  fpfd32_assert_manually(sNaN32, UINT32_C(0x7E028E56));
+
+  fpfd_impl_set_esf(&qNaN_impl, 0, -1, FPFD_QNAN);
+  fpfd32_impl_set_manually(&qNaN_impl32, UINT32_C(0), UINT32_C(0x00123456));
+  fpfd_op2(impl_compress, qNaN, &qNaN_impl);
+  fpfd_assert_rsf(qNaN, -1, FPFD_QNAN);
+  fpfd32_assert_manually(qNaN32, UINT32_C(0xFC028E56));
 
   return exitstatus;
 }
