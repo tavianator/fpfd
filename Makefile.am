@@ -18,7 +18,7 @@
 #########################################################################
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = libfpfd-dpd libfpfd-bid libfpfd check bench doc
+SUBDIRS = libfpfd-dpd libfpfd-bid libfpfd tests bench doc
 
 EXTRA_DIST = autogen.sh
 

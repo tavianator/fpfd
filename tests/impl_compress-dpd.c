@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "check.h"
+#include "test.h"
 #include <stdio.h>  /* For fprintf, stderr            */
 #include <stdlib.h> /* For EXIT_SUCCESS, EXIT_FAILURE */
 
@@ -49,6 +49,13 @@ main()
    */
 
   fpfd_impl_set_esf(&zero_impl, 0, 1, FPFD_ZERO);
+  fpfd32_impl_set_manually(&zero_impl32,
+                           UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
+  fpfd_op2(impl_compress, zero, &zero_impl);
+  fpfd_assert_rsf(zero, +1, FPFD_ZERO);
+  fpfd32_assert_mask(zero32, UINT32_C(0x1C0FFFFF), UINT32_C(0x00000000));
+
+  fpfd_impl_set_esf(&one_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&zero_impl32,
                            UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
   fpfd_op2(impl_compress, zero, &zero_impl);
