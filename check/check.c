@@ -29,6 +29,29 @@ int exitstatus = EXIT_SUCCESS;
 /* Assertions */
 
 void
+fpfd32_assert_rsf(fpfd32_srcptr res, int sign, fpfd_special_t special)
+{
+  fpfd32_impl_t res_impl;
+
+  fpfd32_impl_expand(&res_impl, res);
+
+  if (res_impl.fields.sign != sign || res_impl.fields.special != special) {
+    fprintf(stderr, "\n");
+    fpfd32_dump(stderr, res);
+    fprintf(stderr, " = ");
+    fpfd32_impl_dump(stderr, &res_impl);
+    fprintf(stderr, "\n\n--- ERROR: expected sign == %+d,"
+                    " special == %s ---\n\n",
+            sign, fpfd_special_str(special));
+  }
+}
+
+void
+fpfd32_assert_resf(fpfd32_srcptr res, int exp, int sign, fpfd_special_t special)
+{
+}
+
+void
 fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
                        fpfd32_srcptr op2, fpfd_rnd_t rnd, int sign,
                        fpfd_special_t special,
@@ -57,7 +80,7 @@ fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
     fpfd32_impl_dump(stderr, &op2_impl);
     fprintf(stderr, ", %s)\n\nflags = %s\n",
             fpfd_rnd_str(rnd), fpfd_flags_str(flags));
-    fprintf(stderr, "\n--- ERROR: Expected sign == %d, special == %s,"
+    fprintf(stderr, "\n--- ERROR: Expected sign == %+d, special == %s,"
                     " flags == %s ---\n\n",
             sign, fpfd_special_str(special), fpfd_flags_str(flagsex));
     exitstatus = EXIT_FAILURE;
@@ -65,13 +88,13 @@ fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
 }
 
 void
-fpfd32_impl_assert_orsf(const char *op, const fpfd32_impl_t *res,
-                        int sign, fpfd_special_t special)
+fpfd32_impl_assert_rsf(const fpfd32_impl_t *res, int sign,
+                       fpfd_special_t special)
 {
   if (res->fields.sign != sign || res->fields.special != special) {
-    fprintf(stderr, "\nfpfd32_%s(", op);
+    fprintf(stderr, "\n");
     fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ")\n\n--- ERROR: Expected sign == %d,"
+    fprintf(stderr, "\n\n--- ERROR: Expected sign == %+d,"
                     " special == %s ---\n\n",
             sign, fpfd_special_str(special));
     exitstatus = EXIT_FAILURE;
@@ -79,13 +102,13 @@ fpfd32_impl_assert_orsf(const char *op, const fpfd32_impl_t *res,
 }
 
 void
-fpfd32_impl_assert_oresf(const char *op, const fpfd32_impl_t *res,
-                         int exp, int sign, fpfd_special_t special)
+fpfd32_impl_assert_resf(const fpfd32_impl_t *res, int exp, int sign,
+                        fpfd_special_t special)
 {
   if (res->fields.exp != exp || res->fields.special != special) {
-    fprintf(stderr, "\nfpfd32_%s(", op);
+    fprintf(stderr, "\n");
     fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ")\n\n--- ERROR: Expected exp == %d, sign == %d,"
+    fprintf(stderr, "\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s ---\n\n",
             exp, sign, fpfd_special_str(special));
     exitstatus = EXIT_FAILURE;
@@ -116,7 +139,7 @@ fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res);
     fprintf(stderr, ") = %d\n", rval);
-    fprintf(stderr, "\n--- ERROR: Expected exp == %d, special == %s, "
+    fprintf(stderr, "\n--- ERROR: Expected exp == %+d, special == %s, "
                     "fpfd32_%s() == %d ---\n\n",
             exp, fpfd_special_str(special), op, rexp);
     exitstatus = EXIT_FAILURE;
