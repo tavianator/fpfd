@@ -54,7 +54,7 @@ main()
   fpfd_impl_declare(noncanon_qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_expand works for -0, 1, -1111111, 9999999, -inf, sNan,
+   * Test that fpfd*_impl_expand works for -0, 1, -1111111, 9999999, -inf, sNaN,
    * and qNaN.
    */
 
