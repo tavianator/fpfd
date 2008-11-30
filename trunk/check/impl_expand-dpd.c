@@ -58,37 +58,37 @@ main()
    * and qNaN.
    */
 
-  fpfd32_set_manually(zero32, UINT32_C(0x21400000));
-  fpfd_impl_assert_ora1sf(impl_expand, &zero_impl, zero,
-                          1, FPFD_ZERO);
+  fpfd32_set_manually(zero32, UINT32_C(0x22500000));
+  fpfd_op2(impl_expand, &zero_impl, zero);
+  fpfd_impl_assert_rsf(&zero_impl, 1, FPFD_ZERO);
 
   fpfd32_set_manually(one32, UINT32_C(0x22500001));
-  fpfd_impl_assert_ora1esf(impl_expand, &one_impl, one,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &one_impl, one);
+  fpfd_impl_assert_resf(&one_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(0x1));
 
   fpfd32_set_manually(ones32, UINT32_C(0x26524491));
-  fpfd_impl_assert_ora1esf(impl_expand, &ones_impl, ones,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &ones_impl, ones);
+  fpfd_impl_assert_resf(&ones_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(0x1111111));
 
   fpfd32_set_manually(nines32, UINT32_C(0x6E53FCFF));
-  fpfd_impl_assert_ora1esf(impl_expand, &nines_impl, nines,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &nines_impl, nines);
+  fpfd_impl_assert_resf(&nines_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(0x9999999));
 
   fpfd32_set_manually(inf32, UINT32_C(0x78000000));
-  fpfd_impl_assert_ora1sf(impl_expand, &inf_impl, inf,
-                          1, FPFD_INF);
+  fpfd_op2(impl_expand, &inf_impl, inf);
+  fpfd_impl_assert_rsf(&inf_impl, 1, FPFD_INF);
 
   fpfd32_set_manually(sNaN32, UINT32_C(0x7E028E56));
-  fpfd_impl_assert_ora1sf(impl_expand, &sNaN_impl, sNaN,
-                          1, FPFD_SNAN);
+  fpfd_op2(impl_expand, &sNaN_impl, sNaN);
+  fpfd_impl_assert_rsf(&sNaN_impl, 1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(0x123456));
 
   fpfd32_set_manually(qNaN32, UINT32_C(0x7C028E56));
-  fpfd_impl_assert_ora1sf(impl_expand, &qNaN_impl, qNaN,
-                          1, FPFD_QNAN);
+  fpfd_op2(impl_expand, &qNaN_impl, qNaN);
+  fpfd_impl_assert_rsf(&qNaN_impl, 1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(0x123456));
 
   /*
@@ -97,19 +97,19 @@ main()
    */
 
   fpfd32_set_manually(noncanon32, UINT32_C(0x2655BAFF));
-  fpfd_impl_assert_ora1esf(impl_expand, &noncanon_impl, noncanon,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &noncanon_impl, noncanon);
+  fpfd_impl_assert_resf(&noncanon_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&noncanon_impl32, UINT32_C(0), UINT32_C(0x1888999));
 
   fpfd32_set_manually(noncanon_sNaN32, UINT32_C(0x7E0DB9FF));
-  fpfd_impl_assert_ora1sf(impl_expand, &noncanon_sNaN_impl, noncanon_sNaN,
-                          1, FPFD_SNAN);
+  fpfd_op2(impl_expand, &noncanon_sNaN_impl, noncanon_sNaN);
+  fpfd_impl_assert_rsf(&noncanon_sNaN_impl, 1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&noncanon_sNaN_impl32,
                           UINT32_C(0), UINT32_C(0x888999));
 
   fpfd32_set_manually(noncanon_qNaN32, UINT32_C(0x7C09BBFF));
-  fpfd_impl_assert_ora1sf(impl_expand, &noncanon_qNaN_impl, noncanon_qNaN,
-                          1, FPFD_QNAN);
+  fpfd_op2(impl_expand, &noncanon_qNaN_impl, noncanon_qNaN);
+  fpfd_impl_assert_rsf(&noncanon_qNaN_impl, 1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&noncanon_qNaN_impl32,
                           UINT32_C(0), UINT32_C(0x888999));
 

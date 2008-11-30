@@ -27,5 +27,33 @@
 int
 main()
 {
+  fpfd_declare(zero);
+  fpfd_declare(one);
+  fpfd_declare(ones);
+  fpfd_declare(nines);
+  fpfd_declare(inf);
+  fpfd_declare(sNaN);
+  fpfd_declare(qNaN);
+
+  fpfd_impl_declare(zero_impl);
+  fpfd_impl_declare(one_impl);
+  fpfd_impl_declare(ones_impl);
+  fpfd_impl_declare(nines_impl);
+  fpfd_impl_declare(inf_impl);
+  fpfd_impl_declare(sNaN_impl);
+  fpfd_impl_declare(qNaN_impl);
+
+  /*
+   * Test that fpfd*_impl_compress works for 0, 1, 1111111, 9999999, +inf, sNan,
+   * and qNaN.
+   */
+
+  fpfd_impl_set_esf(&zero_impl, 0, 1, FPFD_ZERO);
+  fpfd32_impl_set_manually(&zero_impl32,
+                           UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
+  fpfd_op2(impl_compress, zero, &zero_impl);
+  fpfd_assert_rsf(zero, +1, FPFD_ZERO);
+  fpfd32_assert_mask(zero32, UINT32_C(0x1C0FFFFF), UINT32_C(0x00000000));
+
   return exitstatus;
 }

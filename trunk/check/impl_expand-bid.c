@@ -29,6 +29,7 @@ main()
 
   fpfd_declare(zero);
   fpfd_declare(one);
+  fpfd_declare(ones);
   fpfd_declare(nines);
   fpfd_declare(inf);
   fpfd_declare(sNaN);
@@ -36,6 +37,7 @@ main()
 
   fpfd_impl_declare(zero_impl);
   fpfd_impl_declare(one_impl);
+  fpfd_impl_declare(ones_impl);
   fpfd_impl_declare(nines_impl);
   fpfd_impl_declare(inf_impl);
   fpfd_impl_declare(sNaN_impl);
@@ -43,44 +45,50 @@ main()
 
   /* Non-canonical inputs */
 
-  fpfd_declare(big_mant_num);
+  fpfd_declare(big_mant);
   fpfd_declare(big_mant_sNaN);
   fpfd_declare(big_mant_qNaN);
 
-  fpfd_impl_declare(big_mant_num_impl);
+  fpfd_impl_declare(big_mant_impl);
   fpfd_impl_declare(big_mant_sNaN_impl);
   fpfd_impl_declare(big_mant_qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_expand works for 0, 1, 9999999, +inf, sNan, and qNaN.
+   * Test that fpfd*_impl_expand works for 0, 1, 1111111, 9999999, +inf, sNan,
+   * and qNaN.
    */
 
   fpfd32_set_manually(zero32, UINT32_C(0x32800000));
-  fpfd_impl_assert_ora1sf(impl_expand, &zero_impl, zero,
-                          1, FPFD_ZERO);
+  fpfd_op2(impl_expand, &zero_impl, zero);
+  fpfd_impl_assert_rsf(&zero_impl, 1, FPFD_ZERO);
 
   fpfd32_set_manually(one32, UINT32_C(0x32800001));
-  fpfd_impl_assert_ora1esf(impl_expand, &one_impl, one,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &one_impl, one);
+  fpfd_impl_assert_resf(&one_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(1));
 
+  fpfd32_set_manually(ones32, UINT32_C(0x3290F447));
+  fpfd_op2(impl_expand, &ones_impl, ones);
+  fpfd_impl_assert_resf(&ones_impl, 0, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(1111111));
+
   fpfd32_set_manually(nines32, UINT32_C(0x6CB8967F));
-  fpfd_impl_assert_ora1esf(impl_expand, &nines_impl, nines,
-                           0, 1, FPFD_NUMBER);
+  fpfd_op2(impl_expand, &nines_impl, nines);
+  fpfd_impl_assert_resf(&nines_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(9999999));
 
   fpfd32_set_manually(inf32, UINT32_C(0x78000000));
-  fpfd_impl_assert_ora1sf(impl_expand, &inf_impl, inf,
-                          1, FPFD_INF);
+  fpfd_op2(impl_expand, &inf_impl, inf);
+  fpfd_impl_assert_rsf(&inf_impl, 1, FPFD_INF);
 
   fpfd32_set_manually(sNaN32, UINT32_C(0x7E01E240));
-  fpfd_impl_assert_ora1sf(impl_expand, &sNaN_impl, sNaN,
-                          1, FPFD_SNAN);
+  fpfd_op2(impl_expand, &sNaN_impl, sNaN);
+  fpfd_impl_assert_rsf(&sNaN_impl, 1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(123456));
 
   fpfd32_set_manually(qNaN32, UINT32_C(0x7C01E240));
-  fpfd_impl_assert_ora1sf(impl_expand, &qNaN_impl, qNaN,
-                          1, FPFD_QNAN);
+  fpfd_op2(impl_expand, &qNaN_impl, qNaN);
+  fpfd_impl_assert_rsf(&qNaN_impl, 1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(123456));
 
   /*
@@ -89,18 +97,18 @@ main()
    * payloads.
    */
 
-  fpfd32_set_manually(big_mant_num32, UINT32_C(0x77FFFFFF));
-  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_num_impl, big_mant_num,
-                          1, FPFD_ZERO);
+  fpfd32_set_manually(big_mant32, UINT32_C(0x77FFFFFF));
+  fpfd_op2(impl_expand, &big_mant_impl, big_mant);
+  fpfd_impl_assert_rsf(&big_mant_impl, 1, FPFD_ZERO);
 
   fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
-  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_sNaN_impl, big_mant_sNaN,
-                          1, FPFD_SNAN);
+  fpfd_op2(impl_expand, &big_mant_sNaN_impl, big_mant_sNaN);
+  fpfd_impl_assert_rsf(&big_mant_sNaN_impl, 1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&big_mant_sNaN_impl32, UINT32_C(0), UINT32_C(0));
 
   fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
-  fpfd_impl_assert_ora1sf(impl_expand, &big_mant_qNaN_impl, big_mant_qNaN,
-                          1, FPFD_QNAN);
+  fpfd_op2(impl_expand, &big_mant_qNaN_impl, big_mant_qNaN);
+  fpfd_impl_assert_rsf(&big_mant_qNaN_impl, 1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&big_mant_qNaN_impl32, UINT32_C(0), UINT32_C(0));
 
   return exitstatus;
