@@ -44,23 +44,22 @@ main()
   fpfd_impl_declare(qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_compress works for 0, 1, 1111111, 9999999, +inf, sNan,
-   * and qNaN.
+   * Test that fpfd*_impl_compress works for -0, 1, -1111111, 9999999, -inf,
+   * sNaN, and qNaN.
    */
 
   fpfd_impl_set_esf(&zero_impl, 0, 1, FPFD_ZERO);
   fpfd32_impl_set_manually(&zero_impl32,
                            UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
   fpfd_op2(impl_compress, zero, &zero_impl);
-  fpfd_assert_rsf(zero, +1, FPFD_ZERO);
+  fpfd_assert_rsf(zero, 1, FPFD_ZERO);
   fpfd32_assert_mask(zero32, UINT32_C(0x1C0FFFFF), UINT32_C(0x00000000));
 
   fpfd_impl_set_esf(&one_impl, 0, 1, FPFD_NUMBER);
-  fpfd32_impl_set_manually(&zero_impl32,
-                           UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
-  fpfd_op2(impl_compress, zero, &zero_impl);
-  fpfd_assert_rsf(zero, +1, FPFD_ZERO);
-  fpfd32_assert_mask(zero32, UINT32_C(0x1C0FFFFF), UINT32_C(0x00000000));
+  fpfd32_impl_set_manually(&one_impl32, UINT32_C(0), UINT32_C(1));
+  fpfd_op2(impl_compress, one, &one_impl);
+  fpfd_assert_rsf(one, 1, FPFD_NUMBER);
+  fpfd32_assert_manually(zero32, UINT32_C(0x22500001));
 
   return exitstatus;
 }

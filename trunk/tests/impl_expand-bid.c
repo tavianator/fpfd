@@ -54,22 +54,22 @@ main()
   fpfd_impl_declare(big_mant_qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_expand works for 0, 1, 1111111, 9999999, +inf, sNan,
+   * Test that fpfd*_impl_expand works for -0, 1, -1111111, 9999999, -inf, sNaN,
    * and qNaN.
    */
 
-  fpfd32_set_manually(zero32, UINT32_C(0x32800000));
+  fpfd32_set_manually(zero32, UINT32_C(0xB2800000));
   fpfd_op2(impl_expand, &zero_impl, zero);
-  fpfd_impl_assert_rsf(&zero_impl, 1, FPFD_ZERO);
+  fpfd_impl_assert_rsf(&zero_impl, -1, FPFD_ZERO);
 
   fpfd32_set_manually(one32, UINT32_C(0x32800001));
   fpfd_op2(impl_expand, &one_impl, one);
   fpfd_impl_assert_resf(&one_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(1));
 
-  fpfd32_set_manually(ones32, UINT32_C(0x3290F447));
+  fpfd32_set_manually(ones32, UINT32_C(0xB290F447));
   fpfd_op2(impl_expand, &ones_impl, ones);
-  fpfd_impl_assert_resf(&ones_impl, 0, 1, FPFD_NUMBER);
+  fpfd_impl_assert_resf(&ones_impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(1111111));
 
   fpfd32_set_manually(nines32, UINT32_C(0x6CB8967F));
@@ -77,18 +77,18 @@ main()
   fpfd_impl_assert_resf(&nines_impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(9999999));
 
-  fpfd32_set_manually(inf32, UINT32_C(0x78000000));
+  fpfd32_set_manually(inf32, UINT32_C(0xF8000000));
   fpfd_op2(impl_expand, &inf_impl, inf);
-  fpfd_impl_assert_rsf(&inf_impl, 1, FPFD_INF);
+  fpfd_impl_assert_rsf(&inf_impl, -1, FPFD_INF);
 
   fpfd32_set_manually(sNaN32, UINT32_C(0x7E01E240));
   fpfd_op2(impl_expand, &sNaN_impl, sNaN);
   fpfd_impl_assert_rsf(&sNaN_impl, 1, FPFD_SNAN);
   fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(123456));
 
-  fpfd32_set_manually(qNaN32, UINT32_C(0x7C01E240));
+  fpfd32_set_manually(qNaN32, UINT32_C(0xFC01E240));
   fpfd_op2(impl_expand, &qNaN_impl, qNaN);
-  fpfd_impl_assert_rsf(&qNaN_impl, 1, FPFD_QNAN);
+  fpfd_impl_assert_rsf(&qNaN_impl, -1, FPFD_QNAN);
   fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(123456));
 
   /*
