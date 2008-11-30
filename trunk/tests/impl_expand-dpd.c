@@ -17,10 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "check.h"
+#include "test.h"
 
 /*
- * Check that fpfd*_impl_expand is behaving correctly.
+ * Check that fpfd*_impl_expand is behaving correctly
  */
 int
 main()
@@ -45,71 +45,73 @@ main()
 
   /* Non-canonical inputs */
 
-  fpfd_declare(big_mant);
-  fpfd_declare(big_mant_sNaN);
-  fpfd_declare(big_mant_qNaN);
+  fpfd_declare(noncanon);
+  fpfd_declare(noncanon_sNaN);
+  fpfd_declare(noncanon_qNaN);
 
-  fpfd_impl_declare(big_mant_impl);
-  fpfd_impl_declare(big_mant_sNaN_impl);
-  fpfd_impl_declare(big_mant_qNaN_impl);
+  fpfd_impl_declare(noncanon_impl);
+  fpfd_impl_declare(noncanon_sNaN_impl);
+  fpfd_impl_declare(noncanon_qNaN_impl);
 
   /*
-   * Test that fpfd*_impl_expand works for 0, 1, 1111111, 9999999, +inf, sNan,
+   * Test that fpfd*_impl_expand works for -0, 1, -1111111, 9999999, -inf, sNan,
    * and qNaN.
    */
 
-  fpfd32_set_manually(zero32, UINT32_C(0x32800000));
+  fpfd32_set_manually(zero32, UINT32_C(0xA2500000));
   fpfd_op2(impl_expand, &zero_impl, zero);
-  fpfd_impl_assert_rsf(&zero_impl, 1, FPFD_ZERO);
+  fpfd_impl_assert_rsf(&zero_impl, -1, FPFD_ZERO);
 
-  fpfd32_set_manually(one32, UINT32_C(0x32800001));
+  fpfd32_set_manually(one32, UINT32_C(0x22500001));
   fpfd_op2(impl_expand, &one_impl, one);
   fpfd_impl_assert_resf(&one_impl, 0, 1, FPFD_NUMBER);
-  fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(1));
+  fpfd32_impl_assert_mant(&one_impl32, UINT32_C(0), UINT32_C(0x1));
 
-  fpfd32_set_manually(ones32, UINT32_C(0x3290F447));
+  fpfd32_set_manually(ones32, UINT32_C(0xA6524491));
   fpfd_op2(impl_expand, &ones_impl, ones);
-  fpfd_impl_assert_resf(&ones_impl, 0, 1, FPFD_NUMBER);
-  fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(1111111));
+  fpfd_impl_assert_resf(&ones_impl, 0, -1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&ones_impl32, UINT32_C(0), UINT32_C(0x1111111));
 
-  fpfd32_set_manually(nines32, UINT32_C(0x6CB8967F));
+  fpfd32_set_manually(nines32, UINT32_C(0x6E53FCFF));
   fpfd_op2(impl_expand, &nines_impl, nines);
   fpfd_impl_assert_resf(&nines_impl, 0, 1, FPFD_NUMBER);
-  fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(9999999));
+  fpfd32_impl_assert_mant(&nines_impl32, UINT32_C(0), UINT32_C(0x9999999));
 
-  fpfd32_set_manually(inf32, UINT32_C(0x78000000));
+  fpfd32_set_manually(inf32, UINT32_C(0xF8000000));
   fpfd_op2(impl_expand, &inf_impl, inf);
-  fpfd_impl_assert_rsf(&inf_impl, 1, FPFD_INF);
+  fpfd_impl_assert_rsf(&inf_impl, -1, FPFD_INF);
 
-  fpfd32_set_manually(sNaN32, UINT32_C(0x7E01E240));
+  fpfd32_set_manually(sNaN32, UINT32_C(0x7E028E56));
   fpfd_op2(impl_expand, &sNaN_impl, sNaN);
   fpfd_impl_assert_rsf(&sNaN_impl, 1, FPFD_SNAN);
-  fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(123456));
+  fpfd32_impl_assert_mant(&sNaN_impl32, UINT32_C(0), UINT32_C(0x123456));
 
-  fpfd32_set_manually(qNaN32, UINT32_C(0x7C01E240));
+  fpfd32_set_manually(qNaN32, UINT32_C(0xFC028E56));
   fpfd_op2(impl_expand, &qNaN_impl, qNaN);
-  fpfd_impl_assert_rsf(&qNaN_impl, 1, FPFD_QNAN);
-  fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(123456));
+  fpfd_impl_assert_rsf(&qNaN_impl, -1, FPFD_QNAN);
+  fpfd32_impl_assert_mant(&qNaN_impl32, UINT32_C(0), UINT32_C(0x123456));
 
   /*
-   * Mantissas with numerical value greater than the maximum representable by
-   * the DPD encoding are non-canonical and evaluate to zero, even for NaN
-   * payloads.
+   * Non-canonical declets should be handled according to Table 3.3, IEEE-2008
+   * S3.5.2, p12.
    */
 
-  fpfd32_set_manually(big_mant32, UINT32_C(0x77FFFFFF));
-  fpfd_op2(impl_expand, &big_mant_impl, big_mant);
-  fpfd_impl_assert_rsf(&big_mant_impl, 1, FPFD_ZERO);
+  fpfd32_set_manually(noncanon32, UINT32_C(0x2655BAFF));
+  fpfd_op2(impl_expand, &noncanon_impl, noncanon);
+  fpfd_impl_assert_resf(&noncanon_impl, 0, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&noncanon_impl32, UINT32_C(0), UINT32_C(0x1888999));
 
-  fpfd32_set_manually(big_mant_sNaN32, UINT32_C(0x7E0FFFFF));
-  fpfd_op2(impl_expand, &big_mant_sNaN_impl, big_mant_sNaN);
-  fpfd_impl_assert_rsf(&big_mant_sNaN_impl, 1, FPFD_SNAN);
-  fpfd32_impl_assert_mant(&big_mant_sNaN_impl32, UINT32_C(0), UINT32_C(0));
+  fpfd32_set_manually(noncanon_sNaN32, UINT32_C(0x7E0DB9FF));
+  fpfd_op2(impl_expand, &noncanon_sNaN_impl, noncanon_sNaN);
+  fpfd_impl_assert_rsf(&noncanon_sNaN_impl, 1, FPFD_SNAN);
+  fpfd32_impl_assert_mant(&noncanon_sNaN_impl32,
+                          UINT32_C(0), UINT32_C(0x888999));
 
-  fpfd32_set_manually(big_mant_qNaN32, UINT32_C(0x7C0FFFFF));
-  fpfd_op2(impl_expand, &big_mant_qNaN_impl, big_mant_qNaN);
-  fpfd_impl_assert_rsf(&big_mant_qNaN_impl, 1, FPFD_QNAN);
-  fpfd32_impl_assert_mant(&big_mant_qNaN_impl32, UINT32_C(0), UINT32_C(0));
+  fpfd32_set_manually(noncanon_qNaN32, UINT32_C(0x7C09BBFF));
+  fpfd_op2(impl_expand, &noncanon_qNaN_impl, noncanon_qNaN);
+  fpfd_impl_assert_rsf(&noncanon_qNaN_impl, 1, FPFD_QNAN);
+  fpfd32_impl_assert_mant(&noncanon_qNaN_impl32,
+                          UINT32_C(0), UINT32_C(0x888999));
 
   return exitstatus;
 }

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "check.h"
+#include "test.h"
 
 /*
  * Check that fpfd*_impl_compress is behaving correctly.
