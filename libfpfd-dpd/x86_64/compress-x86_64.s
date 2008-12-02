@@ -38,8 +38,8 @@ fpfd32_impl_compress:
         movw (%r8,%rdx,2), %dx
         shll $10, %edx
         orl %ecx, %edx          # Get the trailing significand
-        andl $0xF00000, %eax
-        shll $6, %eax
+        andl $0xF000000, %eax
+        shll $2, %eax
         orl %edx, %eax          # Put the leading significand digit in place
         movl 12(%rsi), %ecx
         subl $1, %ecx

@@ -39,8 +39,8 @@ fpfd32_impl_compress:
         movw fpfd_bcd2dpd(,%ebx,2), %bx
         shll $10, %ebx
         orl %ebx, %edx          # Get the trailing significand
-        andl $0xF00000, %eax
-        shll $6, %eax
+        andl $0xF000000, %eax
+        shll $2, %eax
         orl %edx, %eax          # Put the leading significand digit in place
         movl 12(%ecx), %ebx
         subl $1, %ebx
