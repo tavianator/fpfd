@@ -32,9 +32,9 @@ main()
   /*
    * Make sure we handle a zero significand correctly.
    */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
+  fpfd_impl_assert_orsfv(impl_scale, &impl, 1, FPFD_ZERO, 10 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0));
 
   /*
@@ -42,14 +42,14 @@ main()
    * to be passed to fpfd*_impl_scale during normal operation.
    */
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -6, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -6, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(999999));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -1, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -1, 1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999990));
 
   /*
@@ -57,14 +57,14 @@ main()
    * be altered by a call to fpfd*_impl_scale.
    */
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1000000));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 0, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(9999999));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 0, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, 1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /*
@@ -72,24 +72,24 @@ main()
    * coefficient set to zero. They are treated specially on 32-bit hardware.
    */
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000000));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 1, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000001));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 1);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 1, 1, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(99999995));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 5);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 1, -1, FPFD_NUMBER, 5);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(99999999));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 1, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 1, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /*
@@ -97,24 +97,24 @@ main()
    * table look-up, and extra logic to keep the return value accurate.
    */
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(100000000));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 2, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(100000001));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 1);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 2, 1, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1000000000));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 3, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(1000000001));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 1);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 3, 1, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   /*
@@ -122,24 +122,24 @@ main()
    * table look-up.
    */
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(999999950));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 5);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 2, -1, FPFD_NUMBER, 5);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(999999999));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 2, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 2, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(3333333500));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 5);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 3, -1, FPFD_NUMBER, 5);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(3333333));
 
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(3333333999));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 3, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 3, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(3333333));
 
   /*
@@ -147,51 +147,51 @@ main()
    */
 
   /* 10000000000 */
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2), UINT32_C(0x540BE400));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 4, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   /* 10000000001 */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2), UINT32_C(0x540BE401));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 1);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 4, 1, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   /* 99999995000 */
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x17), UINT32_C(0x4876D478));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 5);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 4, -1, FPFD_NUMBER, 5);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /* 99999999999 */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x17), UINT32_C(0x4876E7FF));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 4, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 4, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /* 1000000000000000 */
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x38D7E), UINT32_C(0xA4C68000));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 9, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   /* 1000000000000001 */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x38D7E), UINT32_C(0xA4C68001));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 1);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 9, 1, FPFD_NUMBER, 1);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1000000));
 
   /* 9999999500000000 */
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x51F39B00));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 5);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 9, -1, FPFD_NUMBER, 5);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /* 9999999999999999 */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 9, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 9, 1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /*
@@ -200,69 +200,69 @@ main()
    */
 
   /* 9999999999999999999 */
+  fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x8AC72304), UINT32_C(0x89E7FFFF));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 12, FPFD_NUMBER, 9);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 12, -1, FPFD_NUMBER, 9);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /* 18446744073709551615 */
+  fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0xFFFFFFFF), UINT32_C(0xFFFFFFFF));
-  fpfd_impl_set_ef(&impl, 0, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 13, FPFD_NUMBER, 4);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 13, 1, FPFD_NUMBER, 4);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(1844674));
 
   /*
    * These values need to be subnormalized.
    */
 
+  fpfd_impl_set_esf(&impl, -109, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000000));
-  fpfd_impl_set_ef(&impl, -109, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 1 | 0x10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -101, -1, FPFD_NUMBER, 1 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0));
 
+  fpfd_impl_set_esf(&impl, -107, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000001));
-  fpfd_impl_set_ef(&impl, -107, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 1 | 0x10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -101, 1, FPFD_NUMBER, 1 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(10));
 
   /* 9999500000000000 */
+  fpfd_impl_set_esf(&impl, -113, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x23867E), UINT32_C(0x056E7800));
-  fpfd_impl_set_ef(&impl, -113, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 5 | 0x10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -101, -1, FPFD_NUMBER, 5 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999));
 
   /* 9999999999999999 */
+  fpfd_impl_set_esf(&impl, -111, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
-  fpfd_impl_set_ef(&impl, -111, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, -101, FPFD_NUMBER, 9 | 0x10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, -101, 1, FPFD_NUMBER, 9 | 0x10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(999999));
 
   /*
    * These values should underflow
    */
 
+  fpfd_impl_set_esf(&impl, -110, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000000));
-  fpfd_impl_set_ef(&impl, -110, FPFD_NUMBER);
-  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
+  fpfd_impl_assert_orsfv(impl_scale, &impl, -1, FPFD_ZERO, 10 | 0x10);
 
   /* 9999999999999999 */
+  fpfd_impl_set_esf(&impl, -118, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
-  fpfd_impl_set_ef(&impl, -118, FPFD_NUMBER);
-  fpfd_impl_assert_orfv(impl_scale, &impl, FPFD_ZERO, 10 | 0x10);
+  fpfd_impl_assert_orsfv(impl_scale, &impl, 1, FPFD_ZERO, 10 | 0x10);
 
   /*
    * These values should overflow
    */
 
+  fpfd_impl_set_esf(&impl, 90, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(10000000));
-  fpfd_impl_set_ef(&impl, 90, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 90, FPFD_NUMBER, 10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 90, -1, FPFD_NUMBER, 10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   /* 9999999999999999 */
+  fpfd_impl_set_esf(&impl, 82, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0x2386F2), UINT32_C(0x6FC0FFFF));
-  fpfd_impl_set_ef(&impl, 82, FPFD_NUMBER);
-  fpfd_impl_assert_orefv(impl_scale, &impl, 90, FPFD_NUMBER, 10);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 90, 1, FPFD_NUMBER, 10);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(9999999));
 
   return exitstatus;
