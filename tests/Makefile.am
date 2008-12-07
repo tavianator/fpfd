@@ -18,15 +18,10 @@
 #########################################################################
 
 check_LTLIBRARIES = libfpfd-test.la
-check_PROGRAMS    = impl_expand-dpd impl_expand-bid impl_compress-dpd impl_compress-bid impl_scale-dpd impl_scale-bid signedzero-dpd signedzero-bid
+check_PROGRAMS    = impl_expand-dpd impl_expand-bid impl_compress-dpd impl_compress-bid impl_scale-dpd impl_scale-bid impl_inc-dpd impl_inc-bid signedzero-dpd signedzero-bid
 TESTS             = $(check_PROGRAMS)
 
 libfpfd_test_la_SOURCES = test.c test.h
-
-signedzero_dpd_SOURCES = signedzero.c
-signedzero_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
-signedzero_bid_SOURCES = signedzero.c
-signedzero_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 
 impl_compress_dpd_SOURCES = impl_compress-dpd.c
 impl_compress_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
@@ -42,3 +37,13 @@ impl_scale_dpd_SOURCES = impl_scale-dpd.c
 impl_scale_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 impl_scale_bid_SOURCES = impl_scale-bid.c
 impl_scale_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+
+impl_inc_dpd_SOURCES = impl_inc-dpd.c
+impl_inc_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+impl_inc_bid_SOURCES = impl_inc-bid.c
+impl_inc_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
+
+signedzero_dpd_SOURCES = signedzero.c
+signedzero_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
+signedzero_bid_SOURCES = signedzero.c
+signedzero_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la

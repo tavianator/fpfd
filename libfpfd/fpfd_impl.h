@@ -101,8 +101,6 @@ typedef struct {
 void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
 void fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src);
 
-void fpfd32_impl_inc(fpfd32_impl_t *dest);
-
 unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
                                 const fpfd32_impl_t *lhs,
                                 const fpfd32_impl_t *rhs);
@@ -111,6 +109,7 @@ void fpfd32_impl_mul(fpfd32_impl_t *dest,
 unsigned int fpfd32_impl_div(fpfd32_impl_t *dest, const fpfd32_impl_t *lhs,
                              const fpfd32_impl_t *rhs);
 
+void fpfd32_impl_inc(fpfd32_impl_t *dest);
 unsigned int fpfd32_impl_scale(fpfd32_impl_t *dest);
 
 /* Help with correct rounding */

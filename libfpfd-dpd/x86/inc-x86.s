@@ -67,7 +67,7 @@ fpfd32_impl_inc:
         popl %ebx
         ret
 .Loflow:
-        movl $3, 16(%ecx)       # Set the special flag to FPFD_INF
+        movl $4, 16(%ecx)       # Set the special flag to FPFD_INF
         popl %esi
         popl %ebx
         ret
