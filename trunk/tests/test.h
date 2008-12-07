@@ -134,8 +134,8 @@
 #define fpfd_assert_resf(res, exp, sign, special)  \
   fpfd32_assert_resf(res##32, exp, sign, special)
   /*
-   * fpfd64_assert_ora1esf(res##64, exp, sign, special)
-   * fpfd128_assert_ora1esf(res##128,exp, sign, special)
+   * fpfd64_assert_resf(res##64, exp, sign, special)
+   * fpfd128_assert_resf(res##128, exp, sign, special)
    */
 
 #define fpfd_assert_ora2msfx(op, res, arg1, arg2, rnd, sign, special, flagsex) \
@@ -159,8 +159,24 @@
 #define fpfd_impl_assert_resf(res, exp, sign, special)        \
   fpfd32_impl_assert_resf(res##32, exp, sign, special)
   /*
-   * fpfd64_impl_assert_rfv(res##64, exp, sign, special)
-   * fpfd128_impl_assert_rfv(res##128, exp, sign, special)
+   * fpfd64_impl_assert_resf(res##64, exp, sign, special)
+   * fpfd128_impl_assert_resf(res##128, exp, sign, special)
+   */
+
+#define fpfd_impl_assert_orsf(op, res, sign, special)    \
+  fpfd_op1(op, res);                                     \
+  fpfd32_impl_assert_orsf(#op, res##32, sign, special)
+  /*
+   * fpfd64_impl_assert_orsf(#op, res##64, sign, special)
+   * fpfd128_impl_assert_orsf(#op, res##128, sign, special)
+   */
+
+#define fpfd_impl_assert_oresf(op, res, exp, sign, special)      \
+  fpfd_op1(op, res);                                             \
+  fpfd32_impl_assert_oresf(#op, res##32, exp, sign, special)
+  /*
+   * fpfd64_impl_assert_oresf(#op, res##64, exp, sign, special)
+   * fpfd128_impl_assert_oresf(#op, res##128, exp, sign, special)
    */
 
 #define fpfd_impl_assert_orfv(op, res, special, rval)                   \
@@ -201,6 +217,10 @@ void fpfd32_impl_assert_rsf(const fpfd32_impl_t *res, int sign,
                             fpfd_special_t special);
 void fpfd32_impl_assert_resf(const fpfd32_impl_t *res, int exp, int sign,
                              fpfd_special_t special);
+void fpfd32_impl_assert_orsf(const char *op, const fpfd32_impl_t *res,
+                             int sign, fpfd_special_t special);
+void fpfd32_impl_assert_oresf(const char *op, const fpfd32_impl_t *res,
+                              int exp, int sign, fpfd_special_t special);
 void fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
                              fpfd_special_t special, int rexp, int rval);
 void fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,

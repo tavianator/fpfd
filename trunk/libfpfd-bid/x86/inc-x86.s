@@ -40,6 +40,6 @@ fpfd32_impl_inc:
         movl $1000000, (%eax)
         ret
 .Loflow:
-        movl $3, 16(%eax)       # Set the special flag to FPFD_INF
+        movl $4, 16(%eax)       # Set the special flag to FPFD_INF
         ret
         .size fpfd32_impl_inc, .-fpfd32_impl_inc
