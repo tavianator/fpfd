@@ -144,32 +144,33 @@ fpfd32_impl_assert_oresf(const char *op, const fpfd32_impl_t *res,
 }
 
 void
-fpfd32_impl_assert_orfv(const char *op, const fpfd32_impl_t *res,
-                        fpfd_special_t special, int rexp, int rval)
+fpfd32_impl_assert_orsfv(const char *op, const fpfd32_impl_t *res,
+                         int sign, fpfd_special_t special, int rexp, int rval)
 {
-  if (res->fields.special != special || rexp != rval) {
+  if (res->fields.sign != sign || res->fields.special != special
+      || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res);
     fprintf(stderr, ") = %d\n", rval);
-    fprintf(stderr, "\n--- ERROR: Expected special == %s,"
+    fprintf(stderr, "\n--- ERROR: Expected sign == %+d, special == %s,"
                     " fpfd32_%s() == %d ---\n\n",
-            fpfd_special_str(special), op, rexp);
+            sign, fpfd_special_str(special), op, rexp);
     exitstatus = EXIT_FAILURE;
   }
 }
 
 void
-fpfd32_impl_assert_orefv(const char *op, const fpfd32_impl_t *res, int exp,
-                         fpfd_special_t special, int rexp, int rval)
+fpfd32_impl_assert_oresfv(const char *op, const fpfd32_impl_t *res,
+                          int exp, int sign, fpfd_special_t special,
+                          int rexp, int rval)
 {
-  if (res->fields.exp != exp || res->fields.special != special
-      || rexp != rval) {
+  if (res->fields.exp != exp || res->fields.sign != sign
+      || res->fields.special != special || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res);
-    fprintf(stderr, ") = %d\n", rval);
-    fprintf(stderr, "\n--- ERROR: Expected exp == %+d, special == %s, "
-                    "fpfd32_%s() == %d ---\n\n",
-            exp, fpfd_special_str(special), op, rexp);
+    fprintf(stderr, ") = %d\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
+                    " special == %s, fpfd32_%s() == %d ---\n\n",
+            rval, exp, sign, fpfd_special_str(special), op, rexp);
     exitstatus = EXIT_FAILURE;
   }
 }
