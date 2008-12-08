@@ -391,7 +391,16 @@ fpfd_flags_str(fpfd_flags_t flags)
 void
 fpfd32_dump(FILE *file, fpfd32_srcptr fp)
 {
-  fprintf(file, "0x%.8" PRIX32, *fp);
+  typedef union {
+    fpfd32_t fpfd;
+    uint32_t uint;
+  } fpfd32_union_t;
+
+  fpfd32_union_t cast;
+
+  fpfd32_set(cast.fpfd, fp);
+
+  fprintf(file, "0x%.8" PRIX32, cast.uint);
 }
 
 void

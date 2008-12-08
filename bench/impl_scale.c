@@ -22,7 +22,7 @@
 void
 fpfd32_bench_impl_scale(unsigned int trials)
 {
-  fpfd32_t fp, lhs, rhs;
+  fpfd32_t lhs, rhs;
   fpfd32_impl_t impl, lhs_impl, rhs_impl;
   long ticks1, ticks2, ticks3;
   unsigned int i, j;
