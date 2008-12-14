@@ -81,12 +81,12 @@ typedef struct {
  * special kind of "remainder" from the operation:
  *
  * 0      - Computation was exact.
- * [1, 4] - The real result is closer to the this one than to the next
+ * [1, 4] - The exact result is closer to the this one than to the next
  *          representable value.
- * 5      - The real result is exactly in between the current value and the next
- *          representable one 
- * [6, 9] - The real result is closer to the next representable value than it is
- *          to this one.
+ * 5      - The exact result is exactly in between the current value and the
+ *          next representable one 
+ * [6, 9] - The exact result is closer to the next representable value than it
+ *          is to this one.
  * 10     - Total overflow.
  *
  * If the 0x10 bit is set, then the value has been subnormalized. 10 | 0x10

@@ -53,8 +53,8 @@ fpfd32_impl_addsub:
         subl %r11d, %r10d       # r10d = rhs->fields.exp
         xchgq %rax, %rdx
 .Laddnoswitch:
-        movq %r10, (%rdi)
-        movl $0, 8(%rdi)
+        movq %rcx, (%rdi)
+        movl %r10d, 8(%rdi)
         movl $1, 12(%rdi)
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         movl $0, %eax

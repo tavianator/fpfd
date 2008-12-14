@@ -79,6 +79,13 @@
    * fpfd128_##op(dest##128, op1##128, op2##128)
    */
 
+#define fpfd_opm3(op, dest, m, op1, op2)        \
+  fpfd32_##op(dest##32, m, op1##32, op2##32)
+  /*
+   * fpfd64_##op(dest##64, m, op1##64, op2##64)
+   * fpfd128_##op(dest##128, m, op1##128, op2##128)
+   */
+
 #define fpfd_op3mx(op, dest, op1, op2, rnd)             \
   flags = FPFD_NONE;                                    \
   fpfd32_##op(dest##32, op1##32, op2##32, rnd, &flags)
@@ -105,8 +112,9 @@
  *        unary function which produced the result.
  *   a2 - The next two arguments are the name of the two source operands in the
  *        binary function which produced the result.
- *   m  - The next argument is the rounding mode used in the operation which
- *        produced the result.
+ *   m  - The next argument is an integer to be passed to the function,
+ *        generally the rounding mode used in the operation which produced the
+ *        result.
  *   e  - The next argument is an int, and the exponent of the result is
  *        asserted to be equal to it.
  *   s  - The next argument is an int, and the sign of the result is asserted
@@ -207,6 +215,17 @@
    *                             exp, sign, special)
    */
 
+#define fpfd_impl_assert_orma2esf(op, res, m, arg1, arg2, exp, sign, special) \
+  fpfd_opm3(op, res, m, arg1, arg2);                                          \
+  fpfd32_impl_assert_orma2esf(#op, res##32, m, arg1##32, arg2##32,            \
+                              exp, sign, special)
+  /*
+   * fpfd64_impl_assert_orma2esf(#op, res##64, arg1##64, arg2##64, m,
+   *                             exp, sign, special)
+   * fpfd128_impl_assert_orma2esf(#op, res##128, arg1##128, arg2##128, m
+   *                              exp, sign, special)
+   */
+
 /* main() should return this. */
 extern int exitstatus;
 
@@ -241,6 +260,10 @@ void fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
                                 const fpfd32_impl_t *op1,
                                 const fpfd32_impl_t *op2,
                                 int exp, int sign, fpfd_special_t special);
+void fpfd32_impl_assert_orma2esf(const char *op, const fpfd32_impl_t *res,
+                                 int m, const fpfd32_impl_t *op1,
+                                 const fpfd32_impl_t *op2,
+                                 int exp, int sign, fpfd_special_t special);
 
 /*
  * For more manual checking, call these directly.
