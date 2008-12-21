@@ -29,35 +29,40 @@
 .globl fpfd32_impl_addsub
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
-        xorl 12(%rdx), %esi
-        xorl 12(%rcx), %esi     # Calculate
-                                # (sign ^ lhs->fields.sign ^ rhs->fields.sign)
-        js .Lsub                # If the result is -1, we are subtracting
-        movq (%rcx), %rax
-        movl 8(%rcx), %ecx
-        movl %ecx, %r10d
-        subl 8(%rdx), %ecx      # lhs->fields.exp - rhs->fields.exp
-        movl %ecx, %r11d
-        movq (%rdx), %rdx
-        bsrq %rax, %r8
-        bsrq %rdx, %r9
-        addl $4, %r8d
-        addl $4, %r9d
+        pushq 8(%rcx)
+        pushq (%rcx)
+        pushq 8(%rdx)
+        pushq (%rdx)
+        xorl 12(%rsp), %esi
+        xorl 28(%rsp), %esi
+        js .Lsub
+        bsrq (%rsp), %r8        # Addition
+        bsrq 16(%rsp), %r9
+        subl $60, %r8d
+        subl $60, %r9d
         andl $0x7C, %r8d
         andl $0x7C, %r9d
-        subl %r9d, %r8d
-        shll $2, %ecx
-        addl %r8d, %ecx         # Find the number of bits to shift by
+        negl %r8d
+        negl %r9d
+        movl %r9d, %ecx
+        subl %r8d, %ecx
+        addl 8(%rsp), %ecx
+        subl 24(%rsp), %ecx
         jns .Laddnoswitch
+        movq 16(%rsp), %rax
+        xchgq (%rsp), %rax
+        movq %rax, 16(%rsp)
+        movq 24(%rsp), %rax
+        xchgq 8(%rsp), %rax
+        movq %rax, 24(%rsp)
         negl %ecx
-        subl %r11d, %r10d       # r10d = rhs->fields.exp
-        xchgq %rax, %rdx
 .Laddnoswitch:
-        movq %rcx, (%rdi)
-        movl %r10d, 8(%rdi)
-        movl $1, 12(%rdi)
+        movq (%rsp), %rax
+        movq %rax, (%rdi)
+        movq 8(%rsp), %rax
+        movq %rax, 8(%rdi)
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
-        movl $0, %eax
+        addq $32, %rsp
         ret
 .Lsub:
         ret
