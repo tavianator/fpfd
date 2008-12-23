@@ -29,13 +29,13 @@ main()
   fpfd_impl_declare(lhs);
   fpfd_impl_declare(rhs);
 
-  fpfd_impl_set_esf(&lhs, 10, 1, FPFD_NUMBER);
-  fpfd_impl_set_esf(&rhs, 5, 1, FPFD_NUMBER);
-  fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(0x1));
+  fpfd_impl_set_esf(&lhs, 1, 1, FPFD_NUMBER);
+  fpfd_impl_set_esf(&rhs, 2, 1, FPFD_NUMBER);
+  fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(0x100));
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(0x1));
   fpfd_impl_assert_orma2esf(impl_addsub, &res, 1, &lhs, &rhs, 
-                            10, 1, FPFD_NUMBER);
-  fpfd32_impl_assert_mant(&res32, UINT32_C(0), UINT32_C(0x1));
+                            13, 1, FPFD_NUMBER);
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0x10000000), UINT32_C(0x00000000));
 
   return exitstatus;
 }
