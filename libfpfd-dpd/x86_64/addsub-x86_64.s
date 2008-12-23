@@ -40,8 +40,8 @@ fpfd32_impl_addsub:
         bsrq 16(%rsp), %r9
         subl $60, %r8d
         subl $60, %r9d
-        andl $0x7C, %r8d
-        andl $0x7C, %r9d
+        shrl $2, %r8d
+        shrl $2, %r9d
         negl %r8d
         negl %r9d
         movl %r9d, %ecx
@@ -55,11 +55,15 @@ fpfd32_impl_addsub:
         movq 24(%rsp), %rax
         xchgq 8(%rsp), %rax
         movq %rax, 24(%rsp)
+        xchgl %r8d, %r9d
         negl %ecx
 .Laddnoswitch:
         movq (%rsp), %rax
+        leal (,%r8d,4), %ecx
+        shlq %cl, %rax
         movq %rax, (%rdi)
         movq 8(%rsp), %rax
+        addl %r8d, %eax
         movq %rax, 8(%rdi)
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         addq $32, %rsp
