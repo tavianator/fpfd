@@ -52,6 +52,7 @@ fpfd32_impl_round(fpfd32_impl_t *dest, unsigned int rem, fpfd_rnd_t rnd,
 
   case FPFD_RSIGN:
     tern = dest->fields.sign;
+    break;
 
   case FPFD_RMSIGN:
     fpfd32_impl_inc(dest);
