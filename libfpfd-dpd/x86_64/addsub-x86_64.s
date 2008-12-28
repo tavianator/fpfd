@@ -70,11 +70,12 @@ fpfd32_impl_addsub:
 .Laddnoadd:
         movq %rax, (%rdi)       # Save the mantissa
         movl 8(%rsp), %eax
-        addl %r8d, %eax
+        subl %r8d, %eax
         movl %eax, 8(%rdi)      # Adjust and save the exponent
         movl 12(%rsp), %eax
         movl %eax, 12(%rdi)     # Save the sign
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        movl $0, %eax
         addq $32, %rsp
         ret
 .Lsub:

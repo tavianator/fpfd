@@ -34,7 +34,7 @@ main()
   fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(0x1111111));
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(0x1111111));
   fpfd_impl_assert_orma2esf(impl_addsub, &res, 1, &lhs, &rhs, 
-                            10, 1, FPFD_NUMBER);
+                            -8, 1, FPFD_NUMBER);
   fpfd32_impl_assert_mant(&res32, UINT32_C(0x11222221), UINT32_C(0x10000000));
 
   return exitstatus;
