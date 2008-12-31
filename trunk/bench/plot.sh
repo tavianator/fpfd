@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 gnuplot -persist <<EOF
 plot '$1' index 0 title '$(basename $1)' with points,         \
