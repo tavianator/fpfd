@@ -38,8 +38,8 @@ fpfd32_impl_addsub:
         js .Lsub
         bsrq (%rsp), %r8        # Addition
         bsrq 16(%rsp), %r9
-        subl $60, %r8d
-        subl $60, %r9d
+        subl $63, %r8d
+        subl $63, %r9d
         negl %r8d
         negl %r9d
         shrl $2, %r8d
