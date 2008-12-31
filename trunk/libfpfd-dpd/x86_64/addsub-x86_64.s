@@ -29,15 +29,13 @@
 .globl fpfd32_impl_addsub
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
-        pushq 8(%rcx)
-        pushq (%rcx)
-        pushq 8(%rdx)
-        pushq (%rdx)
-        xorl 12(%rsp), %esi
-        xorl 28(%rsp), %esi
+        movq %rdx, %r10
+        movq %rcx, %r11
+        xorl 12(%r10), %esi
+        xorl 12(%r11), %esi
         js .Lsub
-        bsrq (%rsp), %r8        # Addition
-        bsrq 16(%rsp), %r9
+        bsrq (%r10), %r8        # Addition
+        bsrq (%r11), %r9
         subl $63, %r8d
         subl $63, %r9d
         negl %r8d
@@ -46,37 +44,31 @@ fpfd32_impl_addsub:
         shrl $2, %r9d
         movl %r9d, %edx
         subl %r8d, %edx
-        addl 8(%rsp), %edx
-        subl 24(%rsp), %edx
+        addl 8(%r10), %edx
+        subl 8(%r11), %edx
         jns .Laddnoswitch
-        movq 16(%rsp), %rax
-        xchgq (%rsp), %rax
-        movq %rax, 16(%rsp)
-        movl 24(%rsp), %eax
-        xchgl 8(%rsp), %eax
-        movl %eax, 24(%rsp)
+        xchgq %r10, %r11
         xchgl %r8d, %r9d
         negl %edx
 .Laddnoswitch:
-        movq (%rsp), %rax
+        movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
         subl %edx, %r9d
         js .Laddnoadd
         leal (,%r9d,4), %ecx
-        movq 16(%rsp), %rdx
+        movq (%r11), %rdx
         shlq %cl, %rdx
         addq %rdx, %rax
 .Laddnoadd:
         movq %rax, (%rdi)       # Save the mantissa
-        movl 8(%rsp), %eax
+        movl 8(%r10), %eax
         subl %r8d, %eax
         movl %eax, 8(%rdi)      # Adjust and save the exponent
-        movl 12(%rsp), %eax
+        movl 12(%r10), %eax
         movl %eax, 12(%rdi)     # Save the sign
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         movl $0, %eax
-        addq $32, %rsp
         ret
 .Lsub:
         ret
