@@ -1,0 +1,33 @@
+# Files and folders created by aclocal, autoconf, automake, and libtoolize
+/aclocal.m4
+/autom4te.cache/
+/compile
+/config.*
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/m4
+/missing
+Makefile
+Makefile.in
+
+# Documentation files created by make
+/doc/fpfd.info
+/doc/texinfo.tex
+
+# Automatically-generated look-up tables for the DPD encoding
+/libfpfd-dpd/*/dpdtable*.s
+
+# Test executables
+/tests/*-dpd
+/tests/*-bid
+
+# Files and folders created by libtool
+.deps/
+.libs/
+*.l[oa]
+
+# Files created by compilation
+*.[oa]
