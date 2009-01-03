@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 #########################################################################
 # Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               #
