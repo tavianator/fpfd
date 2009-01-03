@@ -55,20 +55,51 @@ fpfd32_impl_addsub:
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
         subl %edx, %r9d
-        js .Laddnoadd
-        leal (,%r9d,4), %ecx
         movq (%r11), %rdx
+        js .Laddshr
+        leal (,%r9d,4), %ecx
         shlq %cl, %rdx
-        addq %rdx, %rax
-.Laddnoadd:
-        movq %rax, (%rdi)       # Save the mantissa
-        movl 8(%r10), %eax
-        subl %r8d, %eax
-        movl %eax, 8(%rdi)      # Adjust and save the exponent
-        movl 12(%r10), %eax
-        movl %eax, 12(%rdi)     # Save the sign
+        addq %rax, %rdx
+        movq $0, %rax
+        movq $0, %r9
+        jmp .Laddrem
+.Laddshr:
+        negl %r9d
+        leal (,%r9d,4), %ecx
+        cmpl $16, %r9d
+        movq $0, %r9
+        je .Laddrem
+        ja .Laddshrtoofar
+        shrdq %cl, %rdx, %r9
+        shrq %cl, %rdx
+        addq %rax, %rdx
+        movq %r9, %rax
+        movq $0, %r9
+        jmp .Laddrem
+.Laddshrtoofar:
+        xchgq %rax, %rdx
+        shrdq $4, %rax, %r9
+        shrq $4, %rax
+.Laddrem:
+        movq %rdx, (%rdi)       # Save the mantissa
+        movl 8(%r10), %edx
+        subl %r8d, %edx
+        movl %edx, 8(%rdi)      # Adjust and save the exponent
+        movl 12(%r10), %edx
+        movl %edx, 12(%rdi)     # Save the sign
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
-        movl $0, %eax
+        shrdq $60, %rax, %r9
+        shrq $60, %rax
+        cmpl $0, %eax
+        je .Laddspecial
+        cmpl $5, %eax
+        je .Laddspecial
+        ret
+.Laddspecial:
+        cmpq $0, %r9
+        je .Laddspecial1
+        addl $1, %eax
+.Laddspecial1:
         ret
 .Lsub:
         ret
