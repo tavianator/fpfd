@@ -79,13 +79,6 @@
    * fpfd128_##op(dest##128, op1##128, op2##128)
    */
 
-#define fpfd_opm3(op, dest, m, op1, op2)        \
-  fpfd32_##op(dest##32, m, op1##32, op2##32)
-  /*
-   * fpfd64_##op(dest##64, m, op1##64, op2##64)
-   * fpfd128_##op(dest##128, m, op1##128, op2##128)
-   */
-
 #define fpfd_op3mx(op, dest, op1, op2, rnd)             \
   flags = FPFD_NONE;                                    \
   fpfd32_##op(dest##32, op1##32, op2##32, rnd, &flags)
@@ -136,13 +129,6 @@
    * fpfd128_assert_ora1esf(res##128, sign, special)
    */
 
-#define fpfd_assert_resf(res, exp, sign, special)  \
-  fpfd32_assert_resf(res##32, exp, sign, special)
-  /*
-   * fpfd64_assert_resf(res##64, exp, sign, special)
-   * fpfd128_assert_resf(res##128, exp, sign, special)
-   */
-
 #define fpfd_assert_ora2msfx(op, res, arg1, arg2, rnd, sign, special, flagsex) \
   fpfd_op3mx(op, res, arg1, arg2, rnd);                                        \
   fpfd32_assert_ora2msfx(#op, res##32, arg1##32, arg2##32, rnd, sign, special, \
@@ -189,9 +175,9 @@
                            fpfd32_##op(res##32))
   /*
    * fpfd64_impl_assert_orsfv(#op, res##64, sign, special, rval,
-   *                          fpfd64_#op(res##64))
+   *                          fpfd64_##op(res##64))
    * fpfd128_impl_assert_orsfv(#op, res##128, sign, special, rval,
-   *                           fpfd128_#op(res##128))
+   *                           fpfd128_##op(res##128))
    */
 
 #define fpfd_impl_assert_oresfv(op, res, exp, sign, special, rval)      \
@@ -199,9 +185,9 @@
                             fpfd32_##op(res##32))
   /*
    * fpfd64_impl_assert_oresfv(#op, res##64, exp, sign, special, rval,
-   *                           fpfd64_#op(res##64))
+   *                           fpfd64_##op(res##64))
    * fpfd128_impl_assert_oresfv(#op, res##128, exp, sign, special, rval,
-   *                            fpfd128_#op(res##128))
+   *                            fpfd128_##op(res##128))
    */
 
 #define fpfd_impl_assert_ora2esf(op, res, arg1, arg2, exp, sign, special) \
@@ -215,15 +201,19 @@
    *                             exp, sign, special)
    */
 
-#define fpfd_impl_assert_orma2esf(op, res, m, arg1, arg2, exp, sign, special) \
-  fpfd_opm3(op, res, m, arg1, arg2);                                          \
-  fpfd32_impl_assert_orma2esf(#op, res##32, m, arg1##32, arg2##32,            \
-                              exp, sign, special)
+#define fpfd_impl_assert_orma2esfv(op, res, m, arg1, arg2, exp, sign, special, \
+                                   rval)                                       \
+  fpfd32_impl_assert_orma2esfv(#op, res##32, m, arg1##32, arg2##32,            \
+                               exp, sign, special, rval,                       \
+                               fpfd32_##op(res##32, m, arg1##32, arg2##32))
   /*
-   * fpfd64_impl_assert_orma2esf(#op, res##64, arg1##64, arg2##64, m,
-   *                             exp, sign, special)
-   * fpfd128_impl_assert_orma2esf(#op, res##128, arg1##128, arg2##128, m
-   *                              exp, sign, special)
+   * fpfd64_impl_assert_orma2esfv(#op, res##64, m, arg1##64, arg2##64,
+   *                              exp, sign, special, rval,
+   *                              fpfd64_##op(res##64, m, arg1##64, arg2##64))
+   * fpfd128_impl_assert_orma2esfv(#op, res##128, m, arg1##128, arg2##128,
+   *                               exp, sign, special, rval,
+   *                               fpfd128_##op(res##128, m,
+   *                                            arg1##128, arg2##128))
    */
 
 /* main() should return this. */
@@ -234,8 +224,6 @@ extern int exitstatus;
  */
 
 void fpfd32_assert_rsf(fpfd32_srcptr res, int sign, fpfd_special_t special);
-void fpfd32_assert_resf(fpfd32_srcptr res, int exp, int sign,
-                        fpfd_special_t special);
 void fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res,
                             fpfd32_srcptr op1, fpfd32_srcptr op2,
                             fpfd_rnd_t rnd, int sign,
@@ -260,10 +248,11 @@ void fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
                                 const fpfd32_impl_t *op1,
                                 const fpfd32_impl_t *op2,
                                 int exp, int sign, fpfd_special_t special);
-void fpfd32_impl_assert_orma2esf(const char *op, const fpfd32_impl_t *res,
-                                 int m, const fpfd32_impl_t *op1,
-                                 const fpfd32_impl_t *op2,
-                                 int exp, int sign, fpfd_special_t special);
+void fpfd32_impl_assert_orma2esfv(const char *op, const fpfd32_impl_t *res,
+                                  int m, const fpfd32_impl_t *op1,
+                                  const fpfd32_impl_t *op2,
+                                  int exp, int sign, fpfd_special_t special,
+                                  int rexp, int rval);
 
 /*
  * For more manual checking, call these directly.
