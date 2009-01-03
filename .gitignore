@@ -24,6 +24,12 @@ Makefile.in
 /tests/*-dpd
 /tests/*-bid
 
+# Benchmarking executables and results
+/bench/arch
+/bench/dpd
+/bench/bid
+/bench/benchmark-*
+
 # Files and folders created by libtool
 .deps/
 .libs/
