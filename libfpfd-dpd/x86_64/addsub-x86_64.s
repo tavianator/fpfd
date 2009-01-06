@@ -107,13 +107,21 @@ fpfd32_impl_addsub:
         shrq $4, %rsi
         shrq $4, %r11
         test %rsi, %rsi
-        jz .Laddadddone
+        jz .Laddadddonecarry
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
         andb $0x0F, %cl
         stc
         jmp .Laddaddloop
+.Laddadddonecarry:
+        shrdq $4, %rdx, %r9
+        shrq $4, %rdx
+        movq %r9, %rax
+        movq $0x1000000000000000, %rcx
+        orq %rcx, %rdx
+        subl $1, %r8d
+        jmp .Laddrem
 .Laddadddone:
         movq %r9, %rax
         movq $0, %r9
