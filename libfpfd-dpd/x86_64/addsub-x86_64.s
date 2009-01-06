@@ -59,10 +59,8 @@ fpfd32_impl_addsub:
         js .Laddshr
         leal (,%r9d,4), %ecx
         shlq %cl, %rdx
-        addq %rax, %rdx
-        movq $0, %rax
         movq $0, %r9
-        jmp .Laddrem
+        jmp .Laddadd
 .Laddshr:
         negl %r9d
         leal (,%r9d,4), %ecx
@@ -72,14 +70,16 @@ fpfd32_impl_addsub:
         ja .Laddshrtoofar
         shrdq %cl, %rdx, %r9
         shrq %cl, %rdx
-        addq %rax, %rdx
-        movq %r9, %rax
-        movq $0, %r9
-        jmp .Laddrem
+        jmp .Laddadd
 .Laddshrtoofar:
         xchgq %rax, %rdx
         shrdq $4, %rax, %r9
         shrq $4, %rax
+        jmp .Laddrem
+.Laddadd:
+        addq %rax, %rdx         # Available registers: rcx, rsi, r11
+        movq %r9, %rax
+        movq $0, %r9
 .Laddrem:
         movq %rdx, (%rdi)       # Save the mantissa
         movl 8(%r10), %edx
