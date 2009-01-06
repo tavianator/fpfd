@@ -31,9 +31,9 @@ Makefile.in
 /bench/benchmark-*
 
 # Files and folders created by libtool
-.deps/
 .libs/
 *.l[oa]
 
-# Files created by compilation
+# Files and folders created by compilation
+.deps/
 *.[oa]
