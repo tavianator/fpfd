@@ -45,5 +45,13 @@ main()
                              5, -1, FPFD_NUMBER, 6);
   fpfd32_impl_assert_mant(&res32, UINT32_C(0x12345678), UINT32_C(0x000000876));
 
+  fpfd_impl_set_esf(&lhs, 0, 1, FPFD_NUMBER);
+  fpfd_impl_set_esf(&rhs, 0, 1, FPFD_NUMBER);
+  fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(0x12345678));
+  fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(0x98766789));
+  fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs, 
+                             -7, 1, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0x11111246), UINT32_C(0x70000000));
+
   return exitstatus;
 }
