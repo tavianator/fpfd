@@ -77,7 +77,44 @@ fpfd32_impl_addsub:
         shrq $4, %rax
         jmp .Laddrem
 .Laddadd:
-        addq %rax, %rdx         # Available registers: rcx, rsi, r11
+        movq %rax, %rsi
+        movq %rdx, %r11
+        movq %rdx, %rcx
+        movq $0, %rdx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+.Laddaddloop:
+        adcb %al, %cl
+        cmpb $0x9, %cl
+        ja .Laddaddcarry
+        addb %cl, %dl
+        rorq $4, %rdx
+        shrq $4, %rsi
+        shrq $4, %r11
+        test %rsi, %rsi
+        jz .Laddadddone
+        movq %rsi, %rax
+        movq %r11, %rcx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+        clc
+        jmp .Laddaddloop
+.Laddaddcarry:
+        addb $0x06, %cl
+        andb $0x0F, %cl
+        addb %cl, %dl
+        rorq $4, %rdx
+        shrq $4, %rsi
+        shrq $4, %r11
+        test %rsi, %rsi
+        jz .Laddadddone
+        movq %rsi, %rax
+        movq %r11, %rcx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+        stc
+        jmp .Laddaddloop
+.Laddadddone:
         movq %r9, %rax
         movq $0, %r9
 .Laddrem:
