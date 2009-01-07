@@ -31,10 +31,7 @@
 fpfd32_impl_addsub:
         movq %rdx, %r10
         movq %rcx, %r11
-        xorl 12(%r10), %esi
-        xorl 12(%r11), %esi
-        js .Lsub
-        bsrq (%r10), %r8        # Addition
+        bsrq (%r10), %r8
         bsrq (%r11), %r9
         subl $63, %r8d
         subl $63, %r9d
@@ -46,60 +43,62 @@ fpfd32_impl_addsub:
         subl %r8d, %edx
         addl 8(%r10), %edx
         subl 8(%r11), %edx
-        jns .Laddnoswitch
+        jns .Lnoswitch
         xchgq %r10, %r11
         xchgl %r8d, %r9d
         negl %edx
-.Laddnoswitch:
+.Lnoswitch:
         movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
+        xorl 12(%r10), %esi
+        xorl 12(%r11), %esi
+        js .Lsubshift           # Determine if adding or subtracting digits
         subl %edx, %r9d
         movq (%r11), %rdx
         js .Laddshr
         leal (,%r9d,4), %ecx
         shlq %cl, %rdx
         movq $0, %r9
-        jmp .Laddadd
+        jmp .Ladd
 .Laddshr:
         negl %r9d
         leal (,%r9d,4), %ecx
         cmpl $16, %r9d
         movq $0, %r9
-        je .Laddrem
+        je .Lrem
         ja .Laddshrtoofar
         shrdq %cl, %rdx, %r9
         shrq %cl, %rdx
-        jmp .Laddadd
+        jmp .Ladd
 .Laddshrtoofar:
         xchgq %rax, %rdx
         shrdq $4, %rax, %r9
         shrq $4, %rax
-        jmp .Laddrem
-.Laddadd:
+        jmp .Lrem
+.Ladd:
         movq %rax, %rsi
         movq %rdx, %r11
         movq %rdx, %rcx
         movq $0, %rdx
         andb $0x0F, %al
         andb $0x0F, %cl
-.Laddaddloop:
+.Laddloop:
         adcb %al, %cl
         cmpb $0x9, %cl
-        ja .Laddaddcarry
+        ja .Laddcarry
         addb %cl, %dl
         rorq $4, %rdx
         shrq $4, %rsi
         shrq $4, %r11
         test %rsi, %rsi
-        jz .Laddadddone
+        jz .Ladddone
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
         andb $0x0F, %cl
-        clc
-        jmp .Laddaddloop
-.Laddaddcarry:
+        jmp .Laddloop
+.Laddcarry:
         addb $0x06, %cl
         andb $0x0F, %cl
         addb %cl, %dl
@@ -107,25 +106,95 @@ fpfd32_impl_addsub:
         shrq $4, %rsi
         shrq $4, %r11
         test %rsi, %rsi
-        jz .Laddadddonecarry
+        jz .Ladddonecarry
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
         andb $0x0F, %cl
         stc
-        jmp .Laddaddloop
-.Laddadddonecarry:
+        jmp .Laddloop
+.Ladddonecarry:
         shrdq $4, %rdx, %r9
         shrq $4, %rdx
         movq %r9, %rax
         movq $0x1000000000000000, %rcx
         orq %rcx, %rdx
         subl $1, %r8d
-        jmp .Laddrem
-.Laddadddone:
+        jmp .Lrem
+.Ladddone:
         movq %r9, %rax
         movq $0, %r9
-.Laddrem:
+        jmp .Lrem
+.Lsubshift:
+        subl %edx, %r9d
+        movq (%r11), %rdx
+        js .Lsubshr
+        leal (,%r9d,4), %ecx
+        shlq %cl, %rdx
+        movq $0, %r9
+        jmp .Lsub
+.Lsubshr:
+        negl %r9d
+        leal (,%r9d,4), %ecx
+        cmpl $16, %r9d
+        movq $0, %r9
+        je .Lrem
+        ja .Lsubshrtoofar
+        shrdq %cl, %rdx, %r9
+        shrq %cl, %rdx
+        jmp .Lsub
+.Lsubshrtoofar:
+        xchgq %rax, %rdx
+        shrdq $4, %rax, %r9
+        shrq $4, %rax
+        jmp .Lrem
+.Lsub:
+        movq %rax, %rsi
+        movq %rdx, %r11
+        movq %rdx, %rcx
+        movq $0, %rdx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+.Lsubloop:
+        sbbb %cl, %al
+        jc .Lsubborrow
+        addb %al, %dl
+        rorq $4, %rdx
+        shrq $4, %rsi
+        shrq $4, %r11
+        test %rsi, %rsi
+        jz .Lsubdone
+        movq %rsi, %rax
+        movq %r11, %rcx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+        jmp .Lsubloop
+.Lsubborrow:
+        addb $0x0A, %al
+        addb %al, %dl
+        rorq $4, %rdx
+        shrq $4, %rsi
+        shrq $4, %r11
+        test %rsi, %rsi
+        jz .Lsubdonecarry
+        movq %rsi, %rax
+        movq %r11, %rcx
+        andb $0x0F, %al
+        andb $0x0F, %cl
+        stc
+        jmp .Lsubloop
+.Lsubdonecarry:
+        shrdq $4, %rdx, %r9
+        shrq $4, %rdx
+        movq %r9, %rax
+        movq $0x1000000000000000, %rcx
+        orq %rcx, %rdx
+        subl $1, %r8d
+        jmp .Lrem
+.Lsubdone:
+        movq %r9, %rax
+        movq $0, %r9
+.Lrem:
         movq %rdx, (%rdi)       # Save the mantissa
         movl 8(%r10), %edx
         subl %r8d, %edx
@@ -136,16 +205,14 @@ fpfd32_impl_addsub:
         shrdq $60, %rax, %r9
         shrq $60, %rax
         cmpl $0, %eax
-        je .Laddspecial
+        je .Lspecial
         cmpl $5, %eax
-        je .Laddspecial
+        je .Lspecial
         ret
-.Laddspecial:
+.Lspecial:
         cmpq $0, %r9
-        je .Laddspecial1
+        je .Lspecial1
         addl $1, %eax
-.Laddspecial1:
-        ret
-.Lsub:
+.Lspecial1:
         ret
         .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
