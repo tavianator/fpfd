@@ -42,8 +42,7 @@ fpfd32_random(fpfd32_ptr dest)
     }
 
     fpfd32_impl_expand(&impl, dest);
-  } while (impl.fields.special != FPFD_ZERO
-           && impl.fields.special != FPFD_NUMBER);
+  } while (impl.fields.special != FPFD_NUMBER);
 }
 
 void
