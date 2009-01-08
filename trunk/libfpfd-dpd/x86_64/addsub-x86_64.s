@@ -31,6 +31,8 @@
 fpfd32_impl_addsub:
         movq %rdx, %r10
         movq %rcx, %r11
+        movl 12(%r10), %ecx
+        movl %ecx, -4(%rsp)     # Store the sign of the result
         bsrq (%r10), %r8
         bsrq (%r11), %r9
         subl $63, %r8d
@@ -51,8 +53,8 @@ fpfd32_impl_addsub:
         movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
-        movq 8(%r10), %rcx
-        movq %rcx, -8(%rsp)     # Store the sign and exponent of the result
+        movl 8(%r10), %ecx
+        movl %ecx, -8(%rsp)     # Store the exponent of the result
         shrq $32, %rcx
         xorl %ecx, %esi
         xorl 12(%r11), %esi
