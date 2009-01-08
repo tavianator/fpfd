@@ -152,9 +152,6 @@ fpfd32_impl_addsub:
         shrq $4, %rax
         jmp .Lrem
 .Lsub:
-        movq %r9, -16(%rsp)
-        movq $0x999999999999999A, %r9
-        movq $1, %r10
         movq %rax, %rsi
         movq %rdx, %r11
         movq %rdx, %rcx
@@ -164,15 +161,6 @@ fpfd32_impl_addsub:
 .Lsubloop:
         sbbb %cl, %al
         jc .Lsubborrow
-        testq %r10, %r10
-        jz .Lsubloopnotleading
-        testb %al, %al
-        jnz .Lsubloopzeroleading
-        shlq $4, %r9
-        jmp .Lsubloopnotleading
-.Lsubloopzeroleading:
-        movq $0, %r10
-.Lsubloopnotleading:
         addb %al, %dl
         rorq $4, %rdx
         shrq $4, %rsi
@@ -185,7 +173,6 @@ fpfd32_impl_addsub:
         andb $0x0F, %cl
         jmp .Lsubloop
 .Lsubborrow:
-        movq $0, %r10
         addb $0x0A, %al
         addb %al, %dl
         rorq $4, %rdx
@@ -200,14 +187,19 @@ fpfd32_impl_addsub:
         stc
         jmp .Lsubloop
 .Lsubdoneborrow:
-        subq %rdx, %r9
-        movq %r9, %rdx
-        movq -16(%rsp), %rax
+        bsfq %rdx, %rcx
+        addl $1, %ecx
+        andl $0x3C, %ecx
+        movq $0x999999999999999A, %rax
+        shlq %cl, %rax
+        subq %rdx, %rax
+        movq %rax, %rdx
+        movq %r9, %rax
         movq $0, %r9
         negl -4(%rsp)
         jmp .Lrem
 .Lsubdone:
-        movq -16(%rsp), %rax
+        movq %r9, %rax
         movq $0, %r9
 .Lrem:
         movq %rdx, (%rdi)       # Save the mantissa
