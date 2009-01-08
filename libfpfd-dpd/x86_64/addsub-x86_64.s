@@ -51,7 +51,10 @@ fpfd32_impl_addsub:
         movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
-        xorl 12(%r10), %esi
+        movq 8(%r10), %rcx
+        movq %rcx, -8(%rsp)     # Store the sign and exponent of the result
+        shrq $32, %rcx
+        xorl %ecx, %esi
         xorl 12(%r11), %esi
         js .Lsubshift           # Determine if adding or subtracting digits
         subl %edx, %r9d
@@ -149,6 +152,9 @@ fpfd32_impl_addsub:
         shrq $4, %rax
         jmp .Lrem
 .Lsub:
+        movq %r9, -16(%rsp)
+        movq $0x999999999999999A, %r9
+        movq $1, %r10
         movq %rax, %rsi
         movq %rdx, %r11
         movq %rdx, %rcx
@@ -158,6 +164,15 @@ fpfd32_impl_addsub:
 .Lsubloop:
         sbbb %cl, %al
         jc .Lsubborrow
+        testq %r10, %r10
+        jz .Lsubloopnotleading
+        testb %al, %al
+        jnz .Lsubloopzeroleading
+        shlq $4, %r9
+        jmp .Lsubloopnotleading
+.Lsubloopzeroleading:
+        movq $0, %r10
+.Lsubloopnotleading:
         addb %al, %dl
         rorq $4, %rdx
         shrq $4, %rsi
@@ -170,36 +185,36 @@ fpfd32_impl_addsub:
         andb $0x0F, %cl
         jmp .Lsubloop
 .Lsubborrow:
+        movq $0, %r10
         addb $0x0A, %al
         addb %al, %dl
         rorq $4, %rdx
         shrq $4, %rsi
         shrq $4, %r11
         test %rsi, %rsi
-        jz .Lsubdonecarry
+        jz .Lsubdoneborrow
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
         andb $0x0F, %cl
         stc
         jmp .Lsubloop
-.Lsubdonecarry:
-        shrdq $4, %rdx, %r9
-        shrq $4, %rdx
-        movq %r9, %rax
-        movq $0x1000000000000000, %rcx
-        orq %rcx, %rdx
-        subl $1, %r8d
+.Lsubdoneborrow:
+        subq %rdx, %r9
+        movq %r9, %rdx
+        movq -16(%rsp), %rax
+        movq $0, %r9
+        negl -4(%rsp)
         jmp .Lrem
 .Lsubdone:
-        movq %r9, %rax
+        movq -16(%rsp), %rax
         movq $0, %r9
 .Lrem:
         movq %rdx, (%rdi)       # Save the mantissa
-        movl 8(%r10), %edx
+        movl -8(%rsp), %edx
         subl %r8d, %edx
         movl %edx, 8(%rdi)      # Adjust and save the exponent
-        movl 12(%r10), %edx
+        movl -4(%rsp), %edx
         movl %edx, 12(%rdi)     # Save the sign
         movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
         shrdq $60, %rax, %r9
