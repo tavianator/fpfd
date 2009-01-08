@@ -31,8 +31,8 @@
 fpfd32_impl_addsub:
         movq %rdx, %r10
         movq %rcx, %r11
-        movl 12(%r10), %ecx
-        movl %ecx, -4(%rsp)     # Store the sign of the result
+        xorl 12(%r11), %esi
+        xorl $1, %esi           # Find the effective sign of rhs
         bsrq (%r10), %r8
         bsrq (%r11), %r9
         subl $63, %r8d
@@ -43,21 +43,24 @@ fpfd32_impl_addsub:
         shrl $2, %r9d
         movl %r9d, %edx
         subl %r8d, %edx
+        movl 12(%r10), %eax
+        movl %eax, -4(%rsp)
         addl 8(%r10), %edx
         subl 8(%r11), %edx
         jns .Lnoswitch
+        movl %esi, -4(%rsp)
         xchgq %r10, %r11
         xchgl %r8d, %r9d
         negl %edx
 .Lnoswitch:
+        xorl %eax, %esi
+        movl 8(%r10), %eax
+        movl %eax, -8(%rsp)     # Store the result exponent
         movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
-        movl 8(%r10), %ecx
-        movl %ecx, -8(%rsp)     # Store the exponent of the result
         shrq $32, %rcx
-        xorl %ecx, %esi
-        xorl 12(%r11), %esi
+        cmpl $0, %esi
         js .Lsubshift           # Determine if adding or subtracting digits
         subl %edx, %r9d
         movq (%r11), %rdx
