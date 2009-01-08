@@ -132,10 +132,6 @@ int fpfd32_inf_p(fpfd32_srcptr src);
 int fpfd32_number_p(fpfd32_srcptr src);
 int fpfd32_zero_p(fpfd32_srcptr src);
 
-/* --- Random number generation --- */
-void fpfd32_random(fpfd32_ptr dest);
-void fpfd32_srandom(unsigned int seed);
-
 #ifdef __cplusplus
 }
 #endif

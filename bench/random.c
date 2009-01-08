@@ -18,9 +18,16 @@
  * <http://www.gnu.org/licenses/>.                                       *
  *************************************************************************/
 
-#include "fpfd_impl.h"
-#include <stdlib.h> /* For rand, rand_r, srand, RAND_MAX */
-#include <limits.h> /* For UCHAR_MAX                     */
+#include "bench.h"
+#include "../libfpfd/fpfd_impl.h"
+#include <stdlib.h> /* For rand, srand, RAND_MAX */
+#include <limits.h> /* For UCHAR_MAX             */
+
+void
+fpfd_srandom(unsigned int seed)
+{
+  srand(seed);
+}
 
 void
 fpfd32_random(fpfd32_ptr dest)
@@ -42,11 +49,10 @@ fpfd32_random(fpfd32_ptr dest)
     }
 
     fpfd32_impl_expand(&impl, dest);
+    impl.fields.exp = 0; /*
+                          * Addition and subtraction only really do stuff when
+                          * the exponents are close enough; otherwise, we
+                          * benchmark mostly no-ops.
+                          */
   } while (impl.fields.special != FPFD_NUMBER);
-}
-
-void
-fpfd32_srandom(unsigned int seed)
-{
-  srand(seed);
 }
