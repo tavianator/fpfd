@@ -18,7 +18,7 @@
 #########################################################################
 
 EXTRA_LTLIBRARIES        = libfpfd-bench.la
-libfpfd_bench_la_SOURCES = bench.h htable.c x.c
+libfpfd_bench_la_SOURCES = bench.h htable.c random.c x.c
 
 if X86
 libfpfd_bench_la_SOURCES += x86/arch_init-x86.c x86/ticks-x86.s

@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+#include "../libfpfd/fpfd.h"
 #include "../libfpfd/fpfd_impl.h"
 #include <search.h> /* For ENTRY, ACTION */
 #include <stddef.h> /* For size_t        */
@@ -81,3 +82,7 @@ extern unsigned int bench_loops;
  */
 void record_ticks(const char *key, long tick_count);
 void write_ticks(const char *key, FILE *file);
+
+/* Random number generation */
+void fpfd_srandom(unsigned int seed);
+void fpfd32_random(fpfd32_ptr dest);
