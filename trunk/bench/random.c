@@ -55,4 +55,5 @@ fpfd32_random(fpfd32_ptr dest)
                           * benchmark mostly no-ops.
                           */
   } while (impl.fields.special != FPFD_NUMBER);
+  fpfd32_impl_compress(dest, &impl);
 }
