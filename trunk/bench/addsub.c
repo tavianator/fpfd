@@ -20,44 +20,39 @@
 #include "bench.h"
 
 void
-fpfd32_bench_impl_addsub(unsigned int trials)
+fpfd32_bench_addsub(unsigned int trials)
 {
-  fpfd32_t lhs, rhs;
-  fpfd32_impl_t impl, lhs_impl, rhs_impl;
+  fpfd32_t fp, lhs, rhs;
   long ticks1, ticks2;
   unsigned int i, j;
+  fpfd_flags_t flags = FPFD_NONE;
 
   /* Warm up cache */
-
   fpfd32_random(lhs);
   fpfd32_random(rhs);
-  fpfd32_impl_expand(&lhs_impl, lhs);
-  fpfd32_impl_expand(&rhs_impl, rhs);
-  fpfd32_impl_addsub(&impl, 1, &lhs_impl, &rhs_impl);
-  fpfd32_impl_addsub(&impl, -1, &lhs_impl, &rhs_impl);
+  fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
+  fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
     fpfd32_random(rhs);
-    fpfd32_impl_expand(&lhs_impl, lhs);
-    fpfd32_impl_expand(&rhs_impl, rhs);
 
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();
-      fpfd32_impl_addsub(&impl, 1, &lhs_impl, &rhs_impl);
+      fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
     }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_add", ticks2 - ticks1);
+    record_ticks("fpfd32_add", ticks2 - ticks1);
 
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();
-      fpfd32_impl_addsub(&impl, -1, &lhs_impl, &rhs_impl);
+      fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
     }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_sub", ticks2 - ticks1);
+    record_ticks("fpfd32_sub", ticks2 - ticks1);
   }
 }
