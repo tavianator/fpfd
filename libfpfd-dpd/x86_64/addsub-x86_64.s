@@ -74,13 +74,13 @@ fpfd32_impl_addsub:
         leal (,%r9d,4), %ecx
         cmpl $16, %r9d
         movq $0, %r9
-        je .Lrem
-        ja .Laddshrtoofar
+        jae .Laddshrtoofar
         shrdq %cl, %rdx, %r9
         shrq %cl, %rdx
         jmp .Ladd
 .Laddshrtoofar:
         xchgq %rax, %rdx
+        je .Lrem
         shrdq $4, %rax, %r9
         shrq $4, %rax
         jmp .Lrem
