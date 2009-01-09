@@ -41,7 +41,7 @@ Copyright @copyright{} 2008 Tavian Barnes
 @cindex introduction
 @cindex overview
 
-The FPFD library is a library for decimal (base 10) arithmetic in C. It is designed to follow the decimal arithmetic specifications of the IEEE 754R standard for floating-point arithmetic. It implements both decimal encodings specified by the standard (@pxref{Encodings}), and is useful for comparing the two (@pxref{Benchmarking}). FPFD's internals are implemented in a mixture of assembly and C, to provide a portable C interface as well as a highly effecient assembly implementation.
+The FPFD library is a library for decimal (base 10) arithmetic in C. It is designed to follow the decimal arithmetic specifications of the IEEE 754-2008 standard for floating-point arithmetic. It implements both decimal encodings specified by the standard (@pxref{Encodings}), and is useful for comparing the two (@pxref{Benchmarking}). FPFD's internals are implemented in a mixture of assembly and C, to provide a portable C interface as well as a highly effecient assembly implementation.
 
 The C interface is designed similarly to the MPFR library interface; notably, all functions take a parameter describing the rounding mode, and all functions return a ternary value describing the direction the result was rounded.
 
@@ -56,7 +56,7 @@ The C interface is designed similarly to the MPFR library interface; notably, al
 @cindex BID
 @cindex binary
 
-The IEEE 754R standard specifies two encoding schemes for decimal floating-point numbers: DPD (Densely-Packed-Decimal) and BID (Binary-Integer-Decimal). The DPD compresses 3 BCD (Binary-Coded-Decimal) digits from 12 bits to 10, using only logic operations. The BID encoding simply stores the coefficient as a large binary integer. Each encoding has performance benefits and detriments, and one goal of the FPFD project is to determine which encoding is faster, in a software implementation, on many architectures. @xref{Benchmarking}.
+The IEEE 754-2008 standard specifies two encoding schemes for decimal floating-point numbers: DPD (Densely-Packed-Decimal) and BID (Binary-Integer-Decimal). The DPD compresses 3 BCD (Binary-Coded-Decimal) digits from 12 bits to 10, using only logic operations. The BID encoding simply stores the coefficient as a large binary integer. Each encoding has performance benefits and detriments, and one goal of the FPFD project is to determine which encoding is faster, in a software implementation, on many architectures. @xref{Benchmarking}.
 
 @menu
 * Implementation libraries:: Using a particualar encoding
@@ -65,7 +65,7 @@ The IEEE 754R standard specifies two encoding schemes for decimal floating-point
 @node Implementation libraries
 @section Implementation libraries
 
-The FPFD library delegates encoding-specific operations to one of two implementation libraries: libfpfd-dpd, and libfpfd-bid. Aditionally, one of the encodings may be statically compiled into libfpfd, to eliminate the need to link programs with two libraries just to use FPFD. This separation makes it easy to switch an application between the two encodings, either by re-linking or using @code{LD_PRELOAD}. For details of the API exposed by the implementation libraries, @xref{Implementation}.
+The FPFD library delegates encoding-specific operations to one of two implementation libraries: libfpfd-dpd, and libfpfd-bid. This separation makes it easy to switch an application between the two encodings, either by re-linking or using @code{LD_PRELOAD}. For details of the API exposed by the implementation libraries, @xref{Implementation}.
 
 
 @node Benchmarking
