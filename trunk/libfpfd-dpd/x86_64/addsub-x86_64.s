@@ -60,8 +60,8 @@ fpfd32_impl_addsub:
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
         shrq $32, %rcx
-        cmpl $0, %esi
-        js .Lsubshift           # Determine if adding or subtracting digits
+        testl %esi, %esi
+        jnz .Lsubshift          # Determine if adding or subtracting digits
         subl %edx, %r9d
         movq (%r11), %rdx
         js .Laddshr
@@ -163,6 +163,9 @@ fpfd32_impl_addsub:
         movq $0, %rdx
         andb $0x0F, %al
         andb $0x0F, %cl
+        testq %r9, %r9
+        jz .Lsubloop
+        stc
 .Lsubloop:
         sbbb %cl, %al
         jc .Lsubborrow
@@ -205,6 +208,14 @@ fpfd32_impl_addsub:
         jmp .Lrem
 .Lsubdone:
         movq %r9, %rax
+        bsfq %r9, %rcx
+        jz .Lsubdonenorem
+        addl $1, %ecx
+        andl $0x3C, %ecx
+        movq $0x999999999999999A, %rax
+        shlq %cl, %rax
+        subq %r9, %rax
+.Lsubdonenorem:        
         movq $0, %r9
 .Lrem:
         movq %rdx, (%rdi)       # Save the mantissa
