@@ -146,11 +146,33 @@ fpfd32_impl_addsub:
         leal (,%r9d,4), %ecx
         cmpl $16, %r9d
         movq $0, %r9
-        je .Lrem
+        je .Lsubshrjusttoofar
         ja .Lsubshrtoofar
         shrdq %cl, %rdx, %r9
         shrq %cl, %rdx
         jmp .Lsub
+.Lsubshrjusttoofar:
+        bsfq %rdx, %rcx
+        addl $1, %ecx
+        andl $0x3C, %ecx
+        movq $0x999999999999999A, %r9
+        shlq %cl, %r9
+        subq %rdx, %r9
+        xchgq %r9, %rax
+        bsfq %r9, %rdx
+        addl $1, %edx
+        andl $0x3C, %edx
+        jz .Lsubshrjusttoofar1
+        movl $64, %ecx
+        subl %edx, %ecx
+        movq $0x0666666666666666, %rdx
+        shrq %cl, %rdx
+        subq %rdx, %r9
+.Lsubshrjusttoofar1:
+        subq $1, %r9
+        movq %r9, %rdx
+        movq $0, %r9
+        jmp .Lrem
 .Lsubshrtoofar:
         movq %rax, %rdx
         bsfq %rdx, %r9
