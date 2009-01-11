@@ -201,6 +201,8 @@ fpfd32_impl_addsub:
         jnz .Lsubnoopt
         testl %edx, %edx
         jnz .Lsubnoopt
+        testq %r9, %r9
+        jnz .Lsubnoopt
         shrq $32, %rax
         shrq $32, %rdx
 .Lsubnoopt:
