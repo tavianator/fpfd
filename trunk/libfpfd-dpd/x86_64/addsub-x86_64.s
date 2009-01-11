@@ -1,29 +1,31 @@
-#########################################################################
-# Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               #
-#                                                                       #
-# This file is part of The FPFD Library.                                #
-#                                                                       #
-# The FPFD Library is free software; you can redistribute it and/or     #
-# modify it under the terms of the GNU Lesser General Public License as #
-# published by the Free Software Foundation; either version 3 of the    #
-# License, or (at your option) any later version.                       #
-#                                                                       #
-# The FPFD Library is distributed in the hope that it will be useful,   #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU     #
-# Lesser General Public License for more details.                       #
-#                                                                       #
-# You should have received a copy of the GNU Lesser General Public      #
-# License along with this program.  If not, see                         #
-# <http://www.gnu.org/licenses/>.                                       #
-#########################################################################
+/*************************************************************************
+ * Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               *
+ *                                                                       *
+ * This file is part of The FPFD Library.                                *
+ *                                                                       *
+ * The FPFD Library is free software; you can redistribute it and/or     *
+ * modify it under the terms of the GNU Lesser General Public License as *
+ * published by the Free Software Foundation; either version 3 of the    *
+ * License, or (at your option) any later version.                       *
+ *                                                                       *
+ * The FPFD Library is distributed in the hope that it will be useful,   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU     *
+ * Lesser General Public License for more details.                       *
+ *                                                                       *
+ * You should have received a copy of the GNU Lesser General Public      *
+ * License along with this program.  If not, see                         *
+ * <http://www.gnu.org/licenses/>.                                       *
+ *************************************************************************/
 
-# unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
-#                                 const fpfd32_impl_t *lhs,
-#                                 const fpfd32_impl_t *rhs);
-#
-# Add lhs and rhs if sign == 1, or subtract lhs and rhs if sign == -1, and store
-# the result in dest.
+/* unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
+                                   const fpfd32_impl_t *lhs,
+                                   const fpfd32_impl_t *rhs); */
+
+/*
+ * Add lhs and rhs if sign == 1, or subtract lhs and rhs if sign == -1, and
+ * store the result in dest.
+ */
 
         .text
 .globl fpfd32_impl_addsub
@@ -32,7 +34,7 @@ fpfd32_impl_addsub:
         movq %rdx, %r10
         movq %rcx, %r11
         xorl 12(%r11), %esi
-        xorl $1, %esi           # Find the effective sign of rhs
+        xorl $1, %esi           /* Find the effective sign of rhs */
         bsrq (%r10), %r8
         bsrq (%r11), %r9
         subl $63, %r8d
@@ -55,13 +57,13 @@ fpfd32_impl_addsub:
 .Lnoswitch:
         xorl %eax, %esi
         movl 8(%r10), %eax
-        movl %eax, -8(%rsp)     # Store the result exponent
+        movl %eax, -8(%rsp)     /* Store the result exponent */
         movq (%r10), %rax
         leal (,%r8d,4), %ecx
         shlq %cl, %rax
         shrq $32, %rcx
         testl %esi, %esi
-        jnz .Lsubshift          # Determine if adding or subtracting digits
+        jnz .Lsubshift          /* Determine if adding or subtracting digits */
         subl %edx, %r9d
         movq (%r11), %rdx
         js .Laddshr
@@ -267,13 +269,13 @@ fpfd32_impl_addsub:
 .Lsubdonenorem:        
         movq $0, %r9
 .Lrem:
-        movq %rdx, (%rdi)       # Save the mantissa
+        movq %rdx, (%rdi)       /* Save the mantissa */
         movl -8(%rsp), %edx
         subl %r8d, %edx
-        movl %edx, 8(%rdi)      # Adjust and save the exponent
+        movl %edx, 8(%rdi)      /* Adjust and save the exponent */
         movl -4(%rsp), %edx
-        movl %edx, 12(%rdi)     # Save the sign
-        movl $1, 16(%rdi)       # Set the special flag to FPFD_NUMBER
+        movl %edx, 12(%rdi)     /* Save the sign */
+        movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         shrdq $60, %rax, %r9
         shrq $60, %rax
         cmpl $0, %eax
