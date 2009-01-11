@@ -49,12 +49,15 @@ fpfd32_random(fpfd32_ptr dest)
     }
 
     fpfd32_impl_expand(&impl, dest);
-    impl.fields.exp = 0;  /*
-                           * Addition and subtraction only really do stuff when
-                           * the exponents are close enough; otherwise, we
-                           * benchmark mostly no-ops.
-                           */
-    impl.fields.sign = 1; /* Ensures that fpfd_add performs an addition, etc. */
+
+    /*
+     * Addition and subtraction only really do stuff when the exponents are
+     * close enough; otherwise, we benchmark mostly no-ops.
+     */
+    impl.fields.exp = rand() % 7;
+
+    /* Ensure that fpfd_add performs an addition, and fpfd_sub a subtraction. */
+    impl.fields.sign = 1;
   } while (impl.fields.special != FPFD_NUMBER);
   fpfd32_impl_compress(dest, &impl);
 }
