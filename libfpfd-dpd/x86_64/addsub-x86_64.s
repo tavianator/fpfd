@@ -85,6 +85,13 @@ fpfd32_impl_addsub:
         shrq $4, %rax
         jmp .Lrem
 .Ladd:
+        testl %eax, %eax
+        jnz .Laddnoopt
+        testl %edx, %edx
+        jnz .Laddnoopt
+        shrq $32, %rax
+        shrq $32, %rdx
+.Laddnoopt:
         movq %rax, %rsi
         movq %rdx, %r11
         movq %rdx, %rcx
@@ -190,6 +197,13 @@ fpfd32_impl_addsub:
         movq $0, %r9
         jmp .Lrem
 .Lsub:
+        testl %eax, %eax
+        jnz .Lsubnoopt
+        testl %edx, %edx
+        jnz .Lsubnoopt
+        shrq $32, %rax
+        shrq $32, %rdx
+.Lsubnoopt:
         movq %rax, %rsi
         movq %rdx, %r11
         movq %rdx, %rcx
