@@ -152,9 +152,20 @@ fpfd32_impl_addsub:
         shrq %cl, %rdx
         jmp .Lsub
 .Lsubshrtoofar:
-        xchgq %rax, %rdx
-        shrdq $4, %rax, %r9
-        shrq $4, %rax
+        movq %rax, %rdx
+        bsfq %rdx, %r9
+        addl $1, %r9d
+        andl $0x3C, %r9d
+        jz .Lsubshrtoofar1
+        movl $64, %ecx
+        subl %r9d, %ecx
+        movq $0x0666666666666666, %rax
+        shrq %cl, %rax
+        subq %rax, %rdx
+.Lsubshrtoofar1:
+        subq $1, %rdx
+        movq $0x9000000000000000, %rax
+        movq $0, %r9
         jmp .Lrem
 .Lsub:
         movq %rax, %rsi
