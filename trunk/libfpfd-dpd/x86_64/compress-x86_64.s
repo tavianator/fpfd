@@ -73,7 +73,7 @@ fpfd32_impl_compress:
         movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .L1i:
-        andl $0x3FFFFFF, %eax   /* Mask off the highest bit of the big digit */
+        andl $0x4FFFFFF, %eax   /* Mask off the highest bit of the big digit */
         movl %edx, %esi
         andl $0xC0, %esi        /* Get the trailing exponent bits */
         andl $0x3F, %edx        /* Get the leading exponent bits */
