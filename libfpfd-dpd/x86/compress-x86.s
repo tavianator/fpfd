@@ -75,7 +75,7 @@ fpfd32_impl_compress:
         popl %ebx
         ret
 .L1i:
-        andl $0xFFFFFFF, %eax
+        andl $0x4FFFFFF, %eax
         movl %edx, %ecx
         andl $0xC0, %ecx
         andl $0x3F, %edx
