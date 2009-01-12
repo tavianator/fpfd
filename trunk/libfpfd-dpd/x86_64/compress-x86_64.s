@@ -29,21 +29,22 @@
 .globl fpfd32_impl_compress
         .type fpfd32_impl_compress, @function
 fpfd32_impl_compress:
-        movl (%rsi), %eax
+        movl (%rsi), %eax       /* Put src->mant in eax */
         movl %eax, %ecx
         movl %eax, %edx
+        /* Convert the BCD digits to DPD */
         movq fpfd_bcd2dpd@GOTPCREL(%rip), %r8   /* For position-independance */
         andq $0xFFF, %rcx
-        movw (%r8,%rcx,2), %cx
+        movw (%r8,%rcx,2), %cx  /* Lowest three digits */
         shrl $12, %edx
         andq $0xFFF, %rdx
-        movw (%r8,%rdx,2), %dx
+        movw (%r8,%rdx,2), %dx  /* Highest three digits */
         shll $10, %edx
-        orl %ecx, %edx          /* Get the trailing significand */
-        andl $0xF000000, %eax
+        orl %ecx, %edx          /* Complete trailing significand */
+        andl $0xF000000, %eax   /* Leading digit */
         shll $2, %eax
         orl %edx, %eax          /* Put the leading significand digit in place */
-        movl 12(%rsi), %ecx
+        movl 12(%rsi), %ecx     /* Put src->fields.sign in ecx */
         subl $1, %ecx
         negl %ecx
         shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
@@ -57,51 +58,51 @@ fpfd32_impl_compress:
         je .LqNaN
         cmpl $4, %edx
         je .Linf
-        movl 8(%rsi), %edx
-        addl $101, %edx         /* Get the biased exponent */
+        movl 8(%rsi), %edx      /* Put src->fields.exp in edx */
+        addl $101, %edx         /* Add the bias */
         testl $0x20000000, %eax
-        jnz .L1i                /* The leading digit is big */
+        jnz .L1i                /* Test for a big leading digit (8 or 9) */
         movl %edx, %esi
-        andl $0xC0, %esi
-        andl $0x3F, %edx
+        andl $0xC0, %esi        /* Get the trailing exponent bits */
+        andl $0x3F, %edx        /* Get the leading exponent bits */
         shll $20, %edx
         shll $23, %esi
-        orl %edx, %eax          /* The low bits of the exponent */
-        orl %esi, %eax          /* The high bits of the exponent */
+        orl %esi, %eax          /* The trailing exponent bits */
+        orl %edx, %eax          /* The leading exponent bits*/
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .L1i:
-        andl $0xFFFFFFF, %eax
+        andl $0x3FFFFFF, %eax   /* Mask off the highest bit of the big digit */
         movl %edx, %esi
-        andl $0xC0, %esi
-        andl $0x3F, %edx
+        andl $0xC0, %esi        /* Get the trailing exponent bits */
+        andl $0x3F, %edx        /* Get the leading exponent bits */
         shll $20, %edx
         shll $21, %esi
-        orl %edx, %eax          /* The low bits of the exponent */
-        orl %esi, %eax          /* The high bits of the exponent */
+        orl %esi, %eax          /* The trailing exponent bits */
+        orl %edx, %eax          /* The leading exponent bits*/
         orl $0x60000000, %eax   /* Indicate a big leading digit */
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .Lzero:
-        movl $0x22500000, %eax
+        movl $0x22500000, %eax  /* A zero mantissa and exponent */
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .LsNaN:
-        orl $0x7E000000, %eax
+        orl $0x7E000000, %eax   /* Indicate a signalling NaN */
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .LqNaN:
-        orl $0x7C000000, %eax
+        orl $0x7C000000, %eax   /* Indicate a quiet NaN */
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .Linf:   
-        movl $0x78000000, %eax
+        movl $0x78000000, %eax  /* An infinity, with zero payload */
         orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the result in dest */
         ret
         .size fpfd32_impl_compress, .-fpfd32_impl_compress
