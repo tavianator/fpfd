@@ -45,18 +45,20 @@ fpfd32_impl_inc:
 .Lcarryinit:
         pushl %ebx
         pushl %esi              /* Callee-save registers */
-        movl $6, %ebx           /* For decimal carries */
+        movl $6, %ebx
 .Lcarry:
-        addl %ebx, %eax
-        shll $4, %edx
-        shll $4, %ebx
-        cmpl $0x60000000, %ebx
-        je .Lrollover           /* If we carry past this, we've rolled over */
+        /* eax = mantissa, edx = 0xA << n, ebx = 0x6 << n */
+        addl %ebx, %eax         /* Add 0x6 to the digit for a decimal carry */
         movl %eax, %esi
+        shll $4, %edx
+        shll $4, %ebx           /* Shift our mask and carry */
+        cmpl $0x60000000, %ebx
+        je .Lrollover           /* If we carry past 7 digits, we've rolled
+                                   over */
         andl %edx, %esi
-        cmpl %edx, %esi
+        cmpl %edx, %esi         /* Test for carry (digit == 10) */
         je .Lcarry
-        movl %eax, (%ecx)
+        movl %eax, (%ecx)       /* Store the mantissa */
         popl %esi
         popl %ebx
         ret
