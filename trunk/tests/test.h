@@ -22,6 +22,10 @@
 #include <stdio.h>  /* For FILE     */
 #include <stdint.h> /* For uint32_t */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Rather than write these out for every operand width */
 
 #define fpfd_declare(var)                        \
@@ -281,3 +285,7 @@ const char *fpfd_special_str(fpfd_special_t special);
 const char *fpfd_flags_str(fpfd_flags_t flags);
 void fpfd32_dump(FILE *file, fpfd32_srcptr fp);
 void fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *fp);
+
+#ifdef __cplusplus
+}
+#endif
