@@ -29,71 +29,72 @@
 .globl fpfd32_impl_expand
         .type fpfd32_impl_expand, @function
 fpfd32_impl_expand:
-        movl (%rsi), %eax
+        movl (%rsi), %eax       /* Put *src in eax */
         movl %eax, %edx
         shrl $30, %edx
-        andl $0x2, %edx
+        andl $0x2, %edx         /* Put sign bit << 1 in edx */
+        subl $1, %edx
         negl %edx
-        addl $1, %edx
         movl %edx, 12(%rdi)     /* Map the sign bit from (1, 0) to (-1, +1) */
         movl %eax, %ecx
         movl %eax, %edx
         /* Convert the trailing significand digits from DPD to BCD */
         movq fpfd_dpd2bcd@GOTPCREL(%rip), %r8   /* For position-independance */
         andq $0x3FF, %rcx
-        movw (%r8,%rcx,2), %cx
+        movw (%r8,%rcx,2), %cx  /* First declet */
         shrl $10, %edx
         andq $0x3FF, %rdx
-        movw (%r8,%rdx,2), %dx
+        movw (%r8,%rdx,2), %dx  /* Second declet */
         shll $12, %edx
-        orl %ecx, %edx
+        orl %ecx, %edx          /* We have all 6 trailing digits now */
         shrl $20, %eax
-        andl $0x7FF, %eax
+        andl $0x7FF, %eax       /* Put combination field in eax */
         movl %eax, %ecx
         andl $0x600, %ecx
         cmpl $0x600, %ecx
-        je .Lc1i                /* If the combination field begins with 11, */
-                                /* follow 754-2008, S3.5.2, p11, c.1.i */
+        je .Lc1i                /* If the combination field begins with 11,
+                                   follow 754-2008, S3.5.2, p11, c.1.i */
         movl %eax, %ecx
         andl $0x1C0, %ecx
         shll $18, %ecx
-        orl %ecx, %edx
-        jz .Lzero
-        movl %edx, (%rdi)       /* Get the leading significand digit */
+        orl %ecx, %edx          /* Extract leading digit */
+        jz .Lzero               /* Test for a zero mantissa */
+        movl %edx, (%rdi)       /* Store the BCD mantissa */
         movl $0, 4(%rdi)        /* Set the high-order significand bits to 0 */
         movl %eax, %ecx
-        andl $0x3F, %eax
+        andl $0x3F, %eax        /* Trailing exponent bits */
         andl $0x600, %ecx
-        shrl $3, %ecx
+        shrl $3, %ecx           /* Leading exponent bits */
         orl %eax, %ecx
-        subl $101, %ecx
-        movl %ecx, 8(%rdi)      /* Subtract the bias and store the exponent */
+        subl $101, %ecx         /* Subtract the exponent bias */
+        movl %ecx, 8(%rdi)      /* Store the exponent */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
 .Lc1i:
+        /* The leading bits of the combination field determine special values */
         movl %eax, %ecx
         andl $0x7E0, %ecx
         cmpl $0x7E0, %ecx
-        je .LsNaN
+        je .LsNaN               /* 111111 signifies sNaN */
         cmpl $0x7C0, %ecx
-        je .LqNaN
+        je .LqNaN               /* 111110 signifies qNaN */
         andl $0x7C0, %ecx
         cmpl $0x780, %ecx
-        je .Linf
+        je .Linf                /* 11110* signifies infinity */
         movl %eax, %ecx
         andl $0x040, %ecx
-        orl $0x200, %ecx
+        orl $0x200, %ecx        /* Get the leading significand digit */
         shll $18, %ecx
-        orl %ecx, %edx
-        movl %edx, (%rdi)       /* Get the leading significand digit */
+        orl %ecx, %edx          /* Put the leading digit in place */
+        movl %edx, (%rdi)       /* Store the significand */
         movl $0, 4(%rdi)        /* Set the high-order significand bits to 0 */
         movl %eax, %ecx
-        andl $0x3F, %eax
+        andl $0x3F, %eax        /* Leading exponent bits */
         andl $0x180, %ecx
-        shrl %ecx
-        orl %eax, %ecx
-        subl $101, %ecx
-        movl %ecx, 8(%rdi)      /* Subtract the bias and store the exponent */
+        shrl %ecx               /* Trailing exponent bits */
+        orl %eax, %ecx          /* Complete exponent */
+        subl $101, %ecx         /* Subtract the exponent bias */
+        movl %ecx, 8(%rdi)      /* Store the exponent */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
 .Lzero:
@@ -115,7 +116,7 @@ fpfd32_impl_expand:
         ret
 .Linf:
         movq $0, (%rdi)         /* Set the payload to zero */
-        movl $0, 8(%rdi)
+        movl $0, 8(%rdi)        /* Set the exponent to zero */
         movl $4, 16(%rdi)       /* Set the special flag to FPFD_INF */
         ret
         .size fpfd32_impl_expand, .-fpfd32_impl_expand

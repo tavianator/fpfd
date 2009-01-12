@@ -44,14 +44,16 @@ fpfd32_impl_inc:
 .Lcarryinit:
         movl $6, %ecx           /* For decimal carries */
 .Lcarry:
+        /* edx = 0xA << n, ecx = 0x6 << n */
         addl %ecx, %eax
         movl %eax, %esi
         shll $4, %edx
-        shll $4, %ecx
+        shll $4, %ecx           /* Shift our mask and carry */
         cmpl $0x60000000, %ecx
-        je .Lrollover           /* If we carry past this, we've rolled over */
+        je .Lrollover           /* If we carry past 7 digits, we've rolled
+                                   over */
         andl %edx, %esi
-        cmpl %edx, %esi
+        cmpl %edx, %esi         /* Test for carry (digit == 10) */
         je .Lcarry
         movl %eax, (%rdi)
         ret
