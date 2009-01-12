@@ -124,50 +124,54 @@ fpfd32_impl_addsub:
 .Laddnoopt:
         movq %rsi, %rax
         movq %r11, %rcx
-        andb $0x0F, %al
-        andb $0x0F, %cl
+        andb $0x0F, %al         /* al is the next digit of rsi to be added */
+        andb $0x0F, %cl         /* cl is the next digit of r11 to be added.
+                                   The `and' instruction clears the carry flag
+                                   for adc. */
 .Laddloop:
         /* This loop adds the digits of rax to rdx */
-        adcb %al, %cl
+        adcb %al, %cl           /* add al to cl, with carry */
         cmpb $0x9, %cl
-        ja .Laddcarry
-        addb %cl, %dl
-        rorq $4, %rdx
-        shrq $4, %rsi
+        ja .Laddcarry           /* Test for decimal carry */
+        addb %cl, %dl           /* Store the digit in rdx */
+        rorq $4, %rdx           /* Rotate rdx to take the next digit */
         shrq $4, %r11
-        test %rsi, %rsi
-        jz .Ladddone
+        shrq $4, %rsi           /* Queue up the next digits to be added */
+        jz .Ladddone            /* If rsi is zero, we are done */
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
-        andb $0x0F, %cl
+        andb $0x0F, %cl         /* Otherwise, load the next digits */
         jmp .Laddloop
 .Laddcarry:
-        addb $0x06, %cl
-        andb $0x0F, %cl
-        addb %cl, %dl
-        rorq $4, %rdx
-        shrq $4, %rsi
+        addb $0x06, %cl         /* There was a carry, so add 6 to correct the
+                                   BCD sum */
+        andb $0x0F, %cl         /* Mask off the excess */
+        addb %cl, %dl           /* Store the digit in rdx */
+        rorq $4, %rdx           /* Rotate rdx to take the next digit */
         shrq $4, %r11
-        test %rsi, %rsi
-        jz .Ladddonecarry
+        shrq $4, %rsi           /* Queue up the next digits to be added */
+        jz .Ladddonecarry       /* If rsi is zero, we are done, but ended on a
+                                   carry. */
         movq %rsi, %rax
         movq %r11, %rcx
         andb $0x0F, %al
-        andb $0x0F, %cl
-        stc
+        andb $0x0F, %cl         /* Otherwise, load the next digits */
+        stc                     /* Set the carry flag */
         jmp .Laddloop
 .Ladddonecarry:
         shrdq $4, %rdx, %r9
-        shrq $4, %rdx
-        movq %r9, %rax
+        shrq $4, %rdx           /* We finished on a carry, so shift the digits
+                                   right by one, saving the falloff in r9 ... */
         movq $0x1000000000000000, %rcx
-        orq %rcx, %rdx
-        subl $1, %r8d
+        orq %rcx, %rdx          /* ... and set the leading digit to 1. */
+        subl $1, %r8d           /* Correct the exponent */
+        movq %r9, %rax          /* Put the remainder in rax */
+        movq $0, %r9            /* Zero the extra remainder */
         jmp .Lrem
 .Ladddone:
-        movq %r9, %rax
-        movq $0, %r9
+        movq %r9, %rax          /* Put the remainder in rax */
+        movq $0, %r9            /* Zero the extra remainder */
         jmp .Lrem
 .Lsubshift:
         subl %edx, %r9d
