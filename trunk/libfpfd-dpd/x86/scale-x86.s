@@ -46,12 +46,14 @@ fpfd32_impl_scale:
         negl %ecx
         addl 8(%esi), %ecx      /* Add (32 + 4 - ecx)/4 to the exponent */
         cmpl $90, %ecx
-        jg .Loflow
+        jg .Loflow              /* If ecx is > 90, we have overflowed */
         cmpl $-108, %ecx
-        jl .Luflow
-        je .LpuflowMSW
+        jl .Luflow              /* If ecx is < -108, we have underflowed */
+        je .LpuflowMSW          /* If ecx is == -108, we have partially
+                                   underflowed */
         cmpl $-101, %ecx
-        jl .LsubnormMSW
+        jl .LsubnormMSW         /* If -108 < ecx < -101, we need to
+                                   subnormalize */
         movl %ecx, 8(%esi)      /* Set dest->exp to the adjusted exponent */
         movl $0, %ecx
         shrdl $4, %eax, %ecx
@@ -60,18 +62,21 @@ fpfd32_impl_scale:
         movl %edx, (%esi)
         movl $0, 4(%esi)        /* Set dest->mant to the scaled mantissa */
         movl %eax, %ebx
-        andl $0x0FFFFFFF, %ebx  /* Mask off the most significant nibble */
+        andl $0x0FFFFFFF, %ebx  /* Mask off the most significant nibble of the
+                                   remainder */
         shrl $28, %eax
         cmpl $0, %eax
         je .LspecialMSW
         cmpl $5, %eax
-        je .LspecialMSW
+        je .LspecialMSW         /* Test for the special 0 and 5 return values */
         popl %esi
         popl %ebx
         ret
 .LsubnormMSW:
         negl %ecx
-        subl $100, %ecx
+        subl $100, %ecx         /* Subtract ecx from 100, to give the digit
+                                   shift count needed to subnormalize the
+                                   mantissa */
         shll $2, %ecx
         movl $0, %ebx
         shrdl %cl, %eax, %ebx
@@ -84,11 +89,12 @@ fpfd32_impl_scale:
         movl %eax, %ebx
         andl $0x0FFFFFFF, %ebx  /* Mask off the most significant nibble */
         shrl $28, %eax
-        orl $0x10, %eax
+        orl $0x10, %eax         /* Indicate subnormalization */
         cmpl $0x10, %eax
         je .LspecialMSW
         cmpl $0x15, %eax
-        je .LspecialMSW
+        je .LspecialMSW         /* Test for the special 0x10 and 0x15 return
+                                   values */
         popl %esi
         popl %ebx
         ret
@@ -102,11 +108,12 @@ fpfd32_impl_scale:
         movl $-101, 8(%esi)     /* Set the exponent to the subnormal exponent */
         andl $0x0FFFFFFF, %ebx  /* Mask off the most significant nibble */
         shrl $28, %eax
-        orl $0x10, %eax
+        orl $0x10, %eax         /* Indicate subnormalization */
         cmpl $0x10, %eax
         je .LspecialMSW
         cmpl $0x15, %eax
-        je .LspecialMSW
+        je .LspecialMSW         /* Test for the special 0x10 and 0x15 return
+                                   values */
         popl %esi
         popl %ebx
         ret
@@ -128,6 +135,7 @@ fpfd32_impl_scale:
 .LzeroMSW:
         bsrl %eax, %ecx
         jz .Luflow
+        /* MSW is zero and LSW is nonzero; this is unlikely */
         addl $4, %ecx
         andl $0x3C, %ecx        /* Add one and round up to a multiple of 4 */
         subl $32, %ecx
@@ -138,12 +146,14 @@ fpfd32_impl_scale:
         negl %ecx
         addl 8(%esi), %ecx      /* Add (4 - ecx)/4 to the exponent */
         cmpl $90, %ecx
-        jg .Loflow
+        jg .Loflow              /* If ecx is > 90, we have overflowed */
         cmpl $-108, %ecx
-        jl .Luflow
-        je .LpuflowLSW
+        jl .Luflow              /* If ecx is < -108, we have underflowed */
+        je .LpuflowLSW          /* If ecx is == -108, we have partially
+                                   underflowed */
         cmpl $-101, %ecx
-        jl .LsubnormLSW
+        jl .LsubnormLSW         /* If -108 < ecx < -101, we need to
+                                   subnormalize */
         movl %ecx, 8(%esi)      /* Set dest->exp to the adjusted exponent */
         shrdl $4, %eax, %edx
         shrl $4, %eax           /* Shift eax.edx to the 28th bit */
@@ -156,7 +166,9 @@ fpfd32_impl_scale:
         ret
 .LsubnormLSW:
         negl %ecx
-        subl $100, %ecx
+        subl $100, %ecx         /* Subtract ecx from 100, to give the digit
+                                   shift count needed to subnormalize the
+                                   mantissa */
         shll $2, %ecx
         shrdl %cl, %eax, %edx
         shrl %cl, %eax          /* Shift eax.edx to the correct bit */
@@ -181,11 +193,12 @@ fpfd32_impl_scale:
         movl $-101, 8(%esi)     /* Set the exponent to the subnormal exponent */
         andl $0x0FFFFFFF, %edx
         shrl $28, %eax
-        orl $0x10, %eax
+        orl $0x10, %eax         /* Indicate subnormalization */
         cmpl $0x10, %eax
         je .LspecialLSW
         cmpl $0x15, %eax
-        je .LspecialLSW
+        je .LspecialLSW         /* Test for the special 0x10 and 0x15 return
+                                   values */
         popl %esi
         popl %ebx
         ret
@@ -207,7 +220,7 @@ fpfd32_impl_scale:
         ret
 .Luflow:
         movl $0, 16(%esi)       /* Set the special flag to FPFD_ZERO */
-        movl $0x1A, %eax
+        movl $0x1A, %eax        /* Return the special 0x1A value */
         popl %esi
         popl %ebx
         ret

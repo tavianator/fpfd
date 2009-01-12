@@ -84,13 +84,13 @@ fpfd32_impl_addsub:
                                    we shift left */
         leal (,%r9d,4), %ecx    /* cl = 4*r9 */
         shlq %cl, %rdx          /* Shift rdx to line up the digits */
-        movq $0, %r9            /* r9 is our remainder from rhs */
+        movq $0, %r9            /* r9 is the remainder from rhs */
         jmp .Ladd               /* Perform the addition of digits */
 .Laddshr:
         negl %r9d
         leal (,%r9d,4), %ecx    /* cl = -4*r9 */
         cmpl $16, %r9d          /* Check if r9 >= 16 */
-        movq $0, %r9            /* r9 is our remainder from rhs */
+        movq $0, %r9            /* r9 is the remainder from rhs */
         jae .Laddshrtoofar      /* If r9 was >= 16, we would right-shift by more
                                    digits than are in rhs->mant, so handle this
                                    case specially. */
@@ -174,23 +174,28 @@ fpfd32_impl_addsub:
         movq $0, %r9            /* Zero the extra remainder */
         jmp .Lrem
 .Lsubshift:
-        subl %edx, %r9d
-        movq (%r11), %rdx
-        js .Lsubshr
-        leal (,%r9d,4), %ecx
-        shlq %cl, %rdx
-        movq $0, %r9
-        jmp .Lsub
+        subl %edx, %r9d         /* r9d now stores the necessary digit shift
+                                   count of rhs */
+        movq (%r11), %rdx       /* Put rhs->mant in rdx */
+        js .Lsubshr             /* If r9d is negative, we shift right; otherwise
+                                   we shift left */
+        leal (,%r9d,4), %ecx    /* cl = 4*r9 */
+        shlq %cl, %rdx          /* Shift rdx to line up the digits */
+        movq $0, %r9            /* r9 is the remainder from rhs */
+        jmp .Lsub               /* Perform the subtraction of digits */
 .Lsubshr:
         negl %r9d
-        leal (,%r9d,4), %ecx
-        cmpl $16, %r9d
-        movq $0, %r9
+        leal (,%r9d,4), %ecx    /* cl = -4*r9 */
+        cmpl $16, %r9d          /* Check if r9 >= 16 */
+        movq $0, %r9            /* r9 is the remainder from rhs */
         je .Lsubshrjusttoofar
-        ja .Lsubshrtoofar
+        ja .Lsubshrtoofar       /* If r9 was >= 16, we would right-shift by more
+                                   digits than are in rhs->mant, so handle these
+                                   cases specially. */
         shrdq %cl, %rdx, %r9
-        shrq %cl, %rdx
-        jmp .Lsub
+        shrq %cl, %rdx          /* Shift rdx appropriately, and capture the
+                                   falloff in r9 */
+        jmp .Lsub               /* Perform the addition of digits */
 .Lsubshrjusttoofar:
         bsfq %rdx, %rcx
         addl $1, %ecx

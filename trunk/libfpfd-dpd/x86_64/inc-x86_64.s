@@ -42,10 +42,10 @@ fpfd32_impl_inc:
         movl %eax, (%rdi)
         ret
 .Lcarryinit:
-        movl $6, %ecx           /* For decimal carries */
+        movl $6, %ecx
 .Lcarry:
-        /* edx = 0xA << n, ecx = 0x6 << n */
-        addl %ecx, %eax
+        /* eax = mantissa, edx = 0xA << n, ecx = 0x6 << n */
+        addl %ecx, %eax         /* Add 0x6 to the digit for a decimal carry */
         movl %eax, %esi
         shll $4, %edx
         shll $4, %ecx           /* Shift our mask and carry */
@@ -55,7 +55,7 @@ fpfd32_impl_inc:
         andl %edx, %esi
         cmpl %edx, %esi         /* Test for carry (digit == 10) */
         je .Lcarry
-        movl %eax, (%rdi)
+        movl %eax, (%rdi)       /* Store the mantissa */
         ret
 .Lrollover:
         cmpl $90, 8(%rdi)
