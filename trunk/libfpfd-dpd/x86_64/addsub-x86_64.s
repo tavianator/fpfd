@@ -44,8 +44,8 @@ fpfd32_impl_addsub:
         negl %r8d
         negl %r9d
         shrl $2, %r8d
-        shrl $2, %r9d           /* Round up each bit count to a multiple of 4,
-                                   and subtract from 16, to give a leading zero
+        shrl $2, %r9d           /* Divide each bit count by 4, rounding up, and
+                                   subtract from 16, to give a leading zero
                                    digit count of lhs and rhs, in r8 and r9,
                                    respectively. */
         movl %r9d, %edx
@@ -107,20 +107,27 @@ fpfd32_impl_addsub:
                                    digit, and capture the falloff in r9. */
         jmp .Lrem
 .Ladd:
-        testl %eax, %eax
+        movq %rax, %rsi         /* Store rax in rsi */
+        movq %rdx, %r11         /* Store rdx in r11 */
+        movq $0, %rdx           /* rdx will hold the final sum */
+        /*
+         * HUGE optimization (~52 cycles, on average):
+         *   If the low-order 8 digits of rsi are zero, we simply add (in
+         *   binary) r11d to rsi, then do half the number of digit additions.
+         */
+        testl %esi, %esi
         jnz .Laddnoopt
-        testl %edx, %edx
-        jnz .Laddnoopt
-        shrq $32, %rax
-        shrq $32, %rdx
+        movl %r11d, %edx
+        shlq $32, %rdx
+        shrq $32, %rsi
+        shrq $32, %r11
 .Laddnoopt:
-        movq %rax, %rsi
-        movq %rdx, %r11
-        movq %rdx, %rcx
-        movq $0, %rdx
+        movq %rsi, %rax
+        movq %r11, %rcx
         andb $0x0F, %al
         andb $0x0F, %cl
 .Laddloop:
+        /* This loop adds the digits of rax to rdx */
         adcb %al, %cl
         cmpb $0x9, %cl
         ja .Laddcarry
@@ -289,19 +296,21 @@ fpfd32_impl_addsub:
 .Lsubdonenorem:        
         movq $0, %r9
 .Lrem:
-        movq %rdx, (%rdi)       /* Save the mantissa */
+        movq %rdx, (%rdi)       /* Save the mantissa in dest->mant */
         movl -8(%rsp), %edx
-        subl %r8d, %edx
-        movl %edx, 8(%rdi)      /* Adjust and save the exponent */
+        subl %r8d, %edx         /* Adjust the exponent */
+        movl %edx, 8(%rdi)      /* Save the exponent in dest->fields.exp */
         movl -4(%rsp), %edx
-        movl %edx, 12(%rdi)     /* Save the sign */
+        movl %edx, 12(%rdi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         shrdq $60, %rax, %r9
-        shrq $60, %rax
+        shrq $60, %rax          /* Shift the remainder right to be left with
+                                   only the leading digit, and capture the
+                                   falloff in r9 */
         cmpl $0, %eax
         je .Lspecial
         cmpl $5, %eax
-        je .Lspecial
+        je .Lspecial            /* Return values of 0 and 5 are special cases */
         ret
 .Lspecial:
         cmpq $0, %r9
