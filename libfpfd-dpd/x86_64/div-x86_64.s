@@ -31,9 +31,8 @@
         .type fpfd32_impl_div, @function
 fpfd32_impl_div:
         movl 12(%rsi), %ecx
-        /* XOR the signs: 1 (...0001) XOR -1 (...1111) gives -2 (...1110),
-           x XOR x gives 0 */
-        xorl 12(%rdx), %ecx
+        xorl 12(%rdx), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
+                                   gives -2 (...1110), x XOR x gives 0 */
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 8(%rsi), %r8d
         subl 8(%rdx), %r8d      /* Subtract the exponents */
