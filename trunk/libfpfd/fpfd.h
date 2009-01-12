@@ -46,14 +46,21 @@ typedef enum {
  *   FPFD_UNDERFLOW - Non-zero underflow
  *   FPFD_INEXACT   - Inexact result
  */
-typedef enum {
+enum {
   FPFD_NONE      = 0,
   FPFD_INVALID   = 1 << 0,
   FPFD_DIVBYZERO = 1 << 1,
   FPFD_OVERFLOW  = 1 << 2,
   FPFD_UNDERFLOW = 1 << 3,
   FPFD_INEXACT   = 1 << 4
-} fpfd_flags_t;
+};
+
+/*
+ * Don't do typedef enum { ... } fpfd_flags_t; because
+ *   fpfd_flags_t flags = FPFD_UNDERFLOW | FPFD_INEXACT;
+ * would be invalid in C++.
+ */
+typedef unsigned int fpfd_flags_t;
 
 /* Struct wrapper for the actual data of the decimal types. */
 

@@ -15,7 +15,7 @@ main()
   fpfd_assert_ora2msfx(mul, res, pz, pz, FPFD_RNDN, 1, FPFD_ZERO, FPFD_NONE);
 
   /* fpfd_flags_t can't be an enum type for this conversion to work */
-  flags |= FPFD_UNDERFLOW | FPFD_INEXACT;
+  flags = FPFD_UNDERFLOW | FPFD_INEXACT;
 
   return exitstatus;
 }
