@@ -31,60 +31,80 @@
 .globl fpfd32_impl_addsub
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
-        movq %rdx, %r10
-        movq %rcx, %r11
-        xorl 12(%r11), %esi
-        xorl $1, %esi           /* Find the effective sign of rhs */
+        movq %rdx, %r10         /* Put lhs in r10 */
+        movq %rcx, %r11         /* Put rhs in r11 */
+        xorl 12(%r11), %esi     /* esi = sign ^ rhs->fields.sign */
+        xorl $1, %esi           /* Find the effective sign of rhs
+                                   (sign * rhs->fields.sign) */
         bsrq (%r10), %r8
-        bsrq (%r11), %r9
+        bsrq (%r11), %r9        /* Count the leading zero bits of each
+                                   mantissa (we assume mantissas are not 0) */
         subl $63, %r8d
         subl $63, %r9d
         negl %r8d
         negl %r9d
         shrl $2, %r8d
-        shrl $2, %r9d
+        shrl $2, %r9d           /* Round up each bit count to a multiple of 4,
+                                   and subtract from 16, to give a leading zero
+                                   digit count of lhs and rhs, in r8 and r9,
+                                   respectively. */
         movl %r9d, %edx
         subl %r8d, %edx
         movl 12(%r10), %eax
-        movl %eax, -4(%rsp)
+        movl %eax, -4(%rsp)     /* Store lhs->fields.sign on the stack; this
+                                   will be the resultant sign if we don't flip
+                                   our operands. */
         addl 8(%r10), %edx
-        subl 8(%r11), %edx
-        jns .Lnoswitch
-        movl %esi, -4(%rsp)
-        xchgq %r10, %r11
-        xchgl %r8d, %r9d
-        negl %edx
+        subl 8(%r11), %edx      /* edx = (lhs->fields.exp - leadingzeros(lhs))
+                                     - (rhs->fields.exp - leadingzeros(rhs)) */
+        jns .Lnoswitch          /* If edx is positive, lhs gets shifted further
+                                   left to line up the digits. If it's negative,
+                                   rhs needs to be shifted further. In this
+                                   case, we swap lhs and rhs, so that lhs can
+                                   always be the one shifted further */
+        movl %esi, -4(%rsp)     /* esi will be our resultant sign */
+        xchgq %r10, %r11        /* Swap our lhs and rhs pointers */
+        xchgl %r8d, %r9d        /* Swap our leading zero digit counts */
+        negl %edx               /* Re-calculate edx */
 .Lnoswitch:
-        xorl %eax, %esi
+        xorl %eax, %esi         /* esi ^= (original lhs)->fields.sign */
         movl 8(%r10), %eax
-        movl %eax, -8(%rsp)     /* Store the result exponent */
-        movq (%r10), %rax
-        leal (,%r8d,4), %ecx
-        shlq %cl, %rax
-        shrq $32, %rcx
+        movl %eax, -8(%rsp)     /* Store lhs->fields.exp, the resultant
+                                   exponent, on the stack */
+        movq (%r10), %rax       /* Put lhs->mant in rax */
+        leal (,%r8d,4), %ecx    /* cl = 4*r9 */
+        shlq %cl, %rax          /* Shift rax all the way to the left */
         testl %esi, %esi
-        jnz .Lsubshift          /* Determine if adding or subtracting digits */
-        subl %edx, %r9d
-        movq (%r11), %rdx
-        js .Laddshr
-        leal (,%r9d,4), %ecx
-        shlq %cl, %rdx
-        movq $0, %r9
-        jmp .Ladd
+        jnz .Lsubshift          /* If esi == 0, we are adding digits. If not, we
+                                   are subtracting. */
+        subl %edx, %r9d         /* r9d now stores the necessary digit shift
+                                   count of rhs */
+        movq (%r11), %rdx       /* Put rhs->mant in rdx */
+        js .Laddshr             /* If r9d is negative, we shift right; otherwise
+                                   we shift left */
+        leal (,%r9d,4), %ecx    /* cl = 4*r9 */
+        shlq %cl, %rdx          /* Shift rdx to line up the digits */
+        movq $0, %r9            /* r9 is our remainder from rhs */
+        jmp .Ladd               /* Perform the addition of digits */
 .Laddshr:
         negl %r9d
-        leal (,%r9d,4), %ecx
-        cmpl $16, %r9d
-        movq $0, %r9
-        jae .Laddshrtoofar
+        leal (,%r9d,4), %ecx    /* cl = -4*r9 */
+        cmpl $16, %r9d          /* Check if r9 >= 16 */
+        movq $0, %r9            /* r9 is our remainder from rhs */
+        jae .Laddshrtoofar      /* If r9 was >= 16, we would right-shift by more
+                                   digits than are in rhs->mant, so handle this
+                                   case specially. */
         shrdq %cl, %rdx, %r9
-        shrq %cl, %rdx
-        jmp .Ladd
+        shrq %cl, %rdx          /* Shift rdx appropriately, and capture the
+                                   falloff in r9 */
+        jmp .Ladd               /* Perform the addition of digits */
 .Laddshrtoofar:
-        xchgq %rax, %rdx
-        je .Lrem
+        xchgq %rax, %rdx        /* Swap rax and rdx. For .Lrem, rax is the
+                                   remainder, and rdx is the sum. */
+        je .Lrem                /* If r9 was == 16, we are done */
         shrdq $4, %rax, %r9
-        shrq $4, %rax
+        shrq $4, %rax           /* Otherwise, shift the remainder over one
+                                   digit, and capture the falloff in r9. */
         jmp .Lrem
 .Ladd:
         testl %eax, %eax

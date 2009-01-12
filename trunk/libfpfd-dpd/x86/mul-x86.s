@@ -36,10 +36,9 @@ fpfd32_impl_mul:
         movl 24(%esp), %edi
         movl 8(%esi), %ebx
         addl 8(%edi), %ebx      /* Add the exponents */
-        /* XOR the signs: 1 (...0001) XOR -1 (...1111) gives -2 (...1110),
-           x XOR x gives 0 */
         movl 12(%esi), %ecx
-        xorl 12(%edi), %ecx
+        xorl 12(%edi), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
+                                   gives -2 (...1110), x XOR x gives 0 */
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 16(%esp), %esi
         movl %eax, (%esi)
