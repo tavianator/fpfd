@@ -36,3 +36,4 @@ void fpfd32_bench_impl_div(unsigned int trials);
 void fpfd32_bench_addsub(unsigned int trials);
 void fpfd32_bench_mul(unsigned int trials);
 void fpfd32_bench_div(unsigned int trials);
+void fpfd32_bench_fma(unsigned int trials);
