@@ -54,9 +54,9 @@ void
 gcc_bench(unsigned int trials)
 {
   gcc32_bench_add(trials);
-  /* gcc32_bench_sub(trials); */
-  /* gcc32_bench_mul(trials); */
-  /* gcc32_bench_div(trials); */
+  gcc32_bench_sub(trials);
+  gcc32_bench_mul(trials);
+  gcc32_bench_div(trials);
 }
 
 void
@@ -69,9 +69,33 @@ gcc_bench_results()
     file = fopen("__dpd_addsd3.dat", "w");
     write_ticks("__dpd_addsd3", file);
     fclose(file);
+
+    file = fopen("__dpd_subsd3.dat", "w");
+    write_ticks("__dpd_subsd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_mulsd3.dat", "w");
+    write_ticks("__dpd_mulsd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_divsd3.dat", "w");
+    write_ticks("__dpd_divsd3", file);
+    fclose(file);
   } else if (GCC_BID) {
     file = fopen("__bid_addsd3.dat", "w");
     write_ticks("__bid_addsd3", file);
+    fclose(file);
+
+    file = fopen("__bid_subsd3.dat", "w");
+    write_ticks("__bid_subsd3", file);
+    fclose(file);
+
+    file = fopen("__bid_mulsd3.dat", "w");
+    write_ticks("__bid_mulsd3", file);
+    fclose(file);
+
+    file = fopen("__bid_divsd3.dat", "w");
+    write_ticks("__bid_divsd3", file);
     fclose(file);
   }
 }
