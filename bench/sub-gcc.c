@@ -20,7 +20,7 @@
 #include "bench-gcc.h"
 
 void
-gcc32_bench_add(unsigned int trials)
+gcc32_bench_sub(unsigned int trials)
 {
   fpfd32_union_t fp, lhs, rhs;
   long ticks1, ticks2;
@@ -30,9 +30,9 @@ gcc32_bench_add(unsigned int trials)
   fpfd32_random(lhs.fpfd);
   fpfd32_random(rhs.fpfd);
 #if GCC_DPD
-  fp.dec = __dpd_addsd3(lhs.dec, rhs.dec);
+  fp.dec = __dpd_subsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
-  fp.dec = __bid_addsd3(lhs.dec, rhs.dec);
+  fp.dec = __bid_subsd3(lhs.dec, rhs.dec);
 #endif
 
   for (i = 0; i < trials; ++i) {
@@ -43,17 +43,17 @@ gcc32_bench_add(unsigned int trials)
     BENCH_LOOP(j) {
       NO_UNROLL();
 #if GCC_DPD
-      fp.dec = __dpd_addsd3(lhs.dec, rhs.dec);
+      fp.dec = __dpd_subsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
-      fp.dec = __bid_addsd3(lhs.dec, rhs.dec);
+      fp.dec = __bid_subsd3(lhs.dec, rhs.dec);
 #endif
     }
     ticks2 = ticks();
 
     if (GCC_DPD) {
-      record_ticks("__dpd_addsd3", ticks2 - ticks1);
+      record_ticks("__dpd_subsd3", ticks2 - ticks1);
     } else if (GCC_BID) {
-      record_ticks("__bid_addsd3", ticks2 - ticks1);
+      record_ticks("__bid_subsd3", ticks2 - ticks1);
     }
   }
 }
