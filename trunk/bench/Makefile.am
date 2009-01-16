@@ -29,7 +29,7 @@ endif
 
 EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
 
-if BUILTIN_DFP
+if BENCH_GCC
   EXTRA_PROGRAMS += benchmark-gcc
 endif
 
@@ -47,25 +47,22 @@ benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libf
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
-if BUILTIN_DFP
-  benchmark_gcc_SOURCES =
+if BENCH_GCC
+  benchmark_gcc_SOURCES = bench-gcc.h bench-gcc.c add-gcc.c sub-gcc.c mul-gcc.c div-gcc.c
 
-if   BUILTIN_DPD
-    benchmark_gcc_SOURCES += bench-gcc.h bench-gcc.c add-gcc-dpd.c sub-gcc-dpd.c mul-gcc-dpd.c div-gcc-dpd.c
+if   GCC_DPD
+    benchmark_gcc_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
 endif
-
-if   BUILTIN_BID
-    benchmark_gcc_SOURCES += bench-gcc.h bench-gcc.c add-gcc-dpd.c sub-gcc-dpd.c mul-gcc-dpd.c div-gcc-dpd.c
+if   GCC_BID
+    benchmark_gcc_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 endif
-
-  benchmark_gcc_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
 endif
 
 EXTRA_DIST = plot.sh
 
 TRIALS = 1000
 
-if BUILTIN_DFP
+if BENCH_GCC
 bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT) benchmark-gcc$(EXEEXT)
 	mkdir -p arch dpd bid gcc
 	(cd arch && ../benchmark-arch$(EXEEXT) $(TRIALS))
