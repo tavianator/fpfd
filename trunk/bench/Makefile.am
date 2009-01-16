@@ -21,21 +21,25 @@ EXTRA_LTLIBRARIES        = libfpfd-bench.la
 libfpfd_bench_la_SOURCES = bench.h htable.c random.c x.c
 
 if X86
-libfpfd_bench_la_SOURCES += x86/arch_init-x86.c x86/ticks-x86.s
+  libfpfd_bench_la_SOURCES += x86/arch_init-x86.c x86/ticks-x86.s
 endif
 if X86_64
-libfpfd_bench_la_SOURCES += x86_64/arch_init-x86_64.c x86_64/ticks-x86_64.s
+  libfpfd_bench_la_SOURCES += x86_64/arch_init-x86_64.c x86_64/ticks-x86_64.s
 endif
 
 EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
 
+if BUILTIN_DFP
+  EXTRA_PROGRAMS += benchmark-gcc
+endif
+
 benchmark_arch_LDADD = ./libfpfd-bench.la -lm
 
 if X86
-benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/div-x86.c x86/mul-x86.c
+  benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/div-x86.c x86/mul-x86.c
 endif
 if X86_64
-benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c
+  benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c
 endif
 
 benchmark_dpd_SOURCES = bench-fpfd.h bench-fpfd.c impl_compress.c impl_addsub.c impl_mul.c impl_div.c impl_scale.c impl_inc.c impl_expand.c addsub.c mul.c div.c fma.c
@@ -43,12 +47,35 @@ benchmark_dpd_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libf
 benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
+if BUILTIN_DFP
+  benchmark_gcc_SOURCES =
+
+if   BUILTIN_DPD
+    benchmark_gcc_SOURCES += bench-gcc.h bench-gcc.c add-gcc-dpd.c sub-gcc-dpd.c mul-gcc-dpd.c div-gcc-dpd.c
+endif
+
+if   BUILTIN_BID
+    benchmark_gcc_SOURCES += bench-gcc.h bench-gcc.c add-gcc-dpd.c sub-gcc-dpd.c mul-gcc-dpd.c div-gcc-dpd.c
+endif
+
+  benchmark_gcc_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm
+endif
+
 EXTRA_DIST = plot.sh
 
 TRIALS = 1000
 
+if BUILTIN_DFP
+bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT) benchmark-gcc$(EXEEXT)
+	mkdir -p arch dpd bid gcc
+	(cd arch && ../benchmark-arch$(EXEEXT) $(TRIALS))
+	(cd dpd && ../benchmark-dpd$(EXEEXT) $(TRIALS))
+	(cd bid && ../benchmark-bid$(EXEEXT) $(TRIALS))
+	(cd gcc && ../benchmark-gcc$(EXEEXT) $(TRIALS))
+else
 bench: benchmark-arch$(EXEEXT) benchmark-dpd$(EXEEXT) benchmark-bid$(EXEEXT)
 	mkdir -p arch dpd bid
 	(cd arch && ../benchmark-arch$(EXEEXT) $(TRIALS))
 	(cd dpd && ../benchmark-dpd$(EXEEXT) $(TRIALS))
 	(cd bid && ../benchmark-bid$(EXEEXT) $(TRIALS))
+endif

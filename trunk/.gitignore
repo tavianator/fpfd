@@ -28,6 +28,7 @@ Makefile.in
 /bench/arch
 /bench/dpd
 /bench/bid
+/bench/gcc
 /bench/benchmark-*
 
 # Files and folders created by libtool
