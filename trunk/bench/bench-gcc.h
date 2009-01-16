@@ -33,3 +33,15 @@ typedef union {
   fpfd32_t fpfd;
   _Decimal32 dec;
 } fpfd32_union_t;
+
+/* Prototypes for internal GCC functions */
+
+_Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __dpd_subsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __dpd_mulsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __dpd_divsd3(_Decimal32 lhs, _Decimal32 rhs);
+
+_Decimal32 __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __bid_subsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __bid_mulsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal32 __bid_divsd3(_Decimal32 lhs, _Decimal32 rhs);
