@@ -20,7 +20,7 @@
 #include "bench.h"
 
 void
-fpfd32_bench_addsub(unsigned int trials)
+fpfd32_bench_add(unsigned int trials)
 {
   fpfd32_t fp, lhs, rhs;
   long ticks1, ticks2;
@@ -31,7 +31,6 @@ fpfd32_bench_addsub(unsigned int trials)
   fpfd32_random(lhs);
   fpfd32_random(rhs);
   fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
-  fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
@@ -45,14 +44,5 @@ fpfd32_bench_addsub(unsigned int trials)
     ticks2 = ticks();
 
     record_ticks("fpfd32_add", ticks2 - ticks1);
-
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd32_sub", ticks2 - ticks1);
   }
 }
