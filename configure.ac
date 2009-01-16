@@ -53,16 +53,16 @@ AM_CONDITIONAL([GCC_OVERRIDE], [test "$enable_gcc_override" != "no"])
 dnl Detect which (if any) encoding is currently used by gcc's _Decimal* types
 AC_LANG([C])
 
-builtin_dfp=no
-builtin_dpd=no
-builtin_bid=no
+bench_gcc=no
 
 if test "$enable_gcc_override" = "no"; then
   AC_MSG_CHECKING([for the BID encoding for _Decimal* types])
   AC_LINK_IFELSE(AC_LANG_PROGRAM(
     [ _Decimal32 __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
     [ _Decimal32 res = __bid_addsd3(1.0df, 2.0df); ]),
-                 [builtin_dfp=yes; builtin_bid=yes; AC_MSG_RESULT([yes])],
+                 [bench_gcc=bid
+                  AC_DEFINE([BUILTIN_BID])
+                  AC_MSG_RESULT([yes])],
                  [AC_MSG_RESULT([no])])
 
   if test "$builtin_bid" = "no"; then
@@ -70,14 +70,16 @@ if test "$enable_gcc_override" = "no"; then
     AC_LINK_IFELSE(AC_LANG_PROGRAM(
       [ _Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
       [ _Decimal32 res = __dpd_addsd3(1.0df, 2.0df); ]),
-                   [builtin_dfp=yes; builtin_dpd=yes; AC_MSG_RESULT([yes])],
+                   [bench_gcc=dpd
+                    AC_DEFINE([BUILTIN_DPD])
+                    AC_MSG_RESULT([yes])],
                    [AC_MSG_RESULT([no])])
   fi
 fi
 
-AM_CONDITIONAL([BUILTIN_DFP], [test "$builtin_dfp" != "no"])
-AM_CONDITIONAL([BUILTIN_DPD], [test "$builtin_dpd" != "no"])
-AM_CONDITIONAL([BUILTIN_BID], [test "$builtin_bid" != "no"])
+AM_CONDITIONAL([BENCH_GCC], [test "$bench_gcc" != "no"])
+AM_CONDITIONAL([GCC_DPD], [test "$bench_gcc" = "dpd"])
+AM_CONDITIONAL([GCC_BID], [test "$bench_gcc" = "bid"])
 
 dnl Generate Makefiles
 AC_CONFIG_MACRO_DIR([m4])
