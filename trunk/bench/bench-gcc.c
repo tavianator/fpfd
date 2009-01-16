@@ -1,9 +1,9 @@
 /*************************************************************************
  * Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               *
  *                                                                       *
- * This file is part of The FPFD Library Benchmark The.                *
+ * This file is part of The FPFD Library Benchmark Suite.                *
  *                                                                       *
- * Suite FPFD Library Benchmark Suite is free software; you can            *
+ * The FPFD Library Benchmark Suite is free software; you can            *
  * redistribute it and/or modify it under the terms of the GNU General   *
  * Public License as published by the Free Software Foundation; either   *
  * version 3 of the License, or (at your option) any later version.      *
@@ -17,18 +17,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench-x86.h"
+#include "bench-gcc.h"
 #include <stdio.h>  /* For fprintf, fopen */
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */
 
-static void x86_bench(unsigned int trials);
-static void x86_bench_results();
+static void gcc_bench(unsigned int trials);
+static void gcc_bench_results();
 
 int
 main(int argc, char **argv)
 {
-  /* Should be enough to get consistent tick counts every time */
   unsigned int trials;
 
   if (argc != 2) {
@@ -45,49 +44,34 @@ main(int argc, char **argv)
   }
 
   arch_init(); /* Initialize architecture-specific things */
-  x86_bench(trials);
-  x86_bench_results();
+  gcc_bench(trials);
+  gcc_bench_results();
 
   return EXIT_SUCCESS;
 }
 
 void
-x86_bench(unsigned int trials)
+gcc_bench(unsigned int trials)
 {
-  x86_bench_mul(trials);
-  x86_bench_div(trials);
+  gcc32_bench_add(trials);
+  /* gcc32_bench_sub(trials); */
+  /* gcc32_bench_mul(trials); */
+  /* gcc32_bench_div(trials); */
 }
 
 void
-x86_bench_results()
+gcc_bench_results()
 {
   FILE *file;
 
-  file = fopen("x86-mulb.dat", "w");
-  write_ticks("mulb", file);
-  fclose(file);
-
-  file = fopen("x86-mulw.dat", "w");
-  write_ticks("mulw", file);
-  fclose(file);
-
-  file = fopen("x86-mull.dat", "w");
-  write_ticks("mull", file);
-  fclose(file);
-
-  file = fopen("x86-divb.dat", "w");
-  write_ticks("divb", file);
-  fclose(file);
-
-  file = fopen("x86-divw.dat", "w");
-  write_ticks("divw", file);
-  fclose(file);
-
-  file = fopen("x86-divl.dat", "w");
-  write_ticks("divl", file);
-  fclose(file);
-
-  file = fopen("x86-overhead.dat", "w");
-  write_ticks("overhead", file);
-  fclose(file);
+  /* Check all code paths by using if instead of #if */
+  if (GCC_DPD) {
+    file = fopen("__dpd_addsd3.dat", "w");
+    write_ticks("__dpd_addsd3", file);
+    fclose(file);
+  } else if (GCC_BID) {
+    file = fopen("__bid_addsd3.dat", "w");
+    write_ticks("__bid_addsd3", file);
+    fclose(file);
+  }
 }

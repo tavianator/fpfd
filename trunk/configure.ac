@@ -56,25 +56,25 @@ AC_LANG([C])
 bench_gcc=no
 
 if test "$enable_gcc_override" = "no"; then
+  AC_MSG_CHECKING([for the DPD encoding for _Decimal* types])
+  AC_LINK_IFELSE(AC_LANG_PROGRAM(
+    [ _Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
+    [ _Decimal32 res = __dpd_addsd3(1.0df, 2.0df); ]),
+                 [bench_gcc=dpd
+                  AC_DEFINE([GCC_DPD], [1])
+                  AC_MSG_RESULT([yes])],
+                 [AC_DEFINE([GCC_DPD], [0])
+                  AC_MSG_RESULT([no])])
+
   AC_MSG_CHECKING([for the BID encoding for _Decimal* types])
   AC_LINK_IFELSE(AC_LANG_PROGRAM(
     [ _Decimal32 __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
     [ _Decimal32 res = __bid_addsd3(1.0df, 2.0df); ]),
                  [bench_gcc=bid
-                  AC_DEFINE([BUILTIN_BID])
+                  AC_DEFINE([GCC_BID], [1])
                   AC_MSG_RESULT([yes])],
-                 [AC_MSG_RESULT([no])])
-
-  if test "$builtin_bid" = "no"; then
-    AC_MSG_CHECKING([for the DPD encoding for _Decimal* types])
-    AC_LINK_IFELSE(AC_LANG_PROGRAM(
-      [ _Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
-      [ _Decimal32 res = __dpd_addsd3(1.0df, 2.0df); ]),
-                   [bench_gcc=dpd
-                    AC_DEFINE([BUILTIN_DPD])
-                    AC_MSG_RESULT([yes])],
-                   [AC_MSG_RESULT([no])])
-  fi
+                 [AC_DEFINE([GCC_BID], [0])
+                  AC_MSG_RESULT([no])])
 fi
 
 AM_CONDITIONAL([BENCH_GCC], [test "$bench_gcc" != "no"])

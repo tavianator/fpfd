@@ -48,7 +48,7 @@ benchmark_bid_SOURCES = $(benchmark_dpd_SOURCES)
 benchmark_bid_LDADD   = ./libfpfd-bench.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la -lm
 
 if BENCH_GCC
-  benchmark_gcc_SOURCES = bench-gcc.h bench-gcc.c add-gcc.c sub-gcc.c mul-gcc.c div-gcc.c
+  benchmark_gcc_SOURCES = bench-gcc.h bench-gcc.c add-gcc.c
 
 if   GCC_DPD
     benchmark_gcc_LDADD   = ./libfpfd-bench.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la -lm

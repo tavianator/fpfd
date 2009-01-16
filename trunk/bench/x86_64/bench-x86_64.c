@@ -31,7 +31,7 @@ main(int argc, char **argv)
   unsigned int trials;
 
   if (argc != 2) {
-    fprintf(stderr, "Wrong number of arguments: %d, should be 1.\n", argc - 1);
+    fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);
     exit(EXIT_FAILURE);
   }
 
