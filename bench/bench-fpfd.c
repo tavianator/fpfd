@@ -63,7 +63,8 @@ fpfd_bench(unsigned int trials)
   fpfd32_bench_impl_compress(trials);
 
   /* Public functions */
-  fpfd32_bench_addsub(trials);
+  fpfd32_bench_add(trials);
+  fpfd32_bench_sub(trials);
   fpfd32_bench_mul(trials);
   fpfd32_bench_div(trials);
   fpfd32_bench_fma(trials);

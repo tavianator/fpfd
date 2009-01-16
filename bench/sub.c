@@ -19,22 +19,30 @@
 
 #include "bench.h"
 
-/*
- * Routines which benchmark part of the programmer or implementation interfaces.
- * Each stores information about the number of clock ticks in a global hash
- * table, with strings describing the routine being profiled as the key.
- */
+void
+fpfd32_bench_sub(unsigned int trials)
+{
+  fpfd32_t fp, lhs, rhs;
+  long ticks1, ticks2;
+  unsigned int i, j;
+  fpfd_flags_t flags = FPFD_NONE;
 
-void fpfd32_bench_impl_expand(unsigned int trials);
-void fpfd32_bench_impl_compress(unsigned int trials);
-void fpfd32_bench_impl_scale(unsigned int trials);
-void fpfd32_bench_impl_inc(unsigned int trials);
-void fpfd32_bench_impl_addsub(unsigned int trials);
-void fpfd32_bench_impl_mul(unsigned int trials);
-void fpfd32_bench_impl_div(unsigned int trials);
+  /* Warm up cache */
+  fpfd32_random(lhs);
+  fpfd32_random(rhs);
+  fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
 
-void fpfd32_bench_add(unsigned int trials);
-void fpfd32_bench_sub(unsigned int trials);
-void fpfd32_bench_mul(unsigned int trials);
-void fpfd32_bench_div(unsigned int trials);
-void fpfd32_bench_fma(unsigned int trials);
+  for (i = 0; i < trials; ++i) {
+    fpfd32_random(lhs);
+    fpfd32_random(rhs);
+
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+      fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags);
+    }
+    ticks2 = ticks();
+
+    record_ticks("fpfd32_sub", ticks2 - ticks1);
+  }
+}
