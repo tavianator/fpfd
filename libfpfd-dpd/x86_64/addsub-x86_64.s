@@ -237,7 +237,7 @@ fpfd32_impl_addsub:
         jz .Lsubshrtoofar1      /* Test for no trailing zeros */
         movl $64, %ecx
         subl %r9d, %ecx
-        movq $0x0666666666666666, %rax
+        movq $0x6666666666666666, %rax
         shrq %cl, %rax          /* Shift 0x666... right to line up with the
                                    trailing zeros in rdx */
         subq %rax, %rdx         /* Subtract rax from 0x...666 */
