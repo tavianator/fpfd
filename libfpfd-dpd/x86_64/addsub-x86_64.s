@@ -133,7 +133,7 @@ fpfd32_impl_addsub:
         adcb %al, %cl           /* add al to cl, with carry */
         cmpb $0x9, %cl
         ja .Laddcarry           /* Test for decimal carry */
-        addb %cl, %dl           /* Store the digit in rdx */
+        orb %cl, %dl            /* Store the digit in rdx */
         rorq $4, %rdx           /* Rotate rdx to take the next digit */
         shrq $4, %r11
         shrq $4, %rsi           /* Queue up the next digits to be added */
@@ -147,7 +147,7 @@ fpfd32_impl_addsub:
         addb $0x06, %cl         /* There was a carry, so add 6 to correct the
                                    BCD sum */
         andb $0x0F, %cl         /* Mask off the excess */
-        addb %cl, %dl           /* Store the digit in rdx */
+        orb %cl, %dl            /* Store the digit in rdx */
         rorq $4, %rdx           /* Rotate rdx to take the next digit */
         shrq $4, %r11
         shrq $4, %rsi           /* Queue up the next digits to be added */
@@ -197,42 +197,54 @@ fpfd32_impl_addsub:
                                    falloff in r9 */
         jmp .Lsub               /* Perform the addition of digits */
 .Lsubshrjusttoofar:
-        bsfq %rdx, %rcx
-        addl $1, %ecx
-        andl $0x3C, %ecx
+        /*
+         * Shift count == 16. This means we have rax - 0.rdx. So, subtract
+         * 0.rdx from 1, and subtract 1 from rax.
+         *
+         * Subtracting 0.rdx from 1 is equivalent to subtracting the lowest non-
+         * zero digit from 10, and all higher digits from 9.
+         *
+         * Subtracting 1 from rax is equivalent to subtracting, in hexadecimal,
+         * 6 from all trailing zero nibbles (if any), and then subtracting 1.
+         */
+        bsfq %rdx, %rcx         /* Forward bit scan this time */
+        andl $0x3C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
         movq $0x999999999999999A, %r9
-        shlq %cl, %r9
-        subq %rdx, %r9
-        xchgq %r9, %rax
+        shlq %cl, %r9           /* Shift ...999A left to line up with the first
+                                   non-zero digit in rdx */
+        subq %rdx, %r9          /* Subtract rdx from 0x...9999A000... */
+        xchgq %r9, %rax         /* Swap r9 and rax */
         bsfq %r9, %rdx
-        addl $1, %edx
-        andl $0x3C, %edx
-        jz .Lsubshrjusttoofar1
+        andl $0x3C, %edx        /* ecx = bsf/4; */
+        jz .Lsubshrjusttoofar1  /* Test for no trailing zeros */
         movl $64, %ecx
         subl %edx, %ecx
-        movq $0x0666666666666666, %rdx
-        shrq %cl, %rdx
-        subq %rdx, %r9
+        movq $0x6666666666666666, %rdx
+        shrq %cl, %rdx          /* Shift 0x666... right to line up with the
+                                   trailing zeros in r9 */
+        subq %rdx, %r9          /* Subtract rdx from 0x...666 */
 .Lsubshrjusttoofar1:
-        subq $1, %r9
+        subq $1, %r9            /* Subtract 1 from r9 */
         movq %r9, %rdx
-        movq $0, %r9
+        movq $0, %r9            /* Mantissa in rdx; zero excess remainder */
         jmp .Lrem
 .Lsubshrtoofar:
+        /* Shift count > 16; just subtract one from rax as above, and treat the
+           remainder as 0.9 */
         movq %rax, %rdx
         bsfq %rdx, %r9
-        addl $1, %r9d
-        andl $0x3C, %r9d
-        jz .Lsubshrtoofar1
+        andl $0x3C, %r9d        /* r9d = bsf/4; trailing zero digit count */
+        jz .Lsubshrtoofar1      /* Test for no trailing zeros */
         movl $64, %ecx
         subl %r9d, %ecx
         movq $0x0666666666666666, %rax
-        shrq %cl, %rax
-        subq %rax, %rdx
+        shrq %cl, %rax          /* Shift 0x666... right to line up with the
+                                   trailing zeros in rdx */
+        subq %rax, %rdx         /* Subtract rax from 0x...666 */
 .Lsubshrtoofar1:
-        subq $1, %rdx
-        movq $0x9000000000000000, %rax
-        movq $0, %r9
+        subq $1, %rdx           /* Subtract 1 from rdx */
+        movq $0x9000000000000000, %rax  /* Remainder is equivalent to 0.9 */
+        movq $0, %r9            /* Zero excess remainder */
         jmp .Lrem
 .Lsub:
         testl %eax, %eax
@@ -256,11 +268,10 @@ fpfd32_impl_addsub:
 .Lsubloop:
         sbbb %cl, %al
         jc .Lsubborrow
-        addb %al, %dl
+        orb %al, %dl
         rorq $4, %rdx
-        shrq $4, %rsi
         shrq $4, %r11
-        test %rsi, %rsi
+        shrq $4, %rsi
         jz .Lsubdone
         movq %rsi, %rax
         movq %r11, %rcx
@@ -269,11 +280,10 @@ fpfd32_impl_addsub:
         jmp .Lsubloop
 .Lsubborrow:
         addb $0x0A, %al
-        addb %al, %dl
+        orb %al, %dl
         rorq $4, %rdx
-        shrq $4, %rsi
         shrq $4, %r11
-        test %rsi, %rsi
+        shrq $4, %rsi
         jz .Lsubdoneborrow
         movq %rsi, %rax
         movq %r11, %rcx
