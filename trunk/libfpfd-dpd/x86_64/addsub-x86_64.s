@@ -110,20 +110,20 @@ fpfd32_impl_addsub:
         movq %rax, %rsi         /* Store rax in rsi */
         movq %rdx, %r11         /* Store rdx in r11 */
         movq $0, %rdx           /* rdx will hold the final sum */
-        /*
-         * HUGE optimization (~52 cycles, on average):
-         *   If the low-order 8 digits of rsi are zero, we simply add (in
-         *   binary) r11d to rsi, then do half the number of digit additions.
-         */
-        testl %esi, %esi
-        jnz .Laddnoopt
-        movl %r11d, %edx
-        shlq $32, %rdx
-        shrq $32, %rsi
-        shrq $32, %r11
-.Laddnoopt:
-        movq %rsi, %rax
-        movq %r11, %rcx
+        bsfq %rsi, %rcx
+        bsfq %r11, %r10
+        andl $0x3C, %ecx
+        andl $0x3C, %r10d       /* bsf/4 gives a trailing zero digit count of
+                                   rsi and r11 in rcx and r10, respectively */
+        cmpl %ecx, %r10d
+        jae .Laddoptnoswitch
+        xchgl %ecx, %r10d       /* Put the minimum trailing zero digit count in
+                                   ecx, so we don't chop off any digits */
+.Laddoptnoswitch:
+        shrq %cl, %rsi
+        shrq %cl, %r11          /* Trim shared trailing zeros */
+        movb %sil, %al
+        movb %r11b, %cl
         andb $0x0F, %al         /* al is the next digit of rsi to be added */
         andb $0x0F, %cl         /* cl is the next digit of r11 to be added.
                                    The `and' instruction clears the carry flag
@@ -138,8 +138,8 @@ fpfd32_impl_addsub:
         shrq $4, %r11
         shrq $4, %rsi           /* Queue up the next digits to be added */
         jz .Ladddone            /* If rsi is zero, we are done */
-        movq %rsi, %rax
-        movq %r11, %rcx
+        movb %sil, %al
+        movb %r11b, %cl
         andb $0x0F, %al
         andb $0x0F, %cl         /* Otherwise, load the next digits */
         jmp .Laddloop
@@ -153,8 +153,8 @@ fpfd32_impl_addsub:
         shrq $4, %rsi           /* Queue up the next digits to be added */
         jz .Ladddonecarry       /* If rsi is zero, we are done, but ended on a
                                    carry. */
-        movq %rsi, %rax
-        movq %r11, %rcx
+        movb %sil, %al
+        movb %r11b, %cl
         andb $0x0F, %al
         andb $0x0F, %cl         /* Otherwise, load the next digits */
         stc                     /* Set the carry flag */
