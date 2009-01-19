@@ -110,6 +110,14 @@ fpfd32_impl_addsub:
         movq %rax, %rsi         /* Store rax in rsi */
         movq %rdx, %r11         /* Store rdx in r11 */
         movq $0, %rdx           /* rdx will hold the final sum */
+        /*
+         * HUGE OPTIMIZATION: (~64 cycles, on average)
+         *   Rather than add all 16 digits of rsi and r11 in a loop, we can
+         *   eliminate unnecessary additions by finding the longest trailing
+         *   zero digit count of rsi and r11, then masking off that many digits
+         *   from each. Then we add both masked values to rdx, then rotate rdx
+         *   and shift rsi and r11 right by that many digits.
+         */
         bsfq %rsi, %rcx
         bsfq %r11, %r10
         andl $0x3C, %ecx
@@ -117,11 +125,31 @@ fpfd32_impl_addsub:
                                    rsi and r11 in rcx and r10, respectively */
         cmpl %ecx, %r10d
         jae .Laddoptnoswitch
-        xchgl %ecx, %r10d       /* Put the minimum trailing zero digit count in
-                                   ecx, so we don't chop off any digits */
+        xchgl %ecx, %r10d       /* Put the maximum trailing zero digit count in
+                                   r10d */
 .Laddoptnoswitch:
+        testl %r10d, %r10d
+        jz .Laddloopinit        /* If there are no leading zeros, we begin the
+                                   addition */
+        movq $0xFFFFFFFFFFFFFFFF, %rax
+        movl $64, %ecx
+        subl %r10d, %ecx
+        shrq %cl, %rax          /* Shift 0xFFF... right to line up with the
+                                   trailing zeros on rsi or r11 */
+        movq %rsi, %rcx
+        movq %r11, %rdx         /* Copy rsi and r11 to rcx and rdx,
+                                   respectively */
+        andq %rax, %rcx
+        andq %rax, %rdx         /* Mask off the trailing zeros on one of rcx and
+                                   rdx, and the matching non-zero digits in the
+                                   other */
+        addq %rcx, %rdx         /* Capture these non-zero digits in rdx */
+        movl %r10d, %ecx
+        rorq %cl, %rdx
         shrq %cl, %rsi
-        shrq %cl, %r11          /* Trim shared trailing zeros */
+        shrq %cl, %r11          /* Rotate rdx and shift rsi and r11 right
+                                   appropriately */
+.Laddloopinit:
         movb %sil, %al
         movb %r11b, %cl
         andb $0x0F, %al         /* al is the next digit of rsi to be added */
