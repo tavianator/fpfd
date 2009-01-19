@@ -157,7 +157,8 @@ fpfd32_impl_addsub:
                                    The `and' instruction clears the carry flag
                                    for adc. */
 .Laddloop:
-        /* This loop adds the digits of rax to rdx */
+        /* This loop adds the digits of rsi and r11, storing the result in rdx.
+           It terminates when rsi == 0. */
         adcb %al, %cl           /* add al to cl, with carry */
         cmpb $0x9, %cl
         ja .Laddcarry           /* Test for decimal carry */
@@ -250,7 +251,7 @@ fpfd32_impl_addsub:
         movq $0x6666666666666666, %rdx
         shrq %cl, %rdx          /* Shift 0x666... right to line up with the
                                    trailing zeros in r9 */
-        subq %rdx, %r9          /* Subtract rdx from 0x...666 */
+        subq %rdx, %r9          /* Subtract 0x...666 from rdx */
 .Lsubshrjusttoofar1:
         subq $1, %r9            /* Subtract 1 from r9 */
         movq %r9, %rdx
@@ -268,32 +269,67 @@ fpfd32_impl_addsub:
         movq $0x6666666666666666, %rax
         shrq %cl, %rax          /* Shift 0x666... right to line up with the
                                    trailing zeros in rdx */
-        subq %rax, %rdx         /* Subtract rax from 0x...666 */
+        subq %rax, %rdx         /* Subtract 0x...666 from rax */
 .Lsubshrtoofar1:
         subq $1, %rdx           /* Subtract 1 from rdx */
         movq $0x9000000000000000, %rax  /* Remainder is equivalent to 0.9 */
         movq $0, %r9            /* Zero excess remainder */
         jmp .Lrem
 .Lsub:
-        testl %eax, %eax
-        jnz .Lsubnoopt
-        testl %edx, %edx
-        jnz .Lsubnoopt
+        movq %rax, %rsi         /* Store rax in rsi */
+        movq %rdx, %r11         /* Store rdx in r11 */
+        movq $0, %rdx           /* rdx will hold the final sum */
+        /*
+         * HUGE OPTIMIZATION (~57 cycles, on average):
+         *   Rather than do all 16 digit subtractions of rsi and r11 in a loop,
+         *   we can eliminate as many as possible by finding the trailing zero
+         *   digit count of r11, and put that many digits of rsi in rdx.
+         */
         testq %r9, %r9
-        jnz .Lsubnoopt
-        shrq $32, %rax
-        shrq $32, %rdx
-.Lsubnoopt:
-        movq %rax, %rsi
-        movq %rdx, %r11
-        movq %rdx, %rcx
-        movq $0, %rdx
-        andb $0x0F, %al
-        andb $0x0F, %cl
-        testq %r9, %r9
-        jz .Lsubloop
-        stc
+        jz .Lsubopt2            /* Test for a zero remainder from r11 */
+        bsfq %rsi, %rax
+        andl $0x3C, %eax        /* eax = bsf/4; trailing zero digit count */
+        jz .Lsubopt1            /* Test for no trailing zeros */
+        movl $64, %ecx
+        subl %eax, %ecx
+        movq $0x6666666666666666, %rax
+        shrq %cl, %rax          /* Shift 0x666... right to line up with the
+                                   trailing zeros in rsi */
+        subq %rax, %rsi         /* Subtract 0x...666 from rsi */
+.Lsubopt1:
+        subq $1, %rsi           /* Subtract 1 from rsi */
+        cmpq %rsi, %r11         /* rsi could now have fewer digits than r11 */
+        jbe .Lsubopt2
+        xchgq %rsi, %r11        /* If so, swap rsi and r11... */
+        negl -4(%rsp)           /* ...and flip the resultant sign */
+.Lsubopt2:
+        bsfq %r11, %r10
+        andl $0x3C, %r10d       /* r10d = bsf/4; trailing zero digit count */
+        jz .Lsubloopinit        /* Test for no trailing zeros */
+        movl $64, %ecx
+        subl %r10d, %ecx
+        movq $0xFFFFFFFFFFFFFFFF, %rax
+        shrq %cl, %rax          /* Shift 0xFFF... right to line up with the
+                                   trailing zeros of r11 */
+        movq %rsi, %rdx         /* Mask off the matching digits in rsi of r11's
+                                   trailing digits */
+        andq %rax, %rdx         /* Capture these digits in rdx */
+        movl %r10d, %ecx
+        rorq %cl, %rdx
+        shrq %cl, %rsi
+        shrq %cl, %r11          /* Rotate rdx and shift rsi and r11 right
+                                   appropriately */
+.Lsubloopinit:
+        movb %sil, %al
+        movb %r11b, %cl
+        andb $0x0F, %al         /* al is the next digit of rsi to be
+                                   subtracted */
+        andb $0x0F, %cl         /* cl is the next digit of r11 to be subtracted.
+                                   The `and' instruction clears the carry flag
+                                   for sbb. */
 .Lsubloop:
+        /* This loop subtracts the digits of rsi and r11, storing the result in
+           rdx. It terminates when rsi == 0. */
         sbbb %cl, %al
         jc .Lsubborrow
         orb %al, %dl
@@ -301,8 +337,8 @@ fpfd32_impl_addsub:
         shrq $4, %r11
         shrq $4, %rsi
         jz .Lsubdone
-        movq %rsi, %rax
-        movq %r11, %rcx
+        movb %sil, %al
+        movb %r11b, %cl
         andb $0x0F, %al
         andb $0x0F, %cl
         jmp .Lsubloop
@@ -313,8 +349,8 @@ fpfd32_impl_addsub:
         shrq $4, %r11
         shrq $4, %rsi
         jz .Lsubdoneborrow
-        movq %rsi, %rax
-        movq %r11, %rcx
+        movb %sil, %al
+        movb %r11b, %cl
         andb $0x0F, %al
         andb $0x0F, %cl
         stc
