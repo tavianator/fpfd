@@ -102,9 +102,8 @@ fpfd32_impl_addsub:
         xchgq %rax, %rdx        /* Swap rax and rdx. For .Lrem, rax is the
                                    remainder, and rdx is the sum. */
         je .Lrem                /* If r9 was == 16, we are done */
-        shrdq $4, %rax, %r9
-        shrq $4, %rax           /* Otherwise, shift the remainder over one
-                                   digit, and capture the falloff in r9. */
+        movq $0x1000000000000000, %rax  /* Otherwise, treat the remainder as
+                                           0.1 */
         jmp .Lrem
 .Ladd:
         movq %rax, %rsi         /* Store rax in rsi */
@@ -196,11 +195,9 @@ fpfd32_impl_addsub:
         orq %rcx, %rdx          /* ... and set the leading digit to 1. */
         subl $1, %r8d           /* Correct the exponent */
         movq %r9, %rax          /* Put the remainder in rax */
-        movq $0, %r9            /* Zero the extra remainder */
         jmp .Lrem
 .Ladddone:
         movq %r9, %rax          /* Put the remainder in rax */
-        movq $0, %r9            /* Zero the extra remainder */
         jmp .Lrem
 .Lsubshift:
         subl %edx, %r9d         /* r9d now stores the necessary digit shift
@@ -254,8 +251,7 @@ fpfd32_impl_addsub:
         subq %rdx, %r9          /* Subtract 0x...666 from rdx */
 .Lsubshrjusttoofar1:
         subq $1, %r9            /* Subtract 1 from r9 */
-        movq %r9, %rdx
-        movq $0, %r9            /* Mantissa in rdx; zero excess remainder */
+        movq %r9, %rdx          /* Put the mantissa in rdx */
         jmp .Lrem
 .Lsubshrtoofar:
         /* Shift count > 16; just subtract one from rax as above, and treat the
@@ -273,7 +269,6 @@ fpfd32_impl_addsub:
 .Lsubshrtoofar1:
         subq $1, %rdx           /* Subtract 1 from rdx */
         movq $0x9000000000000000, %rax  /* Remainder is equivalent to 0.9 */
-        movq $0, %r9            /* Zero excess remainder */
         jmp .Lrem
 .Lsub:
         movq %rax, %rsi         /* Store rax in rsi */
@@ -369,7 +364,6 @@ fpfd32_impl_addsub:
         movq $0, %rax           /* r9 must be zero, because in order for r11 to
                                    be > than rsi, they must both be shifted all
                                    the way to the left */
-        movq $0, %r9
         negl -4(%rsp)           /* ...and flip the resultant sign */
         jmp .Lrem
 .Lsubdone:
@@ -377,14 +371,12 @@ fpfd32_impl_addsub:
            to negate r9. */
         movq $0, %rax           /* In case r9 == 0 */
         bsfq %r9, %rcx
-        jz .Lsubdonenorem       /* Test for r9 == 0 */
+        jz .Lrem                /* Test for r9 == 0 */
         andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
         movq $0x999999999999999A, %rax
         shlq %cl, %rax          /* Shift ...999A left to line up with the first
                                    non-zero digit in r9 */
         subq %r9, %rax          /* Subtract r9 from 0x...9999A000... */
-.Lsubdonenorem:        
-        movq $0, %r9            /* Zero excess remainder */
 .Lrem:
         movq %rdx, (%rdi)       /* Save the mantissa in dest->mant */
         movl -8(%rsp), %edx
@@ -393,6 +385,7 @@ fpfd32_impl_addsub:
         movl -4(%rsp), %edx
         movl %edx, 12(%rdi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        movq $0, %r9
         shrdq $60, %rax, %r9
         shrq $60, %rax          /* Shift the remainder right to be left with
                                    only the leading digit, and capture the
