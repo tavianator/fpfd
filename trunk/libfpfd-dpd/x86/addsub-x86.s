@@ -32,17 +32,76 @@
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
         pushl %ebx
-        movl 12(%esp), %ecx     /* Put sign in ecx */
-        movl 16(%esp), %eax     /* Put lhs in eax */
-        movl 20(%esp), %edx     /* Put rhs in edx */
-        xorl 12(%eax), %ecx
-        xorl 12(%edx), %ecx
-        js .Lsub                /* If the result is -1, we are subtracting */
-        movl 8(%eax), %ecx
-        subl 8(%edx), %ecx      /* lhs->fields.exp - rhs->fields.exp */
-        popl %ebx
-        ret
-.Lsub:
+        pushl %esi
+        pushl %edi
+        pushl %ebp              /* Callee-save registers */
+        movl 28(%esp), %esi     /* Put lhs in esi */
+        movl 32(%esp), %edi     /* Put rhs in edi */
+        movl 24(%esp), %ebx     /* Put sign in ebx */
+        xorl 12(%edi), %ebx     /* ebx = sign ^ rhs->fields.sign */
+        xorl $1, %ebx           /* Find the effective sign of rhs
+                                   (sign * rhs->fields.sign */
+        bsrl 4(%esi), %ecx
+        jz .LlhsMSWzero
+        subl $31, %ecx
+        negl %ecx
+        jmp .Lbsrrhs
+.LlhsMSWzero:
+        bsrl (%esi), %ecx
+        subl $63, %ecx
+        negl %ecx
+.Lbsrrhs:
+        bsrl 4(%edi), %edx
+        jz .LrhsMSWzero
+        subl $31, %edx
+        negl %edx
+        jmp .Lresexp
+.LrhsMSWzero:
+        bsrl (%edi), %edx
+        subl $63, %edx
+        negl %edx
+.Lresexp:
+        shrl $2, %ecx
+        shrl $2, %edx           /* Divide each bit count by 4 (rounding up), and
+                                   subtract from 16, to give a leading zero
+                                   digit count of lhs and rhs, in ecx and edx,
+                                   respectively. */
+        movl 12(%esi), %eax
+        movl %eax, -4(%esp)     /* Store lhs->fields.sign on the stack; this
+                                   will be the resultant sign if we don't flip
+                                   our operands. */
+        movl %edx, %eax
+        subl %ecx, %eax
+        addl 8(%esi), %eax
+        subl 8(%edi), %eax      /* eax = (lhs->fields.exp - leadingzeros(lhs))
+                                     - (rhs->fields.exp - leadingzeros(rhs)) */
+        jns .Lnoswitch          /* If eax is positive, lhs gets shifted further
+                                   left to line up the digits. If it's negative,
+                                   rhs needs to be shifted further. In this
+                                   case, we swap lhs and rhs, so that lhs can
+                                   always be the one shifted further */
+        movl %ebx, -4(%esp)     /* esi will be our resultant sign */
+        xchgl %esi, %edi        /* Swap our lhs and rhs pointers */
+        xchgl %ecx, %edx        /* Swap our leading zero digit counts */
+        negl %eax               /* Re-calculate eax */
+.Lnoswitch:
+        movl 8(%esi), %eax
+        movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
+                                   exponent, on the stack */
+.Lrem:
+        movl 20(%esp), %esi
+        movl $0, (%esi)
+        movl $0, 4(%esi)
+        movl -8(%esp), %eax
+        subl %edx, %eax
+        movl %eax, 8(%esi)
+        movl -4(%esp), %eax
+        movl %eax, 12(%esi)
+        movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
+        xorl %eax, %eax
+        popl %ebp
+        popl %edi
+        popl %esi
         popl %ebx
         ret
         .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
