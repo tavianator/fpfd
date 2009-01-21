@@ -44,16 +44,16 @@ fpfd32_impl_addsub:
         negl %r8d
         negl %r9d
         shrl $2, %r8d
-        shrl $2, %r9d           /* Divide each bit count by 4, rounding up, and
+        shrl $2, %r9d           /* Divide each bit count by 4 (rounding up), and
                                    subtract from 16, to give a leading zero
                                    digit count of lhs and rhs, in r8 and r9,
                                    respectively. */
-        movl %r9d, %edx
-        subl %r8d, %edx
         movl 12(%r10), %eax
         movl %eax, -4(%rsp)     /* Store lhs->fields.sign on the stack; this
                                    will be the resultant sign if we don't flip
                                    our operands. */
+        movl %r9d, %edx
+        subl %r8d, %edx
         addl 8(%r10), %edx
         subl 8(%r11), %edx      /* edx = (lhs->fields.exp - leadingzeros(lhs))
                                      - (rhs->fields.exp - leadingzeros(rhs)) */
@@ -72,7 +72,7 @@ fpfd32_impl_addsub:
         movl %eax, -8(%rsp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
         movq (%r10), %rax       /* Put lhs->mant in rax */
-        leal (,%r8d,4), %ecx    /* cl = 4*r9 */
+        leal (,%r8d,4), %ecx    /* cl = 4*r8 */
         shlq %cl, %rax          /* Shift rax all the way to the left */
         testl %esi, %esi
         jnz .Lsubshift          /* If esi == 0, we are adding digits. If not, we
