@@ -55,7 +55,7 @@ fpfd32_impl_scale:
         jl .LsubnormMSW         /* If -108 < ecx < -101, we need to
                                    subnormalize */
         movl %ecx, 8(%esi)      /* Set dest->exp to the adjusted exponent */
-        movl $0, %ecx
+        xorl %ecx, %ecx
         shrdl $4, %eax, %ecx
         shrdl $4, %edx, %eax
         shrl $4, %edx           /* Shift edx:eax.ecx to the 28th bit */
@@ -78,7 +78,7 @@ fpfd32_impl_scale:
                                    shift count needed to subnormalize the
                                    mantissa */
         shll $2, %ecx
-        movl $0, %ebx
+        xorl %ebx, %ebx
         shrdl %cl, %eax, %ebx
         shrdl %cl, %edx, %eax
         shrl %cl, %edx          /* Shift edx:eax.ebx to the correct bit */
@@ -102,7 +102,7 @@ fpfd32_impl_scale:
         movl %eax, %ebx
         movl %ebx, %ecx
         movl %edx, %eax
-        movl $0, %edx
+        xorq %edx, %edx
         movl $0, (%esi)
         movl $0, 4(%esi)        /* Set dest->mant to zero */
         movl $-101, 8(%esi)     /* Set the exponent to the subnormal exponent */
