@@ -66,7 +66,7 @@ fpfd32_impl_scale:
         subb $32, %cl
         shrl %cl, %edx
         movl %edx, %eax
-        movb $0, %cl
+        xorb %cl, %cl
 .LshrdMSW:
         shrdl %cl, %edx, %eax
         movl fpfd32_msw_bsr2exp(,%ebx,4), %ebx
@@ -109,7 +109,7 @@ fpfd32_impl_scale:
         subb $32, %cl
         shrl %cl, %edx
         movl %edx, %eax
-        movb $0, %cl
+        xorb %cl, %cl
 .LshrdremMSW:
         shrdl %cl, %edx, %eax
         movl -12(%esp), %edx
@@ -142,7 +142,7 @@ fpfd32_impl_scale:
         cmpl $10000000, %eax
         jae .LoverLSW           /* The mantissa is too big */
         movl %eax, %edx
-        movl $0, %eax
+        xorl %eax, %eax
         movl 8(%esi), %ebx
         jmp .Lnorm
 .LunderLSW:
@@ -151,7 +151,7 @@ fpfd32_impl_scale:
         movl fpfd32_lsw_bsr2exp(,%ebx,4), %ebx
         addl 8(%esi), %ebx      /* Correct the exponent */
         movl %eax, %edx
-        movl $0, %eax
+        xorl %eax, %eax
         cmpl $1000000, %edx
         jae .Lnorm
         imull $10, %edx, %edx   /* Mantissa still too small */

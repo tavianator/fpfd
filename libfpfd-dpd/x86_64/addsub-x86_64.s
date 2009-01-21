@@ -84,13 +84,14 @@ fpfd32_impl_addsub:
                                    we shift left */
         leal (,%r9d,4), %ecx    /* cl = 4*r9 */
         shlq %cl, %rdx          /* Shift rdx to line up the digits */
-        movq $0, %r9            /* r9 is the remainder from rhs */
+        xorq %r9, %r9           /* r9 is the remainder from rhs */
         jmp .Ladd               /* Perform the addition of digits */
 .Laddshr:
         negl %r9d
         leal (,%r9d,4), %ecx    /* cl = -4*r9 */
         cmpl $16, %r9d          /* Check if r9 >= 16 */
-        movq $0, %r9            /* r9 is the remainder from rhs */
+        movq $0, %r9            /* r9 is the remainder from rhs (mov doesn't
+                                   touch the flags) */
         jae .Laddshrtoofar      /* If r9 was >= 16, we would right-shift by more
                                    digits than are in rhs->mant, so handle this
                                    case specially. */
@@ -108,7 +109,7 @@ fpfd32_impl_addsub:
 .Ladd:
         movq %rax, %rsi         /* Store rax in rsi */
         movq %rdx, %r11         /* Store rdx in r11 */
-        movq $0, %rdx           /* rdx will hold the final sum */
+        xorq %rdx, %rdx         /* rdx will hold the final sum */
         /*
          * HUGE OPTIMIZATION: (~64 cycles, on average)
          *   Rather than add all 16 digits of rsi and r11 in a loop, we can
@@ -207,13 +208,14 @@ fpfd32_impl_addsub:
                                    we shift left */
         leal (,%r9d,4), %ecx    /* cl = 4*r9 */
         shlq %cl, %rdx          /* Shift rdx to line up the digits */
-        movq $0, %r9            /* r9 is the remainder from rhs */
+        xorq %r9, %r9           /* r9 is the remainder from rhs */
         jmp .Lsub               /* Perform the subtraction of digits */
 .Lsubshr:
         negl %r9d
         leal (,%r9d,4), %ecx    /* cl = -4*r9 */
         cmpl $16, %r9d          /* Check if r9 >= 16 */
-        movq $0, %r9            /* r9 is the remainder from rhs */
+        movq $0, %r9            /* r9 is the remainder from rhs (mov doesn't
+                                   touch the flags) */
         je .Lsubshrjusttoofar
         ja .Lsubshrtoofar       /* If r9 was >= 16, we would right-shift by more
                                    digits than are in rhs->mant, so handle these
@@ -273,7 +275,7 @@ fpfd32_impl_addsub:
 .Lsub:
         movq %rax, %rsi         /* Store rax in rsi */
         movq %rdx, %r11         /* Store rdx in r11 */
-        movq $0, %rdx           /* rdx will hold the final sum */
+        xorq %rdx, %rdx         /* rdx will hold the final sum */
         /*
          * HUGE OPTIMIZATION (~57 cycles, on average):
          *   Rather than do all 16 digit subtractions of rsi and r11 in a loop,
@@ -361,7 +363,7 @@ fpfd32_impl_addsub:
                                    non-zero digit in rdx */
         subq %rdx, %rax         /* Subtract rdx from 0x...9999A000... */
         movq %rax, %rdx
-        movq $0, %rax           /* r9 must be zero, because in order for r11 to
+        xorq %rax, %rax         /* r9 must be zero, because in order for r11 to
                                    be > than rsi, they must both be shifted all
                                    the way to the left */
         negl -4(%rsp)           /* ...and flip the resultant sign */
@@ -369,7 +371,7 @@ fpfd32_impl_addsub:
 .Lsubdone:
         /* We didn't finish on a borrow, so don't negate rdx. However, we need
            to negate r9. */
-        movq $0, %rax           /* In case r9 == 0 */
+        xorq %rax, %rax         /* In case r9 == 0 */
         bsfq %r9, %rcx
         jz .Lrem                /* Test for r9 == 0 */
         andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
@@ -385,7 +387,7 @@ fpfd32_impl_addsub:
         movl -4(%rsp), %edx
         movl %edx, 12(%rdi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
-        movq $0, %r9
+        xorq %r9, %r9
         shrdq $60, %rax, %r9
         shrq $60, %rax          /* Shift the remainder right to be left with
                                    only the leading digit, and capture the

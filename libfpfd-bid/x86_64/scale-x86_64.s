@@ -36,7 +36,7 @@ fpfd32_impl_scale:
         cmpq $10000000, %rax
         jae .Lover              /* The mantissa is too big */
         movq %rax, %rdx
-        movl $0, %eax
+        xorl %eax, %eax
         movl 8(%rdi), %esi
         jmp .Lnorm
 .Lunder:
@@ -47,7 +47,7 @@ fpfd32_impl_scale:
         movl (%rsi,%r8,4), %esi
         addl 8(%rdi), %esi      /* Correct the exponent */
         movl %eax, %edx
-        movl $0, %eax
+        xorl %eax, %eax
         cmpl $1000000, %edx
         jae .Lnorm
         imulq $10, %rdx, %rdx   /* Mantissa still too small */
