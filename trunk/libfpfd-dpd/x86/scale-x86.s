@@ -102,7 +102,7 @@ fpfd32_impl_scale:
         movl %eax, %ebx
         movl %ebx, %ecx
         movl %edx, %eax
-        xorq %edx, %edx
+        xorl %edx, %edx
         movl $0, (%esi)
         movl $0, 4(%esi)        /* Set dest->mant to zero */
         movl $-101, 8(%esi)     /* Set the exponent to the subnormal exponent */
