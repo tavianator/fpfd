@@ -41,25 +41,28 @@ fpfd32_impl_addsub:
         xorl 12(%edi), %ebx     /* ebx = sign ^ rhs->fields.sign */
         xorl $1, %ebx           /* Find the effective sign of rhs
                                    (sign * rhs->fields.sign */
+        /* We really want ecx = 63 - bsrq((%esi)). But on 32-bit, we have to
+           bit-scan the high-order word first, then if that word is zero, scan
+           the lower word. */
         bsrl 4(%esi), %ecx
-        jz .LlhsMSWzero
+        jz .LlhsMSWzero         /* Test for a zero high-order word */
         subl $31, %ecx
-        negl %ecx
-        jmp .Lbsrrhs
+        negl %ecx               /* 63 - bsrq((%esi)) == 31 - bsrl(4(%esi)) */
+        jmp .Lbsrrhs            /* Now scan rhs */
 .LlhsMSWzero:
-        bsrl (%esi), %ecx
+        bsrl (%esi), %ecx       /* We assume the mantissa is nonzero */
         subl $63, %ecx
-        negl %ecx
+        negl %ecx               /* 63 - bsr */
 .Lbsrrhs:
         bsrl 4(%edi), %edx
-        jz .LrhsMSWzero
+        jz .LrhsMSWzero         /* Test for a zero high-order word */
         subl $31, %edx
-        negl %edx
-        jmp .Lresexp
+        negl %edx               /* 63 - bsrq((%edi)) == 31 - bsrl(4(%edi)) */
+        jmp .Lresexp            /* Now find the resultant exponent */
 .LrhsMSWzero:
-        bsrl (%edi), %edx
+        bsrl (%edi), %edx       /* We assume the mantissa is nonzero */
         subl $63, %edx
-        negl %edx
+        negl %edx               /* 63 - bsr */
 .Lresexp:
         shrl $2, %ecx
         shrl $2, %edx           /* Divide each bit count by 4 (rounding up), and
@@ -89,14 +92,14 @@ fpfd32_impl_addsub:
         movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
 .Lrem:
-        movl 20(%esp), %esi
+        movl 20(%esp), %esi     /* Put dest in esi */
         movl $0, (%esi)
         movl $0, 4(%esi)
         movl -8(%esp), %eax
-        subl %edx, %eax
-        movl %eax, 8(%esi)
+        subl %edx, %eax         /* Adjust the exponent */
+        movl %eax, 8(%esi)      /* Save the exponent in dest->fields.exp */
         movl -4(%esp), %eax
-        movl %eax, 12(%esi)
+        movl %eax, 12(%esi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
         xorl %eax, %eax
         popl %ebp
