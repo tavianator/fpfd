@@ -73,12 +73,12 @@ fpfd32_impl_addsub:
         movl %eax, -4(%esp)     /* Store lhs->fields.sign on the stack; this
                                    will be the resultant sign if we don't flip
                                    our operands. */
-        movl %edx, %eax
-        subl %ecx, %eax
-        addl 8(%esi), %eax
-        subl 8(%edi), %eax      /* eax = (lhs->fields.exp - leadingzeros(lhs))
+        movl %edx, %ebp
+        subl %ecx, %ebp
+        addl 8(%esi), %ebp
+        subl 8(%edi), %ebp      /* ebp = (lhs->fields.exp - leadingzeros(lhs))
                                      - (rhs->fields.exp - leadingzeros(rhs)) */
-        jns .Lnoswitch          /* If eax is positive, lhs gets shifted further
+        jns .Lnoswitch          /* If ebp is positive, lhs gets shifted further
                                    left to line up the digits. If it's negative,
                                    rhs needs to be shifted further. In this
                                    case, we swap lhs and rhs, so that lhs can
@@ -86,16 +86,72 @@ fpfd32_impl_addsub:
         movl %ebx, -4(%esp)     /* esi will be our resultant sign */
         xchgl %esi, %edi        /* Swap our lhs and rhs pointers */
         xchgl %ecx, %edx        /* Swap our leading zero digit counts */
-        negl %eax               /* Re-calculate eax */
+        negl %ebp               /* Re-calculate ebp */
 .Lnoswitch:
+        xorl %eax, %ebx         /* ebx ^= (original lhs)->fields.sign */
         movl 8(%esi), %eax
         movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
+        movl %ecx, -12(%esp)
+        movl %edx, -16(%esp)    /* Store ecx and edx on the stack */
+        movl (%esi), %eax
+        movl 4(%esi), %edx      /* Put lhs->mant in edx:eax */
+        leal (,%ecx,4), %ecx    /* ecx *= 4 */
+        cmpb $32, %cl           /* Perform a 64-bit shift of edx:eax left by cl
+                                   bits, by treating the cases of cl >= 32 and
+                                   cl < 32 differently */
+        jb .Llhsshld
+        subb $32, %cl
+        shll %cl, %eax          /* Shift eax left by cl - 32 bits */
+        movl %eax, %edx
+        xorl %eax, %eax         /* Move eax to edx, and zero eax */
+        xorb %cl, %cl           /* Zero the shift count */
+.Llhsshld:
+        shldl %cl, %eax, %edx
+        shll %cl, %eax          /* Shift edx:eax left by cl bits */
+        testl %ebx, %ebx
+        jnz .Lsubshift          /* If ebx == 0, we are adding digits. If not, we
+                                   are subtracting. */
+        movl -16(%esp), %ecx
+        subl %ebp, %ecx         /* ecx now stores the necessary digit shift
+                                   count of rhs */
+        movl (%edi), %ebx
+        movl 4(%edi), %edi      /* Put lhs->mant in edi:ebx */
+        js .Laddshr             /* If ecx is negative, we shift right; otherwise
+                                   we shift left */
+        leal (,%ecx,4), %ecx    /* ecx *= 4 */
+        cmpb $32, %cl
+        jb .Laddrhsshld
+        subb $32, %cl
+        shll %cl, %ebx          /* Shift ebx left by cl - 32 bits */
+        movl %ebx, %edi
+        xorl %ebx, %ebx         /* Move eax to edx, and zero eax */
+        xorb %cl, %cl           /* Zero the shift count */
+.Laddrhsshld:
+        shldl %cl, %ebx, %edi
+        shll %cl, %edi          /* Shift edi:ebx left by cl bits */
+        jmp .Lrem
+.Laddshr:
+        negl %ecx
+        leal (,%ecx,4), %ecx    /* ecx *= -4 */
+        cmpb $32, %cl
+        jb .Laddrhsshrd
+        subb $32, %cl
+        shrl %cl, %edi          /* Shift edi right by cl - 32 bits */
+        movl %edi, %ebx
+        xorl %edi, %edi         /* Move edi to ebx, and zero edi */
+        xorb %cl, %cl           /* Zero the shift count */
+.Laddrhsshrd:
+        shrdl %cl, %edi, %ebx
+        shrl %cl, %edi          /* Shift edi:ebx right by cl bits */
+        jmp .Lrem
+.Lsubshift:
 .Lrem:
         movl 20(%esp), %esi     /* Put dest in esi */
-        movl $0, (%esi)
-        movl $0, 4(%esi)
+        movl %eax, (%esi)
+        movl %edx, 4(%esi)
         movl -8(%esp), %eax
+        movl -12(%esp), %edx
         subl %edx, %eax         /* Adjust the exponent */
         movl %eax, 8(%esi)      /* Save the exponent in dest->fields.exp */
         movl -4(%esp), %eax
