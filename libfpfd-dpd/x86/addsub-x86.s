@@ -169,7 +169,7 @@ fpfd32_impl_addsub:
                                            0.1 */
         jmp .Lrem
 .Ladd:
-        clc
+        clc                     /* Clear the carry flag for adcb */
 .Laddloop:
         /* This loop adds the digits of edx:eax and edi:ebx, four at a time,
            storing the result in edi:ebx. It terminates when edx:eax == 0. */
@@ -372,8 +372,59 @@ fpfd32_impl_addsub:
         movl $0x90000000, -20(%esp)
         jmp .Lrem
 .Lsub:
-        subl %ebx, %eax
-        sbbl %edi, %edx
+        movl -24(%esp), %ebp
+        movl -20(%esp), %esi
+        testl %ebp, %ebp
+        stc
+        jnz .Lsubloop
+        testl %esi, %esi
+        jz .Lsubloop            /* Testl clears the carry flag for sbbb */
+        stc                     /* Set the carry flag if remainder != 0 */
+.Lsubloop:
+        /* This loop subtracts the digits of edi:ebx from edx:eax, four at a
+           time, storing the result in edi:ebx. It terminates when
+           edx:eax == 0. */
+        sbbb %bl, %al           /* Subtract bl from al in binary */
+        das                     /* Decimal adjust after subtraction - uses AF
+                                   flag to correct al after two BCD digits are
+                                   subtracted from the two already in it. Only
+                                   on x86. */
+        movb %al, %bl           /* Store the result in bl */
+        movb %ah, %al           /* Move the next two digits to al */
+        sbbb %bh, %al           /* Add bh to al in binary */
+        das                     /* Decimal adjust after subtraction */
+        jc .Lsubborrow          /* Test for borrow */
+        movb %al, %bh           /* Store the result in bh */
+        shrdl $16, %edx, %eax
+        shrl $16, %edx
+        movl %ebx, %esi
+        shrdl $16, %edi, %ebx
+        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
+                                   the result in edi:ebx right 4 digits */
+        testl %edx, %edx        /* Test for edx == 0 */
+        jnz .Lsubloop           /* testl clears the carry flag for adcb */
+        testl %eax, %eax        /* Test for eax == 0 */
+        jnz .Lsubloop
+        jmp .Lsubdone
+.Lsubborrow:
+        movb %al, %bh
+        shrdl $16, %edx, %eax
+        shrl $16, %edx
+        movl %ebx, %esi
+        shrdl $16, %edi, %ebx
+        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
+                                   the result in edi:ebx right 4 digits */
+        testl %edx, %edx
+        stc
+        jnz .Lsubloop
+        testl %eax, %eax
+        stc
+        jnz .Lsubloop
+        jmp .Lsubdoneborrow      /* We are done, but finished on a borrow */
+.Lsubdoneborrow:
+.Lsubdone:
+        movl %edi, %edx
+        movl %ebx, %eax
 .Lrem:
         movl 20(%esp), %esi     /* Put dest in esi */
         movl %eax, (%esi)
