@@ -243,7 +243,7 @@ fpfd32_impl_addsub:
         subq %rdx, %r9          /* Subtract rdx from 0x...9999A000... */
         xchgq %r9, %rax         /* Swap r9 and rax */
         bsfq %r9, %rdx
-        andl $0x3C, %edx        /* ecx = bsf/4; */
+        andl $0x3C, %edx        /* edx = bsf/4; */
         jz .Lsubshrjusttoofar1  /* Test for no trailing zeros */
         movl $64, %ecx
         subl %edx, %ecx
