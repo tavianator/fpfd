@@ -138,14 +138,15 @@ fpfd32_impl_addsub:
         negl %ecx
         leal (,%ecx,4), %ecx    /* ecx *= -4 */
         cmpl $64, %ecx
-        jae .Laddshrtoofar
+        jae .Laddshrtoofar      /* Check if edi:ebx would be shifted past its
+                                   width */
         cmpb $32, %cl
         jb .Laddrhsshrd
         subb $32, %cl
         movl $0, %ebp
         shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
-        shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl - 32 bits */
+        shrl %cl, %edi          /* Shift edi.ebx:ebp right by cl - 32 bits */
         movl %ebp, -24(%esp)
         movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
@@ -157,17 +158,78 @@ fpfd32_impl_addsub:
         shrdl %cl, %edi, %ebx
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
         movl %ebp, -20(%esp)
-        movl $0, -24(%esp)
+        movl $0, -24(%esp)      /* Store 0.ebp as the remainder */
         jmp .Ladd
 .Laddshrtoofar:
         movl %ebx, -24(%esp)
-        movl %edi, -20(%esp)
+        movl %edi, -20(%esp)    /* Store 0.edi:ebx as the remainder on the
+                                   stack in case ecx == 64 */
         je .Lrem
-        movl $0x10000000, -20(%esp)
+        movl $0x10000000, -20(%esp)     /* If ecx != 64, treat the remainder as
+                                           0.1 */
         jmp .Lrem
 .Ladd:
-        addl %ebx, %eax
-        adcl %edi, %edx
+        clc
+.Laddloop:
+        /* This loop adds the digits of edx:eax and edi:ebx, four at a time,
+           storing the result in edi:ebx. It terminates when edx:eax == 0. */
+        adcb %bl, %al           /* Add bl to al in binary */
+        daa                     /* Decimal adjust after addition - uses AF flag
+                                   to correct al after two BCD digits are added
+                                   to the two already in it. Only on x86. */
+        movb %al, %bl           /* Store the result in bl */
+        movb %ah, %al           /* Move the next two digits to al */
+        adcb %bh, %al           /* Add bh to al in binary */
+        daa                     /* Decimal adjust after addition */
+        jc .Laddcarry           /* Test for carry */
+        movb %al, %bh           /* Store the result in bh */
+        shrdl $16, %edx, %eax
+        shrl $16, %edx
+        movl %ebx, %esi
+        shrdl $16, %edi, %ebx
+        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
+                                   the result in edi:ebx right 4 digits */
+        testl %edx, %edx        /* Test for edx == 0 */
+        jnz .Laddloop           /* testl clears the carry flag for adcb */
+        testl %eax, %eax        /* Test for eax == 0 */
+        jnz .Laddloop
+        jmp .Ladddone
+.Laddcarry:
+        movb %al, %bh
+        shrdl $16, %edx, %eax
+        shrl $16, %edx
+        movl %ebx, %esi
+        shrdl $16, %edi, %ebx
+        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
+                                   the result in edi:ebx right 4 digits */
+        testl %edx, %edx
+        stc
+        jnz .Laddloop
+        testl %eax, %eax
+        stc
+        jnz .Laddloop
+        jmp .Ladddonecarry      /* We are done, but finished on a carry */
+.Ladddone:
+        movl %edi, %edx
+        movl %ebx, %eax
+        jmp .Lrem
+.Ladddonecarry:
+        /* We finished on a carry, so shift the digits right by one, saving the
+           falloff in edi:ebx, and set the leading digit to 1 */
+        movl %edi, %edx
+        movl %ebx, %eax
+        movl -24(%esp), %ebx
+        movl -20(%esp), %edi    /* Get the previous remainder from the stack,
+                                   and store it in edi:ebx */
+        shrdl $4, %edi, %ebx
+        shrdl $4, %eax, %edi
+        shrdl $4, %edx, %eax
+        shrl $4, %edx           /* Shift edx:eax.edi:ebx right one digit */
+        orl $0x10000000, %edx   /* Set the leading digit to 1 */
+        movl %ebx, -24(%esp)
+        movl %edi, -20(%esp)    /* Store 0.edi:ebx as the remainder on the
+                                   stack */
+        subl $1, -12(%esp)      /* Correct the exponent */
         jmp .Lrem
 .Lsubshift:
         movl -16(%esp), %ecx
