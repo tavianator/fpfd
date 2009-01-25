@@ -133,7 +133,7 @@ fpfd32_impl_addsub:
 .Laddrhsshld:
         shldl %cl, %ebx, %edi
         shll %cl, %edi          /* Shift edi:ebx left by cl bits */
-        jmp .Lrem
+        jmp .Ladd
 .Laddshr:
         negl %ecx
         leal (,%ecx,4), %ecx    /* ecx *= -4 */
@@ -150,7 +150,7 @@ fpfd32_impl_addsub:
         movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
         xorl %edi, %edi         /* Move edi to ebx, and zero edi */
-        jmp .Lrem
+        jmp .Ladd
 .Laddrhsshrd:
         movl $0, %ebp
         shrdl %cl, %ebx, %ebp
@@ -158,12 +158,16 @@ fpfd32_impl_addsub:
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
         movl %ebp, -20(%esp)
         movl $0, -24(%esp)
-        jmp .Lrem
+        jmp .Ladd
 .Laddshrtoofar:
         movl %ebx, -24(%esp)
         movl %edi, -20(%esp)
         je .Lrem
         movl $0x10000000, -20(%esp)
+        jmp .Lrem
+.Ladd:
+        addl %ebx, %eax
+        adcl %edi, %edx
         jmp .Lrem
 .Lsubshift:
         movl -16(%esp), %ecx
@@ -187,7 +191,7 @@ fpfd32_impl_addsub:
 .Lsubrhsshld:
         shldl %cl, %ebx, %edi
         shll %cl, %edi          /* Shift edi:ebx left by cl bits */
-        jmp .Lrem
+        jmp .Lsub
 .Lsubshr:
         negl %ecx
         leal (,%ecx,4), %ecx    /* ecx *= -4 */
@@ -205,7 +209,7 @@ fpfd32_impl_addsub:
         movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
         xorl %edi, %edi         /* Move edi to ebx, and zero edi */
-        jmp .Lrem
+        jmp .Lsub
 .Lsubrhsshrd:
         movl $0, %ebp
         shrdl %cl, %ebx, %ebp
@@ -213,9 +217,101 @@ fpfd32_impl_addsub:
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
         movl %ebp, -20(%esp)
         movl $0, -24(%esp)
-        jmp .Lrem
+        jmp .Lsub
 .Lsubshrjusttoofar:
+        /*
+         * Shift count == 16. This means we have edx:eax - 0.edi:ebx. So,
+         * subtract 0.edi:ebx from 1, and subtract 1 from rax.
+         *
+         * Subtracting 0.edi:ebx from 1 is equivalent to subtracting the lowest
+         * non-zero digit from 10, and all higher digits from 9.
+         *
+         * Subtracting 1 from edx:eax is equivalent to subtracting, in
+         * hexadecimal, 6 from all trailing zero nibbles (if any), and then
+         * subtracting 1.
+         */
+        movl $0x99999999, %esi
+        movl $0x9999999A, %ebp  /* Move 0x999999999999999A into esi:ebp */
+        bsfl %ebx, %ecx         /* Forward bit scan this time */
+        jz .Lsubshrjusttoofar1
+        andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
+        shldl %cl, %ebp, %esi
+        shll %cl, %ebp          /* Shift ...999A left to line up with the first
+                                   non-zero digit in edi:ebx */
+        jmp .Lsubshrjusttoofar2
+.Lsubshrjusttoofar1:
+        bsfl %edi, %ecx
+        andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
+        movl %ebp, %esi
+        xorl %ebp, %ebp
+        shll %cl, %esi          /* Shift ...999A left to line up with the first
+                                   non-zero digit in edi:ebx */
+.Lsubshrjusttoofar2:
+        subl %ebx, %ebp
+        sbbl %edi, %esi         /* Subtract rdx from 0x...9999A000... */
+        movl %ebp, -24(%esp)
+        movl %esi, -20(%esp)    /* Store the remainder on the stack */
+        movl $0x66666666, %esi
+        movl $0x66666666, %ebp  /* Move 0x6666666666666666 into esi:ebp */
+        bsfl %eax, %ecx
+        jz .Lsubshrjusttoofar3
+        andl $0x1C, %ecx        /* ecx = bsf/4; */
+        jz .Lsubshrjusttoofar5  /* Test for no trailing zeros */
+        subl $64, %ecx
+        negl %ecx               /* ecx = 64 - ecx */
+        shrdl %cl, %esi, %ebp
+        shrl %cl, %esi          /* Shift 0x666... right to line up with the
+                                   trailing zeros in edx:eax */
+        jmp .Lsubshrjusttoofar4
+.Lsubshrjusttoofar3:
+        bsfl %edx, %ecx
+        andl $0x1C, %ecx        /* ecx = bsf/4; */
+        subl $32, %ecx
+        negl %ecx               /* ecx = 64 - (ecx + 32) */
+        xorl %esi, %esi
+        shrl %cl, %ebp          /* Shift 0x666... right to line up with the
+                                   trailing zeros in edx:eax */
+.Lsubshrjusttoofar4:
+        subl %ebp, %eax
+        sbbl %esi, %edx         /* Subtract 0x...666 from edx:eax */
+.Lsubshrjusttoofar5:
+        subl $1, %eax
+        sbbl $0, %edx           /* Subtract 1 from edx:eax */
+        jmp .Lrem
 .Lsubshrtoofar:
+        /* Shift count > 16; just subtract one from rax as above, and treat the
+           remainder as 0.9 */
+        movl $0x66666666, %esi
+        movl $0x66666666, %ebp  /* Move 0x6666666666666666 into esi:ebp */
+        bsfl %eax, %ecx
+        jz .Lsubshrtoofar1
+        andl $0x1C, %ecx        /* ecx = bsf/4; */
+        jz .Lsubshrtoofar3  /* Test for no trailing zeros */
+        subl $64, %ecx
+        negl %ecx               /* ecx = 64 - ecx */
+        shrdl %cl, %esi, %ebp
+        shrl %cl, %esi          /* Shift 0x666... right to line up with the
+                                   trailing zeros in edx:eax */
+        jmp .Lsubshrtoofar2
+.Lsubshrtoofar1:
+        bsfl %edx, %ecx
+        andl $0x1C, %ecx        /* ecx = bsf/4; */
+        subl $32, %ecx
+        negl %ecx               /* ecx = 64 - (ecx + 32) */
+        xorl %esi, %esi
+        shrl %cl, %ebp          /* Shift 0x666... right to line up with the
+                                   trailing zeros in edx:eax */
+.Lsubshrtoofar2:
+        subl %ebp, %eax
+        sbbl %esi, %edx         /* Subtract 0x...666 from edx:eax */
+.Lsubshrtoofar3:
+        subl $1, %eax
+        sbbl $0, %edx           /* Subtract 1 from edx:eax */
+        movl $0x90000000, -20(%esp)
+        jmp .Lrem
+.Lsub:
+        subl %ebx, %eax
+        sbbl %edi, %edx
 .Lrem:
         movl 20(%esp), %esi     /* Put dest in esi */
         movl %eax, (%esi)
