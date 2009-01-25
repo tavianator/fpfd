@@ -119,13 +119,16 @@ fpfd32_impl_addsub:
         movl 4(%edi), %edi      /* Put lhs->mant in edi:ebx */
         js .Laddshr             /* If ecx is negative, we shift right; otherwise
                                    we shift left */
+        movl $0, -24(%esp)
+        movl $0, -20(%esp)      /* Remainder is zero */
         leal (,%ecx,4), %ecx    /* ecx *= 4 */
         cmpb $32, %cl
         jb .Laddrhsshld
         subb $32, %cl
+        shldl %cl, %ebx, %ebp
         shll %cl, %ebx          /* Shift ebx left by cl - 32 bits */
         movl %ebx, %edi
-        xorl %ebx, %ebx         /* Move eax to edx, and zero eax */
+        xorl %ebx, %ebx         /* Move ebx to edi, and zero eax */
         xorb %cl, %cl           /* Zero the shift count */
 .Laddrhsshld:
         shldl %cl, %ebx, %edi
@@ -134,18 +137,85 @@ fpfd32_impl_addsub:
 .Laddshr:
         negl %ecx
         leal (,%ecx,4), %ecx    /* ecx *= -4 */
+        cmpl $64, %ecx
+        jae .Laddshrtoofar
         cmpb $32, %cl
         jb .Laddrhsshrd
         subb $32, %cl
-        shrl %cl, %edi          /* Shift edi right by cl - 32 bits */
+        movl $0, %ebp
+        shrdl %cl, %ebx, %ebp
+        shrdl %cl, %edi, %ebx
+        shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl - 32 bits */
+        movl %ebp, -24(%esp)
+        movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
         xorl %edi, %edi         /* Move edi to ebx, and zero edi */
-        xorb %cl, %cl           /* Zero the shift count */
+        jmp .Lrem
 .Laddrhsshrd:
+        movl $0, %ebp
+        shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
-        shrl %cl, %edi          /* Shift edi:ebx right by cl bits */
+        shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
+        movl %ebp, -20(%esp)
+        movl $0, -24(%esp)
+        jmp .Lrem
+.Laddshrtoofar:
+        movl %ebx, -24(%esp)
+        movl %edi, -20(%esp)
+        je .Lrem
+        movl $0x10000000, -20(%esp)
         jmp .Lrem
 .Lsubshift:
+        movl -16(%esp), %ecx
+        subl %ebp, %ecx         /* ecx now stores the necessary digit shift
+                                   count of rhs */
+        movl (%edi), %ebx
+        movl 4(%edi), %edi      /* Put lhs->mant in edi:ebx */
+        js .Lsubshr             /* If ecx is negative, we shift right; otherwise
+                                   we shift left */
+        movl $0, -24(%esp)
+        movl $0, -20(%esp)      /* Remainder is zero */
+        leal (,%ecx,4), %ecx    /* ecx *= 4 */
+        cmpb $32, %cl
+        jb .Lsubrhsshld
+        subb $32, %cl
+        shldl %cl, %ebx, %ebp
+        shll %cl, %ebx          /* Shift ebx left by cl - 32 bits */
+        movl %ebx, %edi
+        xorl %ebx, %ebx         /* Move ebx to edi, and zero eax */
+        xorb %cl, %cl           /* Zero the shift count */
+.Lsubrhsshld:
+        shldl %cl, %ebx, %edi
+        shll %cl, %edi          /* Shift edi:ebx left by cl bits */
+        jmp .Lrem
+.Lsubshr:
+        negl %ecx
+        leal (,%ecx,4), %ecx    /* ecx *= -4 */
+        cmpl $64, %ecx
+        je .Lsubshrjusttoofar
+        ja .Lsubshrtoofar
+        cmpb $32, %cl
+        jb .Lsubrhsshrd
+        subb $32, %cl
+        movl $0, %ebp
+        shrdl %cl, %ebx, %ebp
+        shrdl %cl, %edi, %ebx
+        shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl - 32 bits */
+        movl %ebp, -24(%esp)
+        movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
+        movl %edi, %ebx
+        xorl %edi, %edi         /* Move edi to ebx, and zero edi */
+        jmp .Lrem
+.Lsubrhsshrd:
+        movl $0, %ebp
+        shrdl %cl, %ebx, %ebp
+        shrdl %cl, %edi, %ebx
+        shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
+        movl %ebp, -20(%esp)
+        movl $0, -24(%esp)
+        jmp .Lrem
+.Lsubshrjusttoofar:
+.Lsubshrtoofar:
 .Lrem:
         movl 20(%esp), %esi     /* Put dest in esi */
         movl %eax, (%esi)
@@ -157,7 +227,33 @@ fpfd32_impl_addsub:
         movl -4(%esp), %eax
         movl %eax, 12(%esi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
-        xorl %eax, %eax
+        movl -20(%esp), %eax
+        movl -24(%esp), %edx    /* Retrieve the remainder from the stack */
+        movl %eax, %ecx
+        shrl $28, %eax
+        cmpl $0, %eax
+        je .Lspecial
+        cmpl $5, %eax
+        je .Lspecial            /* Return values of 0 and 5 are special cases */
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lspecial:
+        andl $0x0FFFFFFF, %ecx
+        jz .Lspecial1
+        addl $1, %eax
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lspecial1:
+        cmpl $0, %edx
+        je .Lspecial2
+        addl $1, %eax
+.Lspecial2:
         popl %ebp
         popl %edi
         popl %esi
