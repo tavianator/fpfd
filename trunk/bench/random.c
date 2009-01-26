@@ -19,7 +19,6 @@
  *************************************************************************/
 
 #include "bench.h"
-#include "../libfpfd/fpfd_impl.h"
 #include <stdlib.h> /* For rand, srand, RAND_MAX */
 #include <limits.h> /* For UCHAR_MAX             */
 
