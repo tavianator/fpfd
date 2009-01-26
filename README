@@ -1,0 +1,42 @@
+Please note that FPFD is currently in development, and cannot even remotely
+begin to be useful for anyone needing an implementation of IEEE 754-2008 decimal
+arithmetic.  For starters, FPFD currently only implements the decimal32 type for
+arithmetic, which is not even specified as an arithmetic type by IEEE 754-2008.
+This is to make life easier as development begins, and also because C's proposed
+decimal floating-point extension treats decimal32 as an arithmetic type.  As
+well, only some of the operations are implemented (addition and subtraction for
+DPD, and multiplication for DPD).  Further, none of these implementations have
+undergone extensive testing, and it is very likely that there are bugs.
+Finally, FPFD does not, as yet, implement `cohort' handling correctly (or really
+at all) as per IEEE 754-2008.
+
+Additional `configure' options:
+
+--enable-gcc-override: Override some of gcc's operations for its built-in
+_Decimal32, ...64, and ...128 types.  Currently this overrides _Decimal32's
+addition, subtraction, multiplication, and division operations with FPFD's
+implementation (which is incomplete for all but a few).  Note that you must link
+any programs which wish to use this feature with the appropriate encoding
+library (libfpfd-bid for the BID encoding, which is default on x86 and x86_64,
+or libfpfd-dpd for the DPD encoding).  This may be a nicer interface than FPFD's
+C API, for examining the library.
+
+Additional `make' targets:
+
+Running `make bench' will run FPFD's benchmarking suite, which produces cycle
+counts for FPFD's internal and user-facing routines.  If your site has gnuplot
+installed, you may run
+
+$ ./bench/plot.sh bench/dpd/fpfd32_add.dat
+
+or similar to view the results.  The results are stored in
+bench/<encoding>/<routine name>.dat.  FPFD also benchmarks some basic
+architecture-related things; these results can be found in bench/arch.  Notably,
+bench/arch/<architecture>-overhead.dat is a benchmark of an emptly loop, and
+can be used to find the granularity of the benchmarks (usually within +/-0.05
+cycles).  Lastly, FPFD can benchmark GCC's built-in arithmetic types, for
+comparison, but ONLY if --enable-gcc-override is not specified.  These results
+are found in bench/gcc/__<encoding>_<operation><operand size>.dat.  Here,
+<operand size> is `sd' for decimal32, `dd' for decimal64, and `ld' for
+decimal128.  For the BID encoding, gcc uses Intel's IDFPL implementation, and
+for the DPD encoding, gcc uses IBM's decNumber implementation.

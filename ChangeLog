@@ -1,19 +1,89 @@
+Version 0.0.3 (January 11, 2009, Revision 243)
+
+        Version 0.0.3 features an x86 impl_addsub implementation, and numerous
+        bug fixes to the x86_64 implementation.  The API has not changed since
+        the last release, and it should be stable from now on, but that's NOT
+        a guarantee.  The two other changes are a new gcc benchmark (see the
+        README) and a new C++ test, which ensures that the FPFD interface works
+        from C and C++.  This means you now need a C++ compiler to compile FPFD.
+        An implementation status summary of the library internals follows:
+
+        =======
+        x86 DPD
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_addsub
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        =======
+        x86 BID
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_mul
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        ==========
+        x86_64 DPD
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_addsub
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        ==========
+        x86_64 BID
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_mul
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
 Version 0.0.2 (January 11, 2009, Revision 207)
 
-	This release now features functional BID multiplication for all
-	architectures, and DPD addition/subtraction for x86_64. As well,
-	innumerable bugs have been fixed, largely due to vast test suite
-	improvements, and the benchmarking suite has been improved. However, due
-	to the new impl_addsub test, `make check' fails on x86. If more than the
-	impl_addsub-dpd test fails, please report a bug with the output.
+        This release now features functional BID multiplication for all
+        architectures, and DPD addition/subtraction for x86_64. As well,
+        innumerable bugs have been fixed, largely due to vast test suite
+        improvements, and the benchmarking suite has been improved. However, due
+        to the new impl_addsub test, `make check' fails on x86. If more than the
+        impl_addsub-dpd test fails, please report a bug with the output.
 
-	There are two API changes: fpfd32_random and fpfd32_srandom (which
-	should have been fpfd_srandom) have been removed (well, moved into the
-	benchmarking suite), and an fpfd32_fma function has been added, for
-	Fused Multiply-Add. Also, FPFD can now optionally override GCC's
-	_Decimal32 operations with its own implementation; this feature can be
-	enabled with the configure option `--enable-gcc-override'. A complete
-	implementation summary follows:
+        There are two API changes: fpfd32_random and fpfd32_srandom (which
+        should have been fpfd_srandom) have been removed (well, moved into the
+        benchmarking suite), and an fpfd32_fma function has been added, for
+        Fused Multiply-Add. Also, FPFD can now optionally override GCC's
+        _Decimal32 operations with its own implementation; this feature can be
+        enabled with the configure option `--enable-gcc-override'. A complete
+        implementation summary follows:
 
         =======
         x86 DPD
@@ -41,7 +111,7 @@ Version 0.0.2 (January 11, 2009, Revision 207)
          - fpfd32_impl_inc
          - fpfd32_impl_compress
 
-	Partially implemented:
+        Partially implemented:
          - fpfd32_impl_addsub: Non-functional stub.
          - fpfd32_impl_div: Ditto.
 
@@ -56,7 +126,7 @@ Version 0.0.2 (January 11, 2009, Revision 207)
          - fpfd32_impl_inc
          - fpfd32_impl_compress
 
-	Partially implemented:
+        Partially implemented:
          - fpfd32_impl_mul: Non-functional stub.
          - fpfd32_impl_div: Ditto.
 
@@ -71,7 +141,7 @@ Version 0.0.2 (January 11, 2009, Revision 207)
          - fpfd32_impl_inc
          - fpfd32_impl_compress
 
-	Partially implemented:
+        Partially implemented:
          - fpfd32_impl_addsub: Non-functional stub.
          - fpfd32_impl_div: Ditto.
 
