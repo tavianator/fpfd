@@ -35,16 +35,24 @@ fpfd32_impl_div:
         pushl %edi              /* Callee-save registers */
         movl 20(%esp), %esi
         movl 24(%esp), %edi
+        movl (%esi), %eax
+        movl (%edi), %ebx
+        xorl %edx, %edx
+        divl %ebx               /* Multiply the mantissas */
         movl 8(%esi), %ebx
-        subl 8(%edi), %ebx      /* Subtract the exponents */
+        subl 8(%edi), %ebx      /* Add the exponents */
         movl 12(%esi), %ecx
         xorl 12(%edi), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
                                    gives -2 (...1110), x XOR x gives 0 */
+
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 16(%esp), %esi
+        movl %eax, (%esi)
+        movl $0, 4(%esi)        /* Store the mantissa */
         movl %ebx, 8(%esi)      /* Store the exponent */
         movl %ecx, 12(%esi)     /* Store the sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
+        movl %edx, %eax
         popl %edi
         popl %esi
         popl %ebx
