@@ -36,8 +36,7 @@ fpfd32_impl_mul:
         movl 8(%rsi), %r8d
         addl 8(%rdx), %r8d      /* Add the exponents */
         movl (%rsi), %eax
-        movl (%rdx), %edx
-        mulq %rdx               /* Multiply the mantissas */
+        mulq (%rdx)             /* Multiply the mantissas */
         movq %rax, (%rdi)       /* Store the mantissa */
         movl %r8d, 8(%rdi)      /* Store the exponent */
         movl %ecx, 12(%rdi)     /* Store the sign */

@@ -36,8 +36,14 @@ fpfd32_impl_div:
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 8(%rsi), %r8d
         subl 8(%rdx), %r8d      /* Subtract the exponents */
+        movl (%rsi), %eax
+        movl (%rdx), %r9d
+        xorl %edx, %edx
+        divl %r9d               /* Divide the mantissas */
+        movq %rax, (%rdi)       /* Store the mantissa */
         movl %r8d, 8(%rdi)      /* Store the exponent */
         movl %ecx, 12(%rdi)     /* Store the sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        movl %edx, %eax
         ret
         .size fpfd32_impl_div, .-fpfd32_impl_div
