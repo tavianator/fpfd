@@ -51,10 +51,9 @@ fpfd32_impl_div:
         movl %r8d, %eax
         mull %r9d               /* Multiply the remainder by 1000000 */
         divl %ecx               /* Divide by the denominator */
-        addq %rax, %r10
+        addq %rax, %r10         /* Add the scaled remainder to the mantissa */
         movq %r10, (%rdi)       /* Store the mantissa */
-        movl %edx, %eax
-        movl $10, %edx
+        movl $10, %eax
         mull %edx
         divl %ecx
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
