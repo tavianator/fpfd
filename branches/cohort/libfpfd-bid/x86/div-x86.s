@@ -32,27 +32,56 @@
 fpfd32_impl_div:
         pushl %ebx
         pushl %esi
-        pushl %edi              /* Callee-save registers */
-        movl 20(%esp), %esi
-        movl 24(%esp), %edi
-        movl (%esi), %eax
-        movl (%edi), %ebx
-        xorl %edx, %edx
-        divl %ebx               /* Multiply the mantissas */
-        movl 8(%esi), %ebx
-        subl 8(%edi), %ebx      /* Add the exponents */
+        pushl %edi
+        pushl %ebp      /* Callee-save registers */
+        movl 20(%esp), %ebx
+        movl 24(%esp), %esi
+        movl 28(%esp), %edi     /* Put dest, lhs and rhs in ebx, esi and edi */
         movl 12(%esi), %ecx
         xorl 12(%edi), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
                                    gives -2 (...1110), x XOR x gives 0 */
-
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
-        movl 16(%esp), %esi
-        movl %eax, (%esi)
-        movl $0, 4(%esi)        /* Store the mantissa */
-        movl %ebx, 8(%esi)      /* Store the exponent */
-        movl %ecx, 12(%esi)     /* Store the sign */
-        movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
-        movl %edx, %eax
+        movl %ecx, 12(%ebx)     /* Store the sign in dest->fields.sign */
+        movl 8(%esi), %ecx
+        subl 8(%edi), %ecx      /* Subtract the exponents */
+        subl $6, %ecx           /* We multiply the quotient by 1000000 to ensure
+                                   full precision */
+        movl %ecx, 8(%ebx)      /* Store the exponent in dest->fields.exp */
+        movl (%esi), %eax
+        movl (%edi), %ecx
+        xorl %edx, %edx
+        divl %ecx
+        movl %edx, %esi         /* Store the remainder for later */
+        movl $1000000, %ebp
+        mull %ebp               /* Multiply the quotient by 1000000 */
+        movl %edx, %edi
+        movl %eax, %ebx
+        movl %esi, %eax
+        mull %ebp               /* Multiply the remainder by 1000000 */
+        divl %ecx               /* Divide by the denominator */
+        addl %eax, %ebx
+        adcl $0, %edi           /* Add the scaled remainder to the mantissa */
+        movl $10, %eax
+        mull %edx
+        divl %ecx
+        movl 20(%esp), %ecx     /* Put dest in ebx */
+        movl %ebx, (%ecx)
+        movl %edi, 4(%ecx)      /* Store the mantissa */
+        movl $1, 16(%ecx)       /* Set the special flag to FPFD_NUMBER */
+        cmpl $0, %eax
+        je .Lspecial
+        cmpl $5, %eax
+        je .Lspecial
+        popl %ebp
+        popl %edi
+        popl %esi
+        popl %ebx
+        ret
+.Lspecial:
+        cmpl $0, %edx
+        je .Lspecial1
+.Lspecial1:
+        popl %ebp
         popl %edi
         popl %esi
         popl %ebx
