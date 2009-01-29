@@ -1,0 +1,100 @@
+\input texinfo       @c                    -*- Texinfo -*-
+@c %**start of header
+@setfilename fpfd.info
+@settitle The Fixed Precision Floating-point Decimal Library
+@c %**end of header
+
+@copying
+Copyright @copyright{} 2008 Tavian Barnes
+@end copying
+
+@titlepage
+@title The FPFD Library
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top The FPFD Library
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction:: An introduction to the FPFD library
+* Encodings:: The DPD and BID decimal encodings
+* Benchmarking:: Benchmarking FPFD and its encodings
+* Implementation:: Details of FPFD's implementation
+* Type Index::
+* Function Index::
+* Concept Index::
+@end menu
+
+
+@node Introduction
+@chapter Introduction
+
+@cindex introduction
+@cindex overview
+
+The FPFD library is a library for decimal (base 10) arithmetic in C. It is designed to follow the decimal arithmetic specifications of the IEEE 754-2008 standard for floating-point arithmetic. It implements both decimal encodings specified by the standard (@pxref{Encodings}), and is useful for comparing the two (@pxref{Benchmarking}). FPFD's internals are implemented in a mixture of assembly and C, to provide a portable C interface as well as a highly effecient assembly implementation.
+
+The C interface is designed similarly to the MPFR library interface; notably, all functions take a parameter describing the rounding mode, and all functions return a ternary value describing the direction the result was rounded.
+
+
+@node Encodings
+@chapter Encodings
+
+@cindex encodings
+@cindex DPD
+@cindex BCD
+@cindex decimal
+@cindex BID
+@cindex binary
+
+The IEEE 754-2008 standard specifies two encoding schemes for decimal floating-point numbers: DPD (Densely-Packed-Decimal) and BID (Binary-Integer-Decimal). The DPD compresses 3 BCD (Binary-Coded-Decimal) digits from 12 bits to 10, using only logic operations. The BID encoding simply stores the coefficient as a large binary integer. Each encoding has performance benefits and detriments, and one goal of the FPFD project is to determine which encoding is faster, in a software implementation, on many architectures. @xref{Benchmarking}.
+
+@menu
+* Implementation libraries:: Using a particualar encoding
+@end menu
+
+@node Implementation libraries
+@section Implementation libraries
+
+The FPFD library delegates encoding-specific operations to one of two implementation libraries: libfpfd-dpd, and libfpfd-bid. This separation makes it easy to switch an application between the two encodings, either by re-linking or using @code{LD_PRELOAD}. For details of the API exposed by the implementation libraries, @xref{Implementation}.
+
+
+@node Benchmarking
+@chapter Benchmarking
+
+@cindex benchmarking
+
+
+@node Implementation
+@chapter Implementation
+
+@cindex implementation
+
+
+@node Type Index
+@unnumbered Type Index
+
+@printindex tp
+
+
+@node Function Index
+@unnumbered Function Index
+
+@printindex fn
+
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
+
+@bye
