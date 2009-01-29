@@ -1,3 +1,69 @@
+Version 0.0.4 (January 29, 2009, Revision 251)
+
+        The only change from 0.0.3 is that division is now implemented for the
+        BID encoding on x86 and x86_64 targets.  An implementation status
+        summary of the library internals follows:
+
+        =======
+        x86 DPD
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_addsub
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        =======
+        x86 BID
+        =======
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
+
+        ==========
+        x86_64 DPD
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_addsub
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        ==========
+        x86_64 BID
+        ==========
+
+        Implemented:
+         - fpfd32_impl_expand
+         - fpfd32_impl_mul
+         - fpfd32_impl_div
+         - fpfd32_impl_scale
+         - fpfd32_impl_inc
+         - fpfd32_impl_compress
+
+        Partially implemented:
+         - fpfd32_impl_addsub: Non-functional stub.
+
 Version 0.0.3 (January 11, 2009, Revision 243)
 
         Version 0.0.3 features an x86 impl_addsub implementation, and numerous
