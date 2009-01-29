@@ -34,16 +34,39 @@ fpfd32_impl_div:
         xorl 12(%rdx), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
                                    gives -2 (...1110), x XOR x gives 0 */
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
-        movl 8(%rsi), %r8d
-        subl 8(%rdx), %r8d      /* Subtract the exponents */
+        movl %ecx, 12(%rdi)     /* Store the sign in dest->fields.sign */
+        movl 8(%rsi), %ecx
+        subl 8(%rdx), %ecx      /* Subtract the exponents */
+        subl $6, %ecx           /* We multiply the quotient by 1000000 to ensure
+                                   full precision */
+        movl %ecx, 8(%rdi)      /* Store the exponent in dest->fields.exp */
         movl (%rsi), %eax
-        movl (%rdx), %r9d
+        movl (%rdx), %ecx
         xorl %edx, %edx
-        divl %r9d               /* Divide the mantissas */
-        movq %rax, (%rdi)       /* Store the mantissa */
-        movl %r8d, 8(%rdi)      /* Store the exponent */
-        movl %ecx, 12(%rdi)     /* Store the sign */
-        movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        divl %ecx               /* Divide the mantissas */
+        movl %edx, %r8d         /* Store the remainder for later */
+        movl $1000000, %r9d     /* Multiply the quotient by 1000000 */
+        mulq %r9
+        movq %rax, %r10
+        movl %r8d, %eax
+        mull %r9d               /* Multiply the remainder by 1000000 */
+        divl %ecx               /* Divide by the denominator */
+        addq %rax, %r10
+        movq %r10, (%rdi)       /* Store the mantissa */
         movl %edx, %eax
+        movl $10, %edx
+        mull %edx
+        divl %ecx
+        movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        cmpl $0, %eax
+        je .Lspecial
+        cmpl $5, %eax
+        je .Lspecial
+        ret
+.Lspecial:
+        cmpl $0, %edx
+        je .Lspecial1
+        addl $1, %eax
+.Lspecial1:
         ret
         .size fpfd32_impl_div, .-fpfd32_impl_div
