@@ -1,4 +1,4 @@
-Version 0.0.4 (January 29, 2009, Revision 251)
+Version 0.0.4 (January 29, 2009, Revision 252)
 
         The only change from 0.0.3 is that division is now implemented for the
         BID encoding on x86 and x86_64 targets.  An implementation status
