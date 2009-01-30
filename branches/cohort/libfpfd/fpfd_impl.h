@@ -62,12 +62,13 @@ typedef struct {
   int exp;
   int sign;
   fpfd_special_t special;
+  int cohort; /* The preferred exponent of the operation */
 } fpfd_impl_t;  
 
 /*
- * These structs represent expanded versions of the coresponding fpfdX_t.
+ * These structs represent expanded versions of the coresponding fpfd*_t.
  * Each actually has room for a mantissa twice the length needed to represent a
- * fpfdX_t, so that multiplication can be done exactly.
+ * fpfd*_t, so that multiplication can be done exactly.
  */
 
 typedef struct {
@@ -76,7 +77,7 @@ typedef struct {
 } fpfd32_impl_t;
 
 /*
- * These routines work on expanded fpfdX_t's. A void return type signifies that
+ * These routines work on expanded fpfd*_t's. A void return type signifies that
  * the result is always exact. Functions which return an unsigned int return a
  * special kind of "remainder" from the operation:
  *
