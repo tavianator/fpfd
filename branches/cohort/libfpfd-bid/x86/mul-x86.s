@@ -47,6 +47,7 @@ fpfd32_impl_mul:
         movl %eax, (%esi)
         movl %edx, 4(%esi)      /* Store the mantissa */
         movl %ebx, 8(%esi)      /* Store the exponent */
+        movl %ebx, 20(%esi)     /* Store the cohort */
         movl %ecx, 12(%esi)     /* Store the sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
         popl %edi

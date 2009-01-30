@@ -39,6 +39,7 @@ fpfd32_impl_mul:
         mulq (%rdx)             /* Multiply the mantissas */
         movq %rax, (%rdi)       /* Store the mantissa */
         movl %r8d, 8(%rdi)      /* Store the exponent */
+        movl %r8d, 20(%rdi)     /* Store the cohort */
         movl %ecx, 12(%rdi)     /* Store the sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
