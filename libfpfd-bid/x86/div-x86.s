@@ -44,6 +44,7 @@ fpfd32_impl_div:
         movl %ecx, 12(%ebx)     /* Store the sign in dest->fields.sign */
         movl 8(%esi), %ecx
         subl 8(%edi), %ecx      /* Subtract the exponents */
+        movl %ecx, 20(%ebx)     /* Store the cohort */
         subl $6, %ecx           /* We multiply the quotient by 1000000 to ensure
                                    full precision */
         movl %ecx, 8(%ebx)      /* Store the exponent in dest->fields.exp */
