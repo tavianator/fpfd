@@ -92,12 +92,14 @@ fpfd32_impl_addsub:
         movl 8(%esi), %eax
         movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
-        movl 8(%edi), %ecx
-        cmovl %ecx, %eax
-        movl %ecx, -28(%esp)    /* Calculate the cohort (in this case, the
+        movl %ecx, -12(%esp)
+        movl %edx, -16(%esp)    /* Store ecx and edx on the stack */
+        movl 8(%edi), %edx
+        cmpl %eax, %edx
+        cmovl %edx, %eax
+        movl %eax, -28(%esp)    /* Calculate the cohort (in this case, the
                                    smallest exponent), and store it on the
                                    stack */
-        movl %edx, -16(%esp)    /* Store ecx and edx on the stack */
         movl (%esi), %eax
         movl 4(%esi), %edx      /* Put lhs->mant in edx:eax */
         leal (,%ecx,4), %ecx    /* ecx *= 4 */
