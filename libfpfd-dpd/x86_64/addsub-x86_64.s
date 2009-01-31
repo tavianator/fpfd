@@ -71,6 +71,11 @@ fpfd32_impl_addsub:
         movl 8(%r10), %eax
         movl %eax, -8(%rsp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
+        movl 8(%r11), %ecx
+        cmpl %eax, %ecx
+        cmovl %ecx, %eax
+        movl %eax, 20(%rdi)     /* Calculate and store the cohort (in this case,
+                                   the smallest exponent */
         movq (%r10), %rax       /* Put lhs->mant in rax */
         leal (,%r8d,4), %ecx    /* cl = 4*r8 */
         shlq %cl, %rax          /* Shift rax all the way to the left */

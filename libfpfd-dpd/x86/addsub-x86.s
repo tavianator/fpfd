@@ -92,7 +92,11 @@ fpfd32_impl_addsub:
         movl 8(%esi), %eax
         movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
-        movl %ecx, -12(%esp)
+        movl 8(%edi), %ecx
+        cmovl %ecx, %eax
+        movl %ecx, -28(%esp)    /* Calculate the cohort (in this case, the
+                                   smallest exponent), and store it on the
+                                   stack */
         movl %edx, -16(%esp)    /* Store ecx and edx on the stack */
         movl (%esi), %eax
         movl 4(%esi), %edx      /* Put lhs->mant in edx:eax */
@@ -489,6 +493,8 @@ fpfd32_impl_addsub:
         movl -4(%esp), %eax
         movl %eax, 12(%esi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
+        movl -28(%esp), %eax
+        movl %eax, 20(%esi)     /* Store the cohort in dest->fields.cohort */
         movl -20(%esp), %eax
         movl -24(%esp), %edx    /* Retrieve the remainder from the stack */
         movl %eax, %ecx
