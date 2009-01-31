@@ -21,10 +21,10 @@
 #include <stdio.h>  /* For fprintf, stderr */
 #include <stdlib.h> /* For EXIT_SUCCESS    */
 
-void fpfd_check_add(fpfd_rnd_t rnd);
-void fpfd_check_sub(fpfd_rnd_t rnd);
-void fpfd_check_mul(fpfd_rnd_t rnd);
-void fpfd_check_div(fpfd_rnd_t rnd);
+void signedzero_check_add(fpfd_rnd_t rnd);
+void signedzero_check_sub(fpfd_rnd_t rnd);
+void signedzero_check_mul(fpfd_rnd_t rnd);
+void signedzero_check_div(fpfd_rnd_t rnd);
 
 /*
  * Check all operations which either produce a signed zero, or behave
@@ -33,85 +33,105 @@ void fpfd_check_div(fpfd_rnd_t rnd);
 int
 main()
 {
-  fpfd_check_add(FPFD_RNDN);
-  fpfd_check_add(FPFD_RNDNA);
-  fpfd_check_add(FPFD_RNDZ);
-  fpfd_check_add(FPFD_RNDU);
-  fpfd_check_add(FPFD_RNDD);
+  signedzero_check_add(FPFD_RNDN);
+  signedzero_check_add(FPFD_RNDNA);
+  signedzero_check_add(FPFD_RNDZ);
+  signedzero_check_add(FPFD_RNDU);
+  signedzero_check_add(FPFD_RNDD);
 
-  fpfd_check_sub(FPFD_RNDN);
-  fpfd_check_sub(FPFD_RNDNA);
-  fpfd_check_sub(FPFD_RNDZ);
-  fpfd_check_sub(FPFD_RNDU);
-  fpfd_check_sub(FPFD_RNDD);
+  signedzero_check_sub(FPFD_RNDN);
+  signedzero_check_sub(FPFD_RNDNA);
+  signedzero_check_sub(FPFD_RNDZ);
+  signedzero_check_sub(FPFD_RNDU);
+  signedzero_check_sub(FPFD_RNDD);
 
-  fpfd_check_mul(FPFD_RNDN);
-  fpfd_check_mul(FPFD_RNDNA);
-  fpfd_check_mul(FPFD_RNDZ);
-  fpfd_check_mul(FPFD_RNDU);
-  fpfd_check_mul(FPFD_RNDD);
+  signedzero_check_mul(FPFD_RNDN);
+  signedzero_check_mul(FPFD_RNDNA);
+  signedzero_check_mul(FPFD_RNDZ);
+  signedzero_check_mul(FPFD_RNDU);
+  signedzero_check_mul(FPFD_RNDD);
 
-  fpfd_check_div(FPFD_RNDN);
-  fpfd_check_div(FPFD_RNDNA);
-  fpfd_check_div(FPFD_RNDZ);
-  fpfd_check_div(FPFD_RNDU);
-  fpfd_check_div(FPFD_RNDD);
+  signedzero_check_div(FPFD_RNDN);
+  signedzero_check_div(FPFD_RNDNA);
+  signedzero_check_div(FPFD_RNDZ);
+  signedzero_check_div(FPFD_RNDU);
+  signedzero_check_div(FPFD_RNDD);
 
   return exitstatus;
 }
 
 void
-fpfd_check_add(fpfd_rnd_t rnd)
+signedzero_check_add(fpfd_rnd_t rnd)
 {
   fpfd_flags_t flags;
   fpfd_declare(pz); /* Positive zero */
   fpfd_declare(nz); /* Negative zero */
+  fpfd_declare(po); /* Positive one */
+  fpfd_declare(no); /* Negative one */
 
   fpfd_declare(res); /* Result */
 
   fpfd_set(pz, zero);
   fpfd_set(nz, neg_zero);
+  fpfd_set(po, one);
+  fpfd_set(no, neg_one);
 
   if (rnd == FPFD_RNDD) {
     fpfd_assert_ora2msfx(add, res, pz, pz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, pz, nz, rnd, -1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, nz, pz, rnd, -1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, nz, nz, rnd, -1, FPFD_ZERO, FPFD_NONE);
+
+    fpfd_assert_ora2msfx(add, res, po, no, rnd, -1, FPFD_ZERO, FPFD_NONE);
+    fpfd_assert_ora2msfx(add, res, no, po, rnd, -1, FPFD_ZERO, FPFD_NONE);
   } else {
     fpfd_assert_ora2msfx(add, res, pz, pz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, pz, nz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, nz, pz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(add, res, nz, nz, rnd, -1, FPFD_ZERO, FPFD_NONE);
+
+    fpfd_assert_ora2msfx(add, res, po, no, rnd, 1, FPFD_ZERO, FPFD_NONE);
+    fpfd_assert_ora2msfx(add, res, no, po, rnd, 1, FPFD_ZERO, FPFD_NONE);
   }
 }
 
 void
-fpfd_check_sub(fpfd_rnd_t rnd)
+signedzero_check_sub(fpfd_rnd_t rnd)
 {
   fpfd_flags_t flags;
   fpfd_declare(pz); /* Positive zero */
   fpfd_declare(nz); /* Negative zero */
+  fpfd_declare(po); /* Positive one */
+  fpfd_declare(no); /* Negative one */
 
   fpfd_declare(res); /* Result */
 
   fpfd_set(pz, zero);
   fpfd_set(nz, neg_zero);
+  fpfd_set(po, one);
+  fpfd_set(no, neg_one);
 
   if (rnd == FPFD_RNDD) {
     fpfd_assert_ora2msfx(sub, res, pz, pz, rnd, -1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, pz, nz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, nz, pz, rnd, -1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, nz, nz, rnd, -1, FPFD_ZERO, FPFD_NONE);
+
+    fpfd_assert_ora2msfx(sub, res, po, po, rnd, -1, FPFD_ZERO, FPFD_NONE);
+    fpfd_assert_ora2msfx(sub, res, no, no, rnd, -1, FPFD_ZERO, FPFD_NONE);
   } else {
     fpfd_assert_ora2msfx(sub, res, pz, pz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, pz, nz, rnd, 1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, nz, pz, rnd, -1, FPFD_ZERO, FPFD_NONE);
     fpfd_assert_ora2msfx(sub, res, nz, nz, rnd, 1, FPFD_ZERO, FPFD_NONE);
+
+    fpfd_assert_ora2msfx(sub, res, po, po, rnd, 1, FPFD_ZERO, FPFD_NONE);
+    fpfd_assert_ora2msfx(sub, res, no, no, rnd, 1, FPFD_ZERO, FPFD_NONE);
   }
 }
 
 void
-fpfd_check_mul(fpfd_rnd_t rnd)
+signedzero_check_mul(fpfd_rnd_t rnd)
 {
   fpfd_flags_t flags;
   fpfd_declare(pz); /* Positive zero */
@@ -143,7 +163,7 @@ fpfd_check_mul(fpfd_rnd_t rnd)
 }
 
 void
-fpfd_check_div(fpfd_rnd_t rnd)
+signedzero_check_div(fpfd_rnd_t rnd)
 {
   fpfd_flags_t flags;
   fpfd_declare(pz); /* Positive zero     */
