@@ -33,14 +33,14 @@ main()
   fpfd_impl_set_esf(&rhs, 2, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(65535));
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(65535));
-  fpfd_impl_assert_ora2esf(impl_mul, &res, &lhs, &rhs, 3, 1, FPFD_NUMBER);
+  fpfd_impl_assert_ora2esfh(impl_mul, &res, &lhs, &rhs, 3, 1, FPFD_NUMBER, 3);
   fpfd32_impl_assert_mant(&res32, UINT32_C(0), UINT32_C(4294836225));
 
   fpfd_impl_set_esf(&lhs, -1, -1, FPFD_NUMBER);
   fpfd_impl_set_esf(&rhs, 1, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&lhs32, UINT32_C(0), UINT32_C(9999999));
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(9999999));
-  fpfd_impl_assert_ora2esf(impl_mul, &res, &lhs, &rhs, 0, -1, FPFD_NUMBER);
+  fpfd_impl_assert_ora2esfh(impl_mul, &res, &lhs, &rhs, 0, -1, FPFD_NUMBER, 0);
   /* 99999980000001 */
   fpfd32_impl_assert_mant(&res32, UINT32_C(0x5AF3), UINT32_C(0x0F491301));
 
