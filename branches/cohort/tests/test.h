@@ -196,15 +196,16 @@ extern "C" {
    *                            fpfd128_##op(res##128))
    */
 
-#define fpfd_impl_assert_ora2esf(op, res, arg1, arg2, exp, sign, special) \
-  fpfd_op3(op, res, arg1, arg2);                                          \
-  fpfd32_impl_assert_ora2esf(#op, res##32, arg1##32, arg2##32,            \
-                             exp, sign, special)
+#define fpfd_impl_assert_ora2esfh(op, res, arg1, arg2, exp, sign, special, \
+                                  cohort)                                  \
+  fpfd_op3(op, res, arg1, arg2);                                           \
+  fpfd32_impl_assert_ora2esfh(#op, res##32, arg1##32, arg2##32,             \
+                              exp, sign, special, cohort)
   /*
-   * fpfd64_impl_assert_ora2esf(#op, res##64, arg1##64, arg2##64,
-   *                            exp, sign, special)
-   * fpfd128_impl_assert_ora2esf(#op, res##128, arg1##128, arg2##128,
-   *                             exp, sign, special)
+   * fpfd64_impl_assert_ora2esfh(#op, res##64, arg1##64, arg2##64,
+   *                             exp, sign, special, cohort)
+   * fpfd128_impl_assert_ora2esfh(#op, res##128, arg1##128, arg2##128,
+   *                              exp, sign, special, cohort)
    */
 
 #define fpfd_impl_assert_ora2esfv(op, res, arg1, arg2, exp, sign, special, \
@@ -264,10 +265,10 @@ void fpfd32_impl_assert_orsfv(const char *op, const fpfd32_impl_t *res,
 void fpfd32_impl_assert_oresfv(const char *op, const fpfd32_impl_t *res,
                                int exp, int sign, fpfd_special_t special,
                                int rexp, int rval);
-void fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
-                                const fpfd32_impl_t *op1,
-                                const fpfd32_impl_t *op2,
-                                int exp, int sign, fpfd_special_t special);
+void fpfd32_impl_assert_ora2esfh(const char *op, const fpfd32_impl_t *res,
+                                 const fpfd32_impl_t *op1,
+                                 const fpfd32_impl_t *op2, int exp, int sign,
+                                 fpfd_special_t special, int cohort);
 void fpfd32_impl_assert_ora2esfv(const char *op, const fpfd32_impl_t *res,
                                  const fpfd32_impl_t *op1,
                                  const fpfd32_impl_t *op2,

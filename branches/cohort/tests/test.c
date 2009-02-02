@@ -172,12 +172,13 @@ fpfd32_impl_assert_oresfv(const char *op, const fpfd32_impl_t *res,
 }
 
 void
-fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
-                           const fpfd32_impl_t *op1, const fpfd32_impl_t *op2,
-                           int exp, int sign, fpfd_special_t special)
+fpfd32_impl_assert_ora2esfh(const char *op, const fpfd32_impl_t *res,
+                            const fpfd32_impl_t *op1, const fpfd32_impl_t *op2,
+                            int exp, int sign, fpfd_special_t special,
+                            int cohort)
 {
   if (res->fields.exp != exp || res->fields.sign != sign
-      || res->fields.special != special) {
+      || res->fields.special != special || res->fields.cohort != cohort) {
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ", ");
@@ -185,8 +186,8 @@ fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
     fprintf(stderr, ", ");
     fpfd32_impl_dump(stderr, op2, 0);
     fprintf(stderr, ")\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
-                    " special == %s ---\n\n",
-            exp, sign, fpfd_special_str(special));
+                    " special == %s, cohort == %+d ---\n\n",
+            exp, sign, fpfd_special_str(special), cohort);
     exitstatus = EXIT_FAILURE;
   }
 }
