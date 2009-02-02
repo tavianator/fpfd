@@ -118,6 +118,8 @@ extern "C" {
  *        to be equal to it.
  *   f  - The next argument is an fpfd_special_t, and the special flag of the
  *        result is asserted to be equal to it.
+ *   h  - The next argument is an int, and the preferred exponent of the result
+ *        is asserted to be equal to it.
  *   x  - The next argument is an fpfd_flags_t, and flags is asserted to be
  *        equal to it.
  *   v  - The next argument is an int, and the return value of the function is
@@ -219,19 +221,19 @@ extern "C" {
    *                              fpfd128_##op(res##128, arg1##128, arg2##128))
    */
 
-#define fpfd_impl_assert_orma2esfv(op, res, m, arg1, arg2, exp, sign, special, \
-                                   rval)                                       \
-  fpfd32_impl_assert_orma2esfv(#op, res##32, m, arg1##32, arg2##32,            \
-                               exp, sign, special, rval,                       \
-                               fpfd32_##op(res##32, m, arg1##32, arg2##32))
+#define fpfd_impl_assert_orma2esfhv(op, res, m, arg1, arg2, exp, sign,  \
+                                    special, cohort, rval)              \
+  fpfd32_impl_assert_orma2esfhv(#op, res##32, m, arg1##32, arg2##32,    \
+                                exp, sign, special, cohort, rval,       \
+                                fpfd32_##op(res##32, m, arg1##32, arg2##32))
   /*
-   * fpfd64_impl_assert_orma2esfv(#op, res##64, m, arg1##64, arg2##64,
-   *                              exp, sign, special, rval,
-   *                              fpfd64_##op(res##64, m, arg1##64, arg2##64))
-   * fpfd128_impl_assert_orma2esfv(#op, res##128, m, arg1##128, arg2##128,
-   *                               exp, sign, special, rval,
-   *                               fpfd128_##op(res##128, m,
-   *                                            arg1##128, arg2##128))
+   * fpfd64_impl_assert_orma2esfhv(#op, res##64, m, arg1##64, arg2##64,
+   *                               exp, sign, special, cohort, rval,
+   *                               fpfd64_##op(res##64, m, arg1##64, arg2##64))
+   * fpfd128_impl_assert_orma2esfhv(#op, res##128, m, arg1##128, arg2##128,
+   *                                exp, sign, special, cohort, rval,
+   *                                fpfd128_##op(res##128, m,
+   *                                             arg1##128, arg2##128))
    */
 
 /* main() should return this. */
@@ -271,11 +273,11 @@ void fpfd32_impl_assert_ora2esfv(const char *op, const fpfd32_impl_t *res,
                                  const fpfd32_impl_t *op2,
                                  int exp, int sign, fpfd_special_t special,
                                  int rexp, int rval);
-void fpfd32_impl_assert_orma2esfv(const char *op, const fpfd32_impl_t *res,
-                                  int m, const fpfd32_impl_t *op1,
-                                  const fpfd32_impl_t *op2,
-                                  int exp, int sign, fpfd_special_t special,
-                                  int rexp, int rval);
+void fpfd32_impl_assert_orma2esfhv(const char *op, const fpfd32_impl_t *res,
+                                   int m, const fpfd32_impl_t *op1,
+                                   const fpfd32_impl_t *op2,
+                                   int exp, int sign, fpfd_special_t special,
+                                   int cohort, int rexp, int rval);
 
 /*
  * For more manual checking, call these directly.
@@ -303,7 +305,7 @@ const char *fpfd_rnd_str(fpfd_rnd_t rnd);
 const char *fpfd_special_str(fpfd_special_t special);
 const char *fpfd_flags_str(fpfd_flags_t flags);
 void fpfd32_dump(FILE *file, fpfd32_srcptr fp);
-void fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *fp);
+void fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *fp, int show_cohort);
 
 #ifdef __cplusplus
 }
