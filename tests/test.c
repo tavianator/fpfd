@@ -39,7 +39,7 @@ fpfd32_assert_rsf(fpfd32_srcptr res, int sign, fpfd_special_t special)
     fprintf(stderr, "\n");
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
+    fpfd32_impl_dump(stderr, &res_impl, 0);
     fprintf(stderr, "\n\n--- ERROR: expected sign == %+d,"
                     " special == %s ---\n\n",
             sign, fpfd_special_str(special));
@@ -64,15 +64,15 @@ fpfd32_assert_ora2msfx(const char *op, fpfd32_srcptr res, fpfd32_srcptr op1,
     fprintf(stderr, "\nfpfd32_%s(", op);
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
+    fpfd32_impl_dump(stderr, &res_impl, 0);
     fprintf(stderr, ", ");
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &op1_impl);
+    fpfd32_impl_dump(stderr, &op1_impl, 0);
     fprintf(stderr, ", ");
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &op2_impl);
+    fpfd32_impl_dump(stderr, &op2_impl, 0);
     fprintf(stderr, ", %s)\n\nflags = %s\n",
             fpfd_rnd_str(rnd), fpfd_flags_str(flags));
     fprintf(stderr, "\n--- ERROR: Expected sign == %+d, special == %s,"
@@ -88,7 +88,7 @@ fpfd32_impl_assert_rsf(const fpfd32_impl_t *res, int sign,
 {
   if (res->fields.sign != sign || res->fields.special != special) {
     fprintf(stderr, "\n");
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, "\n\n--- ERROR: Expected sign == %+d,"
                     " special == %s ---\n\n",
             sign, fpfd_special_str(special));
@@ -102,7 +102,7 @@ fpfd32_impl_assert_resf(const fpfd32_impl_t *res, int exp, int sign,
 {
   if (res->fields.exp != exp || res->fields.special != special) {
     fprintf(stderr, "\n");
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, "\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s ---\n\n",
             exp, sign, fpfd_special_str(special));
@@ -116,7 +116,7 @@ fpfd32_impl_assert_orsf(const char *op, const fpfd32_impl_t *res,
 {
   if (res->fields.sign != sign || res->fields.special != special) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ")\n\n--- ERROR: Expected sign == %+d,"
                     " special == %s ---\n\n",
             sign, fpfd_special_str(special));
@@ -131,7 +131,7 @@ fpfd32_impl_assert_oresf(const char *op, const fpfd32_impl_t *res,
   if (res->fields.exp != exp || res->fields.sign != sign
       || res->fields.special != special) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ")\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s ---\n\n",
             exp, sign, fpfd_special_str(special));
@@ -146,7 +146,7 @@ fpfd32_impl_assert_orsfv(const char *op, const fpfd32_impl_t *res,
   if (res->fields.sign != sign || res->fields.special != special
       || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ") = %d\n", rval);
     fprintf(stderr, "\n--- ERROR: Expected sign == %+d, special == %s,"
                     " fpfd32_%s() == %d ---\n\n",
@@ -163,7 +163,7 @@ fpfd32_impl_assert_oresfv(const char *op, const fpfd32_impl_t *res,
   if (res->fields.exp != exp || res->fields.sign != sign
       || res->fields.special != special || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ") = %d\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s, fpfd32_%s() == %d ---\n\n",
             rval, exp, sign, fpfd_special_str(special), op, rexp);
@@ -179,11 +179,11 @@ fpfd32_impl_assert_ora2esf(const char *op, const fpfd32_impl_t *res,
   if (res->fields.exp != exp || res->fields.sign != sign
       || res->fields.special != special) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ", ");
-    fpfd32_impl_dump(stderr, op1);
+    fpfd32_impl_dump(stderr, op1, 0);
     fprintf(stderr, ", ");
-    fpfd32_impl_dump(stderr, op2);
+    fpfd32_impl_dump(stderr, op2, 0);
     fprintf(stderr, ")\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s ---\n\n",
             exp, sign, fpfd_special_str(special));
@@ -200,11 +200,11 @@ fpfd32_impl_assert_ora2esfv(const char *op, const fpfd32_impl_t *res,
   if (res->fields.exp != exp || res->fields.sign != sign
       || res->fields.special != special || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ", ");
-    fpfd32_impl_dump(stderr, op1);
+    fpfd32_impl_dump(stderr, op1, 0);
     fprintf(stderr, ", ");
-    fpfd32_impl_dump(stderr, op2);
+    fpfd32_impl_dump(stderr, op2, 0);
     fprintf(stderr, ") = %d\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
                     " special == %s, fpfd32_%s() == %d ---\n\n",
             rval, exp, sign, fpfd_special_str(special), op, rexp);
@@ -213,22 +213,24 @@ fpfd32_impl_assert_ora2esfv(const char *op, const fpfd32_impl_t *res,
 }
 
 void
-fpfd32_impl_assert_orma2esfv(const char *op, const fpfd32_impl_t *res, int m,
-                             const fpfd32_impl_t *op1, const fpfd32_impl_t *op2,
-                             int exp, int sign, fpfd_special_t special,
-                             int rexp, int rval)
+fpfd32_impl_assert_orma2esfhv(const char *op, const fpfd32_impl_t *res, int m,
+                              const fpfd32_impl_t *op1,
+                              const fpfd32_impl_t *op2,
+                              int exp, int sign, fpfd_special_t special,
+                              int cohort, int rexp, int rval)
 {
   if (res->fields.exp != exp || res->fields.sign != sign
-      || res->fields.special != special || rexp != rval) {
+      || res->fields.special != special || res->fields.cohort != cohort
+      || rexp != rval) {
     fprintf(stderr, "\nfpfd32_%s(", op);
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 1);
     fprintf(stderr, ",\n%+d,\n", m);
-    fpfd32_impl_dump(stderr, op1);
+    fpfd32_impl_dump(stderr, op1, 0);
     fprintf(stderr, ", ");
-    fpfd32_impl_dump(stderr, op2);
+    fpfd32_impl_dump(stderr, op2, 0);
     fprintf(stderr, ") = %d\n\n--- ERROR: Expected exp == %+d, sign == %+d,"
-                    " special == %s, fpfd32_%s() == %d ---\n\n",
-            rval, exp, sign, fpfd_special_str(special), op, rexp);
+                    " special == %s, cohort == %+d, fpfd32_%s() == %d ---\n\n",
+            rval, exp, sign, fpfd_special_str(special), cohort, op, rexp);
     exitstatus = EXIT_FAILURE;
   }
 }
@@ -286,7 +288,7 @@ fpfd32_assert_mant(fpfd32_srcptr res, uint32_t src)
     fprintf(stderr, "\n");
     fpfd32_dump(stderr, res);
     fprintf(stderr, " = ");
-    fpfd32_impl_dump(stderr, &res_impl);
+    fpfd32_impl_dump(stderr, &res_impl, 0);
     fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.16" PRIX32 " ---\n\n",
             src);
     exitstatus = EXIT_FAILURE;
@@ -334,7 +336,7 @@ void fpfd32_impl_assert_mant(const fpfd32_impl_t *res, uint32_t h, uint32_t l)
 
   if (impl_h != h || impl_l != l) {
     fprintf(stderr, "\n");
-    fpfd32_impl_dump(stderr, res);
+    fpfd32_impl_dump(stderr, res, 0);
     fprintf(stderr, "\n\n--- ERROR: Expected mant == 0x%.8" PRIX32 "%.8" PRIX32
                     " ---\n\n",
             h, l);
@@ -441,7 +443,7 @@ fpfd32_dump(FILE *file, fpfd32_srcptr fp)
 }
 
 void
-fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl)
+fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl, int show_cohort)
 {
   uint32_t l, h; /* Low and high 32 bits of fp.mant */
 
@@ -453,11 +455,22 @@ fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl)
     h = *((uint32_t *)impl->mant);
   }
 
-  fprintf(file, "{\n"
-          "  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
-          "  exp     = %+d\n"
-          "  sign    = %+d\n"
-          "  special = %s\n}",
-          h, l, impl->fields.exp, impl->fields.sign,
-          fpfd_special_str(impl->fields.special));
+  if (show_cohort) {
+    fprintf(file, "{\n"
+            "  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
+            "  exp     = %+d\n"
+            "  sign    = %+d\n"
+            "  special = %s\n"
+            "  cohort  = %+d\n}",
+            h, l, impl->fields.exp, impl->fields.sign,
+            fpfd_special_str(impl->fields.special), impl->fields.cohort);
+  } else {
+    fprintf(file, "{\n"
+            "  mant    = 0x%.8" PRIX32 "%.8" PRIX32 "\n"
+            "  exp     = %+d\n"
+            "  sign    = %+d\n"
+            "  special = %s\n}",
+            h, l, impl->fields.exp, impl->fields.sign,
+            fpfd_special_str(impl->fields.special));
+  }
 }
