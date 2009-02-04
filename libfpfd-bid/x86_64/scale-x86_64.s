@@ -254,7 +254,7 @@ bsr2mul:
         .long 10                        /* bsr2mul[18] */
         .long 10                        /* bsr2mul[19] */
 
-        .align 32
+        .align 64
         .type bsr2div, @object
         .size bsr2div, 512
 bsr2div:
@@ -417,7 +417,7 @@ bsr2exp:
         .long 12        /* bsr2exp[62] */
         .long 12        /* bsr2exp[63] */
 
-        .align 32
+        .align 64
         .type exp2mul, @object
         .size exp2mul, 104
 exp2mul:
@@ -435,7 +435,7 @@ exp2mul:
         .quad 100000000000      /* exp2mul[11] */
         .quad 1000000000000     /* exp2mul[12] */
 
-        .align 32
+        .align 64
         .type exp2div, @object
         .size exp2div, 96
 exp2div:
