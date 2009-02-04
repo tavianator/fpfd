@@ -37,8 +37,8 @@ main()
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0), UINT32_C(100000));
   fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs, 
                              -12, 1, FPFD_NUMBER, 0);
-  /* 11000000000000000000 */
-  fpfd32_impl_assert_mant(&res32, UINT32_C(0x98A7D9B8), UINT32_C(0x314C0000));
+  /* 1100000000000000000 */
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0x0F43FC2C), UINT32_C(0x04EE0000));
 
 
   /* Subtraction */

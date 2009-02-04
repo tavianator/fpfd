@@ -78,13 +78,46 @@ fpfd32_impl_addsub:
         testl %r11d, %r11d
         jnz .Lsubdiv            /* If r11d == 0, we are adding the mantissas.
                                    Otherwise, we are subtracting. */
-        addq %rax, %rdx
+        cmpl $19, %ecx
+        jg .Ladddivtoofar
+        movq %rax, %r10
+        movq %rdx, %r11
+        testl %ecx, %ecx
+        jz .Laddnodiv
+        movl %ecx, %r8d
+        leaq exp2div(%rip), %rdx
+        mulq (%rdx,%r8,8)
+        leaq exp2shr(%rip), %rcx
+        movb (%rcx,%r8,1), %cl
+        shrq %cl, %rdx
+.Laddnodiv:
+        addq %r11, %rdx
+        jmp .Lrem
+.Ladddivtoofar:
         jmp .Lrem
 .Lsubdiv:
-        subq %rax, %rdx
+        cmpl $19, %ecx
+        jg .Lsubdivtoofar
+        movq %rax, %r10
+        movq %rdx, %r11
+        testl %ecx, %ecx
+        jz .Lsubnodiv
+        movl %ecx, %r8d
+        leaq exp2div(%rip), %rdx
+        mulq (%rdx,%r8,8)
+        leaq exp2shr(%rip), %rcx
+        movb (%rcx,%r8,1), %cl
+        shrq %cl, %rdx
+.Lsubnodiv:
+        subq %rdx, %r11
+        movq %r11, %rdx
+        jmp .Lrem
+.Lsubdivtoofar:
+        jmp .Lrem
 .Lrem:
         movq %rdx, (%rdi)
         movl %r9d, 8(%rdi)
+        movl %esi, 12(%rdi)
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
         .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
@@ -157,7 +190,7 @@ bsr2mul:
         .quad 1                         /* bsr2mul[60] = 10 ** 0 */
         .quad 1                         /* bsr2mul[61] = 10 ** 0 */
         .quad 1                         /* bsr2mul[62] = 10 ** 0 */
-        .quad 1                         /* bsr2mul[62] = 10 ** 0 */
+        .quad 1                         /* bsr2mul[63] = 10 ** 0 */
 
         .align 32
         .type bsr2exp, @object
@@ -227,3 +260,53 @@ bsr2exp:
         .long 0         /* bsr2exp[61] */
         .long 0         /* bsr2exp[62] */
         .long 0         /* bsr2exp[63] */
+
+        .align 64
+        .type exp2div, @object
+        .size exp2div, 160
+exp2div:
+        .quad 0                         /* exp2div[0] is undefined */
+        .quad 0xCCCCCCCCCCCCCCCD        /* exp2div[1]  = 10 ** -1 */
+        .quad 0xA3D70A3D70A3D70B        /* exp2div[2]  = 10 ** -2 */
+        .quad 0x83126E978D4FDF3C        /* exp2div[3]  = 10 ** -3 */
+        .quad 0xD1B71758E219652C        /* exp2div[4]  = 10 ** -4 */
+        .quad 0xA7C5AC471B478424        /* exp2div[5]  = 10 ** -5 */
+        .quad 0x8637BD05AF6C69B6        /* exp2div[6]  = 10 ** -6 */
+        .quad 0xD6BF94D5E57A42BD        /* exp2div[7]  = 10 ** -7 */
+        .quad 0xABCC77118461CEFD        /* exp2div[8]  = 10 ** -8 */
+        .quad 0x89705F4136B4A598        /* exp2div[9]  = 10 ** -9 */
+        .quad 0xDBE6FECEBDEDD5BF        /* exp2div[10] = 10 ** -10 */
+        .quad 0xAFEBFF0BCB24AAFF        /* exp2div[11] = 10 ** -11 */
+        .quad 0x8CBCCC096F5088CC        /* exp2div[12] = 10 ** -12 */
+        .quad 0xE12E13424BB40E14        /* exp2div[13] = 10 ** -13 */
+        .quad 0xB424DC35095CD810        /* exp2div[14] = 10 ** -14 */
+        .quad 0x901D7CF73AB0ACDA        /* exp2div[15] = 10 ** -15 */
+        .quad 0xE69594BEC44DE15C        /* exp2div[16] = 10 ** -16 */
+        .quad 0xB877AA3236A4B44A        /* exp2div[17] = 10 ** -17 */
+        .quad 0x9392EE8E921D5D07        /* exp2div[18] = 10 ** -18 */
+        .quad 0xEC1E4A7DB69561A5        /* exp2div[19] = 10 ** -19 */
+
+        .align 32
+        .type exp2shr, @object
+        .size exp2shr, 20
+exp2shr:
+        .byte 0         /* exp2shr[0] is undefined */
+        .byte 3         /* exp2shr[1] */
+        .byte 6         /* exp2shr[2] */
+        .byte 9         /* exp2shr[3] */
+        .byte 13        /* exp2shr[4] */
+        .byte 16        /* exp2shr[5] */
+        .byte 19        /* exp2shr[6] */
+        .byte 23        /* exp2shr[7] */
+        .byte 26        /* exp2shr[8] */
+        .byte 29        /* exp2shr[9] */
+        .byte 33        /* exp2shr[10] */
+        .byte 36        /* exp2shr[11] */
+        .byte 39        /* exp2shr[12] */
+        .byte 43        /* exp2shr[13] */
+        .byte 46        /* exp2shr[14] */
+        .byte 49        /* exp2shr[15] */
+        .byte 53        /* exp2shr[16] */
+        .byte 56        /* exp2shr[17] */
+        .byte 59        /* exp2shr[18] */
+        .byte 63        /* exp2shr[19] */
