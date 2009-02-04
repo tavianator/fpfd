@@ -31,12 +31,190 @@
 .globl fpfd32_impl_addsub
         .type fpfd32_impl_addsub, @function
 fpfd32_impl_addsub:
-        xorl 12(%rdx), %esi
-        xorl 12(%rcx), %esi
-        js .Lsub                /* If the result is -1, we are subtracting */
-        movl 8(%rcx), %eax
-        subl 8(%rdx), %eax      /* lhs->fields.exp - rhs->fields.exp */
-        ret
-.Lsub:
+        movq %rdx, %r10         /* Put lhs in r10 */
+        movq %rcx, %r11         /* Put rhs in r11 */
+        xorl 12(%r11), %esi     /* esi = sign ^ rhs->fields.sign */
+        xorl $1, %esi           /* Find the effective sign of rhs
+                                   (sign * rhs->fields.sign) */
+        movq (%r10), %rax       /* Put lhs->mant in rax */
+        movq (%r11), %rdx       /* Put rhs->mant in rdx */
+        bsrq %rax, %r8
+        bsrq %rdx, %r9
+        leaq bsr2mul(%rip), %rcx        /* For position-independence */
+        imulq (%rcx,%r8,8), %rax
+        imulq (%rcx,%r9,8), %rdx        /* Scale rax and rdx to be
+                                           >= 10 ** 19 */
+        leaq bsr2exp(%rip), %rcx
+        movl (%rcx,%r8,4), %r8d
+        movl (%rcx,%r9,4), %r9d
+        addl 8(%r10), %r8d
+        addl 8(%r11), %r9d      /* Correct the exponents */
+        movq $10000000000000000000, %rcx
+        cmpq %rcx, %rax         /* See if we need one more multiplication by
+                                   10 */
+        jae .Lrhscmp
+        shlq %rcx
+        leaq (%rax,%rax,4), %rax        /* rax *= 10 */
+        subl $1, %r8d
+.Lrhscmp:
+        cmpq %rcx, %rdx
+        jae .Ldiv
+        shlq %rcx
+        leaq (%rdx,%rdx,4), %rdx        /* rdx *= 10 */
+        subl $1, %r9d
+.Ldiv:
+        movl %r8d, %ecx
+        subl %r9d, %ecx         /* Subtract the exponents */
+        jns .Lnoswap
+        /* If r9d > r8d, swap rax and rdx, and put r8d in r9d */
+        xchgq %rax, %rdx
+        movl %r8d, %r9d
+        negl %ecx               /* Re-calculate ecx */
+.Lnoswap:
+        movl 12(%r10), %r8d     /* Put lhs->sign in r8d */
+        
+.Lrem:
+        movq %rdx, (%rdi)
+        movl %r9d, 8(%rdi)
+        movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
         .size fpfd32_impl_addsub, .-fpfd32_impl_addsub
+
+        .section .rodata
+        .align 64
+        .type bsr2mul, @object
+        .size bsr2mul, 512
+bsr2mul:
+        .quad 10000000000000000000      /* bsr2mul[0]  = 10 ** 19 */
+        .quad 10000000000000000000      /* bsr2mul[1]  = 10 ** 19 */
+        .quad 10000000000000000000      /* bsr2mul[2]  = 10 ** 19 */
+        .quad 1000000000000000000       /* bsr2mul[3]  = 10 ** 18 */
+        .quad 1000000000000000000       /* bsr2mul[4]  = 10 ** 18 */
+        .quad 1000000000000000000       /* bsr2mul[5]  = 10 ** 18 */
+        .quad 100000000000000000        /* bsr2mul[6]  = 10 ** 17 */
+        .quad 100000000000000000        /* bsr2mul[7]  = 10 ** 17 */
+        .quad 100000000000000000        /* bsr2mul[8]  = 10 ** 17 */
+        .quad 10000000000000000         /* bsr2mul[9]  = 10 ** 16 */
+        .quad 10000000000000000         /* bsr2mul[10] = 10 ** 16 */
+        .quad 10000000000000000         /* bsr2mul[11] = 10 ** 16 */
+        .quad 10000000000000000         /* bsr2mul[12] = 10 ** 16 */
+        .quad 1000000000000000          /* bsr2mul[13] = 10 ** 15 */
+        .quad 1000000000000000          /* bsr2mul[14] = 10 ** 15 */
+        .quad 1000000000000000          /* bsr2mul[15] = 10 ** 15 */
+        .quad 100000000000000           /* bsr2mul[16] = 10 ** 14 */
+        .quad 100000000000000           /* bsr2mul[17] = 10 ** 14 */
+        .quad 100000000000000           /* bsr2mul[18] = 10 ** 14 */
+        .quad 10000000000000            /* bsr2mul[19] = 10 ** 13 */
+        .quad 10000000000000            /* bsr2mul[20] = 10 ** 13 */
+        .quad 10000000000000            /* bsr2mul[21] = 10 ** 13 */
+        .quad 10000000000000            /* bsr2mul[22] = 10 ** 13 */
+        .quad 1000000000000             /* bsr2mul[23] = 10 ** 12 */
+        .quad 1000000000000             /* bsr2mul[24] = 10 ** 12 */
+        .quad 1000000000000             /* bsr2mul[25] = 10 ** 12 */
+        .quad 100000000000              /* bsr2mul[26] = 10 ** 11 */
+        .quad 100000000000              /* bsr2mul[27] = 10 ** 11 */
+        .quad 100000000000              /* bsr2mul[28] = 10 ** 11 */
+        .quad 10000000000               /* bsr2mul[29] = 10 ** 10 */
+        .quad 10000000000               /* bsr2mul[30] = 10 ** 10 */
+        .quad 10000000000               /* bsr2mul[31] = 10 ** 10 */
+        .quad 10000000000               /* bsr2mul[32] = 10 ** 10 */
+        .quad 1000000000                /* bsr2mul[33] = 10 ** 9 */
+        .quad 1000000000                /* bsr2mul[34] = 10 ** 9 */
+        .quad 1000000000                /* bsr2mul[35] = 10 ** 9 */
+        .quad 100000000                 /* bsr2mul[36] = 10 ** 8 */
+        .quad 100000000                 /* bsr2mul[37] = 10 ** 8 */
+        .quad 100000000                 /* bsr2mul[38] = 10 ** 8 */
+        .quad 10000000                  /* bsr2mul[39] = 10 ** 7 */
+        .quad 10000000                  /* bsr2mul[40] = 10 ** 7 */
+        .quad 10000000                  /* bsr2mul[41] = 10 ** 7 */
+        .quad 10000000                  /* bsr2mul[42] = 10 ** 7 */
+        .quad 1000000                   /* bsr2mul[43] = 10 ** 6 */
+        .quad 1000000                   /* bsr2mul[44] = 10 ** 6 */
+        .quad 1000000                   /* bsr2mul[45] = 10 ** 6 */
+        .quad 100000                    /* bsr2mul[46] = 10 ** 5 */
+        .quad 100000                    /* bsr2mul[47] = 10 ** 5 */
+        .quad 100000                    /* bsr2mul[48] = 10 ** 5 */
+        .quad 10000                     /* bsr2mul[49] = 10 ** 4 */
+        .quad 10000                     /* bsr2mul[50] = 10 ** 4 */
+        .quad 10000                     /* bsr2mul[51] = 10 ** 4 */
+        .quad 10000                     /* bsr2mul[52] = 10 ** 4 */
+        .quad 1000                      /* bsr2mul[53] = 10 ** 3 */
+        .quad 1000                      /* bsr2mul[54] = 10 ** 3 */
+        .quad 1000                      /* bsr2mul[55] = 10 ** 3 */
+        .quad 100                       /* bsr2mul[56] = 10 ** 2 */
+        .quad 100                       /* bsr2mul[57] = 10 ** 2 */
+        .quad 100                       /* bsr2mul[58] = 10 ** 2 */
+        .quad 10                        /* bsr2mul[59] = 10 ** 1 */
+        .quad 10                        /* bsr2mul[60] = 10 ** 1 */
+        .quad 10                        /* bsr2mul[61] = 10 ** 1 */
+        .quad 10                        /* bsr2mul[62] = 10 ** 1 */
+        .quad 1                         /* bsr2mul[62] = 10 ** 0 */
+
+        .align 32
+        .type bsr2exp, @object
+        .size bsr2exp, 256
+bsr2exp:
+        .long -19       /* bsr2exp[0] */
+        .long -19       /* bsr2exp[1] */
+        .long -19       /* bsr2exp[2] */
+        .long -18       /* bsr2exp[3] */
+        .long -18       /* bsr2exp[4] */
+        .long -18       /* bsr2exp[5] */
+        .long -17       /* bsr2exp[6] */
+        .long -17       /* bsr2exp[7] */
+        .long -17       /* bsr2exp[8] */
+        .long -16       /* bsr2exp[9] */
+        .long -16       /* bsr2exp[10] */
+        .long -16       /* bsr2exp[11] */
+        .long -16       /* bsr2exp[12] */
+        .long -15       /* bsr2exp[13] */
+        .long -15       /* bsr2exp[14] */
+        .long -15       /* bsr2exp[15] */
+        .long -14       /* bsr2exp[16] */
+        .long -14       /* bsr2exp[17] */
+        .long -14       /* bsr2exp[18] */
+        .long -13       /* bsr2exp[19] */
+        .long -13       /* bsr2exp[20] */
+        .long -13       /* bsr2exp[21] */
+        .long -13       /* bsr2exp[22] */
+        .long -12       /* bsr2exp[23] */
+        .long -12       /* bsr2exp[24] */
+        .long -12       /* bsr2exp[25] */
+        .long -11       /* bsr2exp[26] */
+        .long -11       /* bsr2exp[27] */
+        .long -11       /* bsr2exp[28] */
+        .long -10       /* bsr2exp[29] */
+        .long -10       /* bsr2exp[30] */
+        .long -10       /* bsr2exp[31] */
+        .long -10       /* bsr2exp[32] */
+        .long -9        /* bsr2exp[33] */
+        .long -9        /* bsr2exp[34] */
+        .long -9        /* bsr2exp[35] */
+        .long -8        /* bsr2exp[36] */
+        .long -8        /* bsr2exp[37] */
+        .long -8        /* bsr2exp[38] */
+        .long -7        /* bsr2exp[39] */
+        .long -7        /* bsr2exp[40] */
+        .long -7        /* bsr2exp[41] */
+        .long -7        /* bsr2exp[42] */
+        .long -6        /* bsr2exp[43] */
+        .long -6        /* bsr2exp[44] */
+        .long -6        /* bsr2exp[45] */
+        .long -5        /* bsr2exp[46] */
+        .long -5        /* bsr2exp[47] */
+        .long -5        /* bsr2exp[48] */
+        .long -4        /* bsr2exp[49] */
+        .long -4        /* bsr2exp[50] */
+        .long -4        /* bsr2exp[51] */
+        .long -4        /* bsr2exp[52] */
+        .long -3        /* bsr2exp[53] */
+        .long -3        /* bsr2exp[54] */
+        .long -3        /* bsr2exp[55] */
+        .long -2        /* bsr2exp[56] */
+        .long -2        /* bsr2exp[57] */
+        .long -2        /* bsr2exp[58] */
+        .long -1        /* bsr2exp[59] */
+        .long -1        /* bsr2exp[60] */
+        .long -1        /* bsr2exp[61] */
+        .long -1        /* bsr2exp[62] */
+        .long 0         /* bsr2exp[63] */
