@@ -79,21 +79,55 @@ fpfd32_impl_addsub:
         jnz .Lsubdiv            /* If r11d == 0, we are adding the mantissas.
                                    Otherwise, we are subtracting. */
         cmpl $19, %ecx
-        jg .Ladddivtoofar
-        movq %rax, %r10
-        movq %rdx, %r11
+        jg .Ladddivtoofar       /* Test for an exponent difference > 19
+                                   ( == 19 is handled by the following code) */
         testl %ecx, %ecx
-        jz .Laddnodiv
-        movl %ecx, %r8d
+        jz .Laddnodiv           /* Test for a zero exponent difference */
+        movq %rax, %r10
+        movq %rdx, %r11         /* Put rax and rdx in r10 and r11,
+                                   respectively */
+        movl %ecx, %r8d         /* Save our exponent difference in r8 */
         leaq exp2div(%rip), %rdx
         mulq (%rdx,%r8,8)
         leaq exp2shr(%rip), %rcx
         movb (%rcx,%r8,1), %cl
-        shrq %cl, %rdx
-.Laddnodiv:
-        addq %r11, %rdx
+        shrq %cl, %rdx          /* Divide rax by the appropriate power of 10 */
+        addq %rdx, %r11
+        leaq exp2mul(%rip), %rax
+        imulq (%rax,%r8,8), %rdx
+        subq %rdx, %r10         /* Calculate the remainder */
+        subl $1, %r8d
+        movq %r10, %rax
+        movq %r11, %rdx
+        jz .Lrem                /* If r8d == 1, we are done */
+        leaq exp2div(%rip), %rdx
+        mulq (%rdx,%r8,8)
+        leaq exp2shr(%rip), %rcx
+        movb (%rcx,%r8,1), %cl
+        shrq %cl, %rdx          /* Find the first digit of the remainder */
+        movl %edx, %eax
+        movq %r11, %rdx
+        cmpl $0, %eax
+        je .Laddspecial
+        cmpl $5, %eax
+        jne .Lrem
+.Laddspecial:
+        movl %eax, %ecx
+        leaq exp2mul(%rip), %rdx
+        imulq (%rdx,%r8,8), %rax
+        subl %eax, %r10d
+        jz .Laddspecial1
+        addl $1, %ecx
+.Laddspecial1:
+        movl %ecx, %eax
+        movq %r11, %rdx
         jmp .Lrem
 .Ladddivtoofar:
+        movl $1, %eax
+        jmp .Lrem
+.Laddnodiv:
+        addq %rax, %rdx
+        xorl %eax, %eax
         jmp .Lrem
 .Lsubdiv:
         cmpl $19, %ecx
@@ -310,3 +344,28 @@ exp2shr:
         .byte 56        /* exp2shr[17] */
         .byte 59        /* exp2shr[18] */
         .byte 63        /* exp2shr[19] */
+
+        .align 64
+        .type exp2mul, @object
+        .size exp2mul, 160
+exp2mul:
+        .quad 1                         /* esp2mul[0] */
+        .quad 10                        /* esp2mul[1] */
+        .quad 100                       /* esp2mul[2] */
+        .quad 1000                      /* esp2mul[3] */
+        .quad 10000                     /* esp2mul[4] */
+        .quad 100000                    /* esp2mul[5] */
+        .quad 1000000                   /* esp2mul[6] */
+        .quad 10000000                  /* esp2mul[7] */
+        .quad 100000000                 /* esp2mul[8] */
+        .quad 1000000000                /* esp2mul[9] */
+        .quad 10000000000               /* esp2mul[10] */
+        .quad 100000000000              /* esp2mul[11] */
+        .quad 1000000000000             /* esp2mul[12] */
+        .quad 10000000000000            /* esp2mul[13] */
+        .quad 100000000000000           /* esp2mul[14] */
+        .quad 1000000000000000          /* esp2mul[15] */
+        .quad 10000000000000000         /* esp2mul[16] */
+        .quad 100000000000000000        /* esp2mul[17] */
+        .quad 1000000000000000000       /* esp2mul[18] */
+        .quad 10000000000000000000      /* esp2mul[19] */
