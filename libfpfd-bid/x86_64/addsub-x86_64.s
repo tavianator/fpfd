@@ -92,7 +92,8 @@ fpfd32_impl_addsub:
         leaq exp2shr(%rip), %rcx
         movb (%rcx,%r8,1), %cl
         shrq %cl, %rdx          /* Divide rax by the appropriate power of 10 */
-        addq %rdx, %r11
+        addq %rdx, %r11         /* Add the mantissas */
+        jc .Laddcarry           /* Test for carry; this shouldn't happen */
         leaq exp2mul(%rip), %rax
         imulq (%rax,%r8,8), %rdx
         subq %rdx, %r10         /* Calculate the remainder */
@@ -127,7 +128,54 @@ fpfd32_impl_addsub:
         jmp .Lrem
 .Laddnodiv:
         addq %rax, %rdx
+        jc .Laddnodivcarry
         xorl %eax, %eax
+        jmp .Lrem
+.Laddcarry:
+        /* This should never happen, but we test for it anyway. */
+        movq %rdx, %rcx
+        movq $0x199999999999999A, %rax
+        mulq %r11
+        movq $0x199999999999999A, %rax
+        addq %rax, %rdx         /* Divide the sum by ten */
+        leaq (%rdx,%rdx,4), %rax
+        shlq %rax
+        subq %rax, %r11
+        movq %r11, %rax         /* Calculate the remainder */
+        jns .Laddcarrynoadj
+        subq $1, %rdx
+        addl $10, %eax
+.Laddcarrynoadj:
+        addl $1, %r9d           /* Correct the exponent */
+        cmpl $0, %eax
+        je .Laddcarryspecial
+        cmpl $5, %eax
+        jne .Lrem
+.Laddcarryspecial:
+        movq %rdx, %r11
+        leaq exp2mul(%rip), %rdx
+        imulq (%rdx,%r8,8), %rcx
+        subq %rcx, %r10         /* Calculate the remainder */
+        movq %r11, %rdx
+        jz .Lrem
+        addl $1, %eax
+        jmp .Lrem
+.Laddnodivcarry:
+        /* This should never happen, but we test for it anyway. */
+        movq %rdx, %r11
+        movq %rdx, %rax
+        movq $0x199999999999999A, %rcx
+        mulq %rcx
+        addq %rcx, %rdx         /* Divide by ten */
+        leaq (%rdx,%rdx,4), %rax
+        shlq %rax
+        subq %rax, %r11
+        movq %r11, %rax         /* Calculate the remainder */
+        jns .Laddnodivcarrynoadj
+        subq $1, %rdx
+        addl $10, %eax
+.Laddnodivcarrynoadj:
+        addl $1, %r9d           /* Correct the exponent */
         jmp .Lrem
 .Lsubdiv:
         cmpl $19, %ecx
