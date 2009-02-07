@@ -99,9 +99,8 @@ fpfd32_impl_scale:
         movl %eax, %r8d         /* Mantissa still too large */
         movl %edx, %eax
         movl %edx, %ecx
-        movq $0xCCCCCCCCCCCCCCCD, %rdx
-        mulq %rdx
-        shrq $3, %rdx           /* Divide by 10 */
+        movq $0x199999999999999A, %rdx
+        mulq %rdx               /* Divide by 10 */
         addl $1, %esi           /* Correct the exponent again */
         leal (%edx,%edx,4), %eax
         shll %eax
