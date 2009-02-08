@@ -179,22 +179,67 @@ fpfd32_impl_addsub:
         jmp .Lrem
 .Lsubdiv:
         cmpl $19, %ecx
-        jg .Lsubdivtoofar
-        movq %rax, %r10
-        movq %rdx, %r11
+        jg .Lsubdivtoofar       /* Test for an exponent difference > 19
+                                   ( == 19 is handled by the following code) */
         testl %ecx, %ecx
-        jz .Lsubnodiv
-        movl %ecx, %r8d
+        jz .Lsubnodiv           /* Test for a zero exponent difference */
+        movq %rax, %r10
+        movq %rdx, %r11         /* Put rax and rdx in r10 and r11,
+                                   respectively */
+        movl %ecx, %r8d         /* Save our exponent difference in r8 */
         leaq exp2div(%rip), %rdx
         mulq (%rdx,%r8,8)
         leaq exp2shr(%rip), %rcx
         movb (%rcx,%r8,1), %cl
-        shrq %cl, %rdx
-.Lsubnodiv:
-        subq %rdx, %r11
+        shrq %cl, %rdx          /* Divide rax by the appropriate power of 10 */
+        subq %rdx, %r11         /* Subtract the mantissas */
+        jc .Lsubborrow
+        leaq exp2mul(%rip), %rax
+        imulq (%rax,%r8,8), %rdx
+        subq %rdx, %r10         /* Calculate the remainder */
+        subl $1, %r8d
+        movq %r10, %rax
+        movq %r11, %rdx
+        jz .Lrem                /* If r8d == 1, we are done */
+        leaq exp2div(%rip), %rdx
+        mulq (%rdx,%r8,8)
+        leaq exp2shr(%rip), %rcx
+        movb (%rcx,%r8,1), %cl
+        shrq %cl, %rdx          /* Find the first digit of the remainder */
+        movl %edx, %eax
+        movq %r11, %rdx
+        cmpl $0, %eax
+        je .Lsubspecial
+        cmpl $5, %eax
+        jne .Lrem
+.Lsubspecial:
+        movl %eax, %ecx
+        leaq exp2mul(%rip), %rdx
+        imulq (%rdx,%r8,8), %rax
+        subl %eax, %r10d
+        jz .Lsubspecial1
+        subl $1, %ecx
+.Lsubspecial1:
+        movl %ecx, %eax
         movq %r11, %rdx
         jmp .Lrem
+.Lsubborrow:
+        negq %r11
+        movq %r11, %rdx
+        negl %esi
+        jmp .Lrem
 .Lsubdivtoofar:
+        subq $1, %rdx
+        jmp .Lrem
+.Lsubnodiv:
+        subq %rax, %rdx
+        jc .Lsubnodivborrow
+        xorl %eax, %eax
+        jmp .Lrem
+.Lsubnodivborrow:
+        negq %rdx
+        negl %esi
+        xorl %eax, %eax
         jmp .Lrem
 .Lrem:
         movq %rdx, (%rdi)
