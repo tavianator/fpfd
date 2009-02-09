@@ -225,8 +225,12 @@ fpfd32_impl_addsub:
         jmp .Lrem
 .Lsubborrow:
         negq %r11
-        movq %r11, %rdx
         negl %esi
+        leaq exp2mul(%rip), %rax
+        imulq (%rax,%r8,8), %rdx
+        subq %rdx, %r10         /* Calculate the remainder */
+        movq %r10, %rax
+        movq %r11, %rdx
         jmp .Lrem
 .Lsubdivtoofar:
         subq $1, %rdx
