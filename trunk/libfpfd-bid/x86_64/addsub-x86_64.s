@@ -55,13 +55,13 @@ fpfd32_impl_addsub:
         jae .Lrhscmp
         shlq %rcx                       /* rax *= 2 */
         leaq (%rax,%rax,4), %rax        /* rax *= 5 */
-        subl $1, %r8d
+        subl $1, %r8d           /* Correct the exponent */
 .Lrhscmp:
         cmpq %rcx, %rdx
         jae .Lswap
         shlq %rcx                       /* rax *= 2 */
         leaq (%rdx,%rdx,4), %rdx        /* rdx *= 5 */
-        subl $1, %r9d
+        subl $1, %r9d           /* Correct the exponent */
 .Lswap:
         movl 12(%r10), %r10d
         movl %r10d, %r11d
@@ -198,7 +198,8 @@ fpfd32_impl_addsub:
         imulq (%rax,%r8,8), %rdx
         subq %rdx, %r10         /* Calculate the remainder */
         subl $1, %r8d
-        movq %r10, %rax
+        movl $9, %eax
+        subl %r10d, %eax
         movq %r11, %rdx
         jz .Lrem                /* If r8d == 1, we are done */
         leaq exp2div(%rip), %rdx
@@ -229,22 +230,33 @@ fpfd32_impl_addsub:
         leaq exp2mul(%rip), %rax
         imulq (%rax,%r8,8), %rdx
         subq %rdx, %r10         /* Calculate the remainder */
-        movq %r10, %rax
+        bsrq %r11, %r8
+        leaq bsr2mul(%rip), %rcx
+        imulq (%rcx,%r8,8), %r11
+        leaq bsr2exp(%rip), %rcx
+        xorl %edx, %edx
+        subl (%rcx,%r8,4), %edx
+        subl $1, %edx
+        js .Lsubborrow0
+        leaq exp2mul(%rip), %rcx
+        imulq (%rcx,%rdx,8), %r10
+        addq %r10, %r11
         movq %r11, %rdx
+        xorl %eax, %eax
+        jmp .Lrem
+.Lsubborrow0:
+        movq %rcx, %rdx
+        movl %r10d, %eax
         jmp .Lrem
 .Lsubdivtoofar:
         subq $1, %rdx
         jmp .Lrem
 .Lsubnodiv:
         subq %rax, %rdx
-        jc .Lsubnodivborrow
-        xorl %eax, %eax
-        jmp .Lrem
-.Lsubnodivborrow:
+        movl $0, %eax
+        jnc .Lrem
         negq %rdx
         negl %esi
-        xorl %eax, %eax
-        jmp .Lrem
 .Lrem:
         movq %rdx, (%rdi)
         movl %r9d, 8(%rdi)
