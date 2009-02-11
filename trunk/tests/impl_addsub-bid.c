@@ -140,7 +140,7 @@ main()
   fpfd32_impl_set_manually(&lhs32, UINT32_C(0x8AC72304), UINT32_C(0x89E8000B));
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0x0DE0B6B3), UINT32_C(0xA7640000));
   fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs,
-                             1, -1, FPFD_NUMBER, 0);
+                             -17, -1, FPFD_NUMBER, 0);
   fpfd32_impl_assert_mant(&res32, UINT32_C(0x0F43FC2C), UINT32_C(0x04EE0000));
 
   return exitstatus;

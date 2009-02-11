@@ -53,13 +53,13 @@ fpfd32_impl_addsub:
         cmpq %rcx, %rax         /* See if we need one more multiplication by
                                    10 */
         jae .Lrhscmp
-        shlq %rcx                       /* rax *= 2 */
+        shlq %rax                       /* rax *= 2 */
         leaq (%rax,%rax,4), %rax        /* rax *= 5 */
         subl $1, %r8d           /* Correct the exponent */
 .Lrhscmp:
         cmpq %rcx, %rdx
         jae .Lswap
-        shlq %rcx                       /* rax *= 2 */
+        shlq %rdx                       /* rdx *= 2 */
         leaq (%rdx,%rdx,4), %rdx        /* rdx *= 5 */
         subl $1, %r9d           /* Correct the exponent */
 .Lswap:
@@ -230,21 +230,31 @@ fpfd32_impl_addsub:
         leaq exp2mul(%rip), %rax
         imulq (%rax,%r8,8), %rdx
         subq %rdx, %r10         /* Calculate the remainder */
-        bsrq %r11, %r8
+        bsrq %r11, %r8          /* If we've lost significant digits by the
+                                   subtraction, reclaim them */
         leaq bsr2mul(%rip), %rcx
-        imulq (%rcx,%r8,8), %r11
+        imulq (%rcx,%r8,8), %r11        /* Scale r11 to be >= 10 ** 18 */
         leaq bsr2exp(%rip), %rcx
         xorl %edx, %edx
         subl (%rcx,%r8,4), %edx
+        movq $1000000000000000000, %rcx
+        cmpq %rcx, %r11         /* See if we need one more multiplication by
+                                   10 */
+        jae .Lsubborrow1
+        shlq %r11                       /* r11 *= 2 */
+        leaq (%r11,%r11,4), %r11        /* r11 *= 5 */
+        addl $1, %edx           /* Correct the exponent */
+.Lsubborrow1:
+        subl %edx, %r9d         /* Correct the exponent */
         subl $1, %edx
-        js .Lsubborrow0
+        js .Lsubborrow0exp
         leaq exp2mul(%rip), %rcx
         imulq (%rcx,%rdx,8), %r10
         addq %r10, %r11
         movq %r11, %rdx
         xorl %eax, %eax
         jmp .Lrem
-.Lsubborrow0:
+.Lsubborrow0exp:
         movq %rcx, %rdx
         movl %r10d, %eax
         jmp .Lrem
