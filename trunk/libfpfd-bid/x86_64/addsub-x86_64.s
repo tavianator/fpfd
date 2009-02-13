@@ -195,13 +195,19 @@ fpfd32_impl_addsub:
         subq %rdx, %r11         /* Subtract the mantissas */
         jc .Lsubborrow
         leaq exp2mul(%rip), %rax
-        imulq (%rax,%r8,8), %rdx
+        movq (%rax,%r8,8), %rax
+        imulq %rax, %rdx
         subq %rdx, %r10         /* Calculate the remainder */
+        jz .Lsubrem
+        subq $1, %r11
+        jc .Lsubborrow
+        subq %r10, %rax
+        movq %rax, %r10
+.Lsubrem:
         subl $1, %r8d
-        movl $9, %eax
-        subl %r10d, %eax
+        movq %r10, %rax
         movq %r11, %rdx
-        jz .Lrem                /* If r8d == 1, we are done */
+        jz .Lrem                /* If r8d == 0, we are done */
         leaq exp2div(%rip), %rdx
         mulq (%rdx,%r8,8)
         leaq exp2shr(%rip), %rcx
@@ -219,7 +225,7 @@ fpfd32_impl_addsub:
         imulq (%rdx,%r8,8), %rax
         subl %eax, %r10d
         jz .Lsubspecial1
-        subl $1, %ecx
+        addl $1, %ecx
 .Lsubspecial1:
         movl %ecx, %eax
         movq %r11, %rdx
