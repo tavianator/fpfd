@@ -392,14 +392,14 @@ fpfd32_impl_addsub:
         shrq $60, %rax          /* Shift the remainder right to be left with
                                    only the leading digit, and capture the
                                    falloff in r9 */
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         je .Lspecial            /* Return values of 0 and 5 are special cases */
         ret
 .Lspecial:
-        cmpq $0, %r9
-        je .Lspecial1
+        testq %r9, %r9
+        jz .Lspecial1
         addl $1, %eax
 .Lspecial1:
         ret

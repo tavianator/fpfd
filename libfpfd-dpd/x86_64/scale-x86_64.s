@@ -56,8 +56,8 @@ fpfd32_impl_scale:
         movq $0x0FFFFFFFFFFFFFFF, %rdx
         andq %rdx, %rcx         /* Mask off the most significant nibble */
         shrq $60, %rax
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         je .Lspecial
         ret
@@ -104,8 +104,8 @@ fpfd32_impl_scale:
         je .Lspecial
         ret
 .Lspecial:
-        cmpq $0, %rcx
-        je .Lspecial2
+        testq %rcx, %rcx
+        jz .Lspecial2
         addl $1, %eax
 .Lspecial2:
         ret

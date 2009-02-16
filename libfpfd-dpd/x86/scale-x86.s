@@ -65,8 +65,8 @@ fpfd32_impl_scale:
         andl $0x0FFFFFFF, %ebx  /* Mask off the most significant nibble of the
                                    remainder */
         shrl $28, %eax
-        cmpl $0, %eax
-        je .LspecialMSW
+        testl %eax, %eax
+        jz .LspecialMSW
         cmpl $5, %eax
         je .LspecialMSW         /* Test for the special 0 and 5 return values */
         popl %esi
@@ -118,15 +118,15 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .LspecialMSW:
-        cmpl $0, %ebx
-        je .LspecialMSW2
+        testl %ebx, %ebx
+        jz .LspecialMSW2
         addl $1, %eax
         popl %esi
         popl %ebx
         ret
 .LspecialMSW2:
-        cmpl $0, %ecx
-        je .LspecialMSW3
+        testl %ecx, %ecx
+        jz .LspecialMSW3
         addl $1, %eax
 .LspecialMSW3:
         popl %esi
@@ -203,8 +203,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .LspecialLSW:
-        cmpl $0, %edx
-        je .LspecialLSW2
+        testl %edx, %edx
+        jz .LspecialLSW2
         addl $1, %eax
 .LspecialLSW2:
         popl %esi

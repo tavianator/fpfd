@@ -68,8 +68,8 @@ fpfd32_impl_div:
         movl %ebx, (%ecx)
         movl %edi, 4(%ecx)      /* Store the mantissa */
         movl $1, 16(%ecx)       /* Set the special flag to FPFD_NUMBER */
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         je .Lspecial
         popl %ebp
@@ -78,8 +78,8 @@ fpfd32_impl_div:
         popl %ebx
         ret
 .Lspecial:
-        cmpl $0, %edx
-        je .Lspecial1
+        testl %edx, %edx
+        jz .Lspecial1
 .Lspecial1:
         popl %ebp
         popl %edi

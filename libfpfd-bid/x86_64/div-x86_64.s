@@ -57,14 +57,14 @@ fpfd32_impl_div:
         mull %edx
         divl %ecx
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         je .Lspecial
         ret
 .Lspecial:
-        cmpl $0, %edx
-        je .Lspecial1
+        testl %edx, %edx
+        jz .Lspecial1
         addl $1, %eax
 .Lspecial1:
         ret

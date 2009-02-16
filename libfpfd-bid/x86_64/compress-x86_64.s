@@ -36,8 +36,8 @@ fpfd32_impl_compress:
         shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
         movl 16(%rsi), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
-        cmpl $0, %edx
-        je .Lzero
+        testl %edx, %edx
+        jz .Lzero
         cmpl $2, %edx
         je .LsNaN
         cmpl $3, %edx
