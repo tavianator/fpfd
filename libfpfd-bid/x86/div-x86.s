@@ -44,20 +44,20 @@ fpfd32_impl_div:
         movl %ecx, 12(%ebx)     /* Store the sign in dest->fields.sign */
         movl 8(%esi), %ecx
         subl 8(%edi), %ecx      /* Subtract the exponents */
-        subl $6, %ecx           /* We multiply the quotient by 1000000 to ensure
-                                   full precision */
+        subl $7, %ecx           /* We multiply the quotient by 10000000 to
+                                   ensure full precision */
         movl %ecx, 8(%ebx)      /* Store the exponent in dest->fields.exp */
         movl (%esi), %eax
         movl (%edi), %ecx
         xorl %edx, %edx
         divl %ecx
         movl %edx, %esi         /* Store the remainder for later */
-        movl $1000000, %ebp
-        mull %ebp               /* Multiply the quotient by 1000000 */
+        movl $10000000, %ebp
+        mull %ebp               /* Multiply the quotient by 10000000 */
         movl %edx, %edi
         movl %eax, %ebx
         movl %esi, %eax
-        mull %ebp               /* Multiply the remainder by 1000000 */
+        mull %ebp               /* Multiply the remainder by 10000000 */
         divl %ecx               /* Divide by the denominator */
         addl %eax, %ebx
         adcl $0, %edi           /* Add the scaled remainder to the mantissa */
@@ -80,6 +80,7 @@ fpfd32_impl_div:
 .Lspecial:
         testl %edx, %edx
         jz .Lspecial1
+        addl $1, %eax
 .Lspecial1:
         popl %ebp
         popl %edi
