@@ -106,11 +106,11 @@ fpfd_sub_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         break;
       case FPFD_INF:
         if (op1->sign == op2->sign) {
-          action = FPFD_LHS;
-        } else {
           rop->special = FPFD_QNAN;
           action = FPFD_RET;
           if (flags) *flags |= FPFD_INVALID;
+        } else {
+          action = FPFD_LHS;
         }
         break;
       }
