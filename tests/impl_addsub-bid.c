@@ -137,11 +137,33 @@ main()
 
   fpfd_impl_set_esf(&lhs, 0, -1, FPFD_NUMBER);
   fpfd_impl_set_esf(&rhs, 1, 1, FPFD_NUMBER);
+  /* 10000000000000000011 */
   fpfd32_impl_set_manually(&lhs32, UINT32_C(0x8AC72304), UINT32_C(0x89E8000B));
+  /* 1000000000000000000 */
   fpfd32_impl_set_manually(&rhs32, UINT32_C(0x0DE0B6B3), UINT32_C(0xA7640000));
   fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs,
-                             -17, -1, FPFD_NUMBER, 0);
-  fpfd32_impl_assert_mant(&res32, UINT32_C(0x0F43FC2C), UINT32_C(0x04EE0000));
+                             0, -1, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0), UINT32_C(11));
+
+  fpfd_impl_set_esf(&lhs, 0, 1, FPFD_NUMBER);
+  fpfd_impl_set_esf(&rhs, 1, -1, FPFD_NUMBER);
+  /* 10000000000000000011 */
+  fpfd32_impl_set_manually(&lhs32, UINT32_C(0x8AC72304), UINT32_C(0x89E8000B));
+  /* 1000000000000000001 */
+  fpfd32_impl_set_manually(&rhs32, UINT32_C(0x0DE0B6B3), UINT32_C(0xA7640001));
+  fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs,
+                             0, 1, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0), UINT32_C(1));
+
+  fpfd_impl_set_esf(&lhs, 0, -1, FPFD_NUMBER);
+  fpfd_impl_set_esf(&rhs, 1, 1, FPFD_NUMBER);
+  /* 10000000000000000011 */
+  fpfd32_impl_set_manually(&lhs32, UINT32_C(0x8AC72304), UINT32_C(0x89E8000B));
+  /* 1000000000000000003 */
+  fpfd32_impl_set_manually(&rhs32, UINT32_C(0x0DE0B6B3), UINT32_C(0xA7640003));
+  fpfd_impl_assert_orma2esfv(impl_addsub, &res, 1, &lhs, &rhs,
+                             0, 1, FPFD_NUMBER, 0);
+  fpfd32_impl_assert_mant(&res32, UINT32_C(0), UINT32_C(19));
 
   return exitstatus;
 }

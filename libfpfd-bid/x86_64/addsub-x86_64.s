@@ -200,9 +200,24 @@ fpfd32_impl_addsub:
         subq %rdx, %r10         /* Calculate the remainder */
         jz .Lsubrem
         subq $1, %r11
-        jc .Lsubborrow
-        subq %r10, %rax
+        jnc .Lsubnoborrow
+        negl %esi
+        movq %r10, %r11
+        xorl %r10d, %r10d
+        subl $1, %r9d           /* Correct the exponent */
+        jmp .Lsubrem
+.Lsubnoborrow:
+        subq %r10, %rax         /* Subtract the remainder from 1.0 */
         movq %rax, %r10
+        movq $1000000000000000000, %rcx
+        cmpq %rcx, %r11         /* See if we need to reclaim significant digits
+                                   from the remainder */
+        jae .Lsubrem
+        shlq %r11                       /* r11 *= 2 */
+        leaq (%r11,%r11,4), %r11        /* r11 *= 5 */
+        addq %r10, %r11
+        xorl %r10d, %r10d
+        subl $1, %r9d           /* Correct the exponent */
 .Lsubrem:
         subl $1, %r8d
         movq %r10, %rax
@@ -236,32 +251,18 @@ fpfd32_impl_addsub:
         leaq exp2mul(%rip), %rax
         imulq (%rax,%r8,8), %rdx
         subq %rdx, %r10         /* Calculate the remainder */
-        bsrq %r11, %r8          /* If we've lost significant digits by the
-                                   subtraction, reclaim them */
-        leaq bsr2mul(%rip), %rcx
-        imulq (%rcx,%r8,8), %r11        /* Scale r11 to be >= 10 ** 18 */
-        leaq bsr2exp(%rip), %rcx
-        xorl %edx, %edx
-        subl (%rcx,%r8,4), %edx
+        jz .Lsubborrow1
         movq $1000000000000000000, %rcx
-        cmpq %rcx, %r11         /* See if we need one more multiplication by
-                                   10 */
+        cmpq %rcx, %r11         /* See if we need to reclaim significant digits
+                                   from the remainder */
         jae .Lsubborrow1
         shlq %r11                       /* r11 *= 2 */
         leaq (%r11,%r11,4), %r11        /* r11 *= 5 */
-        addl $1, %edx           /* Correct the exponent */
-.Lsubborrow1:
-        subl %edx, %r9d         /* Correct the exponent */
-        subl $1, %edx
-        js .Lsubborrow0exp
-        leaq exp2mul(%rip), %rcx
-        imulq (%rcx,%rdx,8), %r10
         addq %r10, %r11
+        xorl %r10d, %r10d
+        subl $1, %r9d           /* Correct the exponent */
+.Lsubborrow1:
         movq %r11, %rdx
-        xorl %eax, %eax
-        jmp .Lrem
-.Lsubborrow0exp:
-        movq %rcx, %rdx
         movl %r10d, %eax
         jmp .Lrem
 .Lsubdivtoofar:
