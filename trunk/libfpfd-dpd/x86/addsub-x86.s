@@ -493,8 +493,8 @@ fpfd32_impl_addsub:
         movl -24(%esp), %edx    /* Retrieve the remainder from the stack */
         movl %eax, %ecx
         shrl $28, %eax
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         je .Lspecial            /* Return values of 0 and 5 are special cases */
         popl %ebp
@@ -512,8 +512,8 @@ fpfd32_impl_addsub:
         popl %ebx
         ret
 .Lspecial1:
-        cmpl $0, %edx
-        je .Lspecial2
+        testl %edx, %edx
+        jz .Lspecial2
         addl $1, %eax
 .Lspecial2:
         popl %ebp

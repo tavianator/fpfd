@@ -113,8 +113,8 @@ fpfd32_impl_scale:
 .LshrdremMSW:
         shrdl %cl, %edx, %eax
         movl -12(%esp), %edx
-        cmpl $0, %eax
-        je .LspecialMSW
+        testl %eax, %eax
+        jz .LspecialMSW
         cmpl $5, %eax
         jne .LexpcorrectLSW
 .LspecialMSW:
@@ -176,8 +176,8 @@ fpfd32_impl_scale:
         shrl %cl, %edx
         movl %edx, %eax
         movl %ebp, %edx
-        cmpl $0, %eax
-        je .LspecialLSW
+        testl %eax, %eax
+        jz .LspecialLSW
         cmpl $5, %eax
         jne .LexpcorrectLSW
 .LspecialLSW:
@@ -203,13 +203,13 @@ fpfd32_impl_scale:
         shll %eax
         subl %ecx, %eax
         negl %eax               /* Calculate the remainder */
-        cmpl $0, %eax
-        je .LspecialLSW2
+        testl %eax, %eax
+        jz .LspecialLSW2
         cmpl $5, %eax
         jne .Lnorm
 .LspecialLSW2:
-        cmpl $0, %edi
-        je .Lnorm
+        testl %edi, %edi
+        jz .Lnorm
         addl $1, %eax           /* Correct it with the last remainder */
 .Lnorm:
         cmpl $90, %ebx
@@ -250,8 +250,8 @@ fpfd32_impl_scale:
         shrl %cl, %edx
         movl %edx, %eax
         movl %ebp, %edx
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial:
@@ -263,8 +263,8 @@ fpfd32_impl_scale:
         je .Lspecial2
         addl $1, %eax
 .Lspecial2:
-        cmpl $0, %eax
-        je .Lspecial3
+        testl %eax, %eax
+        jz .Lspecial3
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial3:
@@ -326,8 +326,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lspecial4:
-        cmpl $0, %ebx
-        je .Lspecial5
+        testl %ebx, %ebx
+        jz .Lspecial5
         addl $1, %eax           /* Correct it with the last remainder */
 .Lspecial5:
         cmpl $0x10, %eax
@@ -340,8 +340,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lspecial6:
-        cmpl $0, %ebp
-        je .Lspecial7
+        testl %ebp, %ebp
+        jz .Lspecial7
         addl $1, %eax
 .Lspecial7:
         popl %ebp
