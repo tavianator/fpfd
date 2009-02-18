@@ -21,4 +21,4 @@ nobase_include_HEADERS = fpfd.h
 
 lib_LTLIBRARIES    = libfpfd.la
 libfpfd_la_SOURCES = fpfd.h fpfd_impl.h add.c div.c fma.c mul.c nan.c neg.c pred.c round.c set.c sub.c
-libfpfd_la_LDFLAGS = -version-info 2:2:0
+libfpfd_la_LDFLAGS = -version-info 2:3:0
