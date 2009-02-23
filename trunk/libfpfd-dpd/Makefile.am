@@ -18,18 +18,19 @@
 ###########################################################################
 
 EXTRA_PROGRAMS = dpdtable multable
+BUILT_SOURCES  = dpdtable$(EXEEXT) multable$(EXEEXT)
 
 dpdtable_SOURCES = dpdtable.c
 multable_SOURCES = multable.c
 
-x86/dpdtable-x86.s: dpdtable
+$(srcdir)/x86/dpdtable-x86.s: dpdtable.c
 	./dpdtable$(EXEEXT) >$@
-x86/multable-x86.s: multable
+$(srcdir)/x86/multable-x86.s: multable.c
 	./multable$(EXEEXT) >$@
 
-x86_64/dpdtable-x86_64.s: dpdtable
+$(srcdir)/x86_64/dpdtable-x86_64.s: dpdtable.c
 	./dpdtable$(EXEEXT) >$@
-x86_64/multable-x86_64.s: multable
+$(srcdir)/x86_64/multable-x86_64.s: multable.c
 	./multable$(EXEEXT) >$@
 
 lib_LTLIBRARIES = libfpfd-dpd.la
