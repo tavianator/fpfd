@@ -17,6 +17,21 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>. ##
 ###########################################################################
 
+EXTRA_PROGRAMS = dpdtable multable
+
+dpdtable_SOURCES = dpdtable.c
+multable_SOURCES = multable.c
+
+x86/dpdtable-x86.s: dpdtable
+	./dpdtable > x86/dpdtable-x86.s
+x86/multable-x86.s: multable
+	./multable > x86/multable-x86.s
+
+x86_64/dpdtable-x86_64.s: dpdtable
+	./dpdtable > x86_64/dpdtable-x86_64.s
+x86_64/multable-x86_64.s: multable
+	./multable > x86_64/multable-x86_64.s
+
 lib_LTLIBRARIES = libfpfd-dpd.la
 
 libfpfd_dpd_la_SOURCES =
@@ -32,5 +47,3 @@ endif
 if GCC_OVERRIDE
   libfpfd_dpd_la_SOURCES += gcc.c
 endif
-
-EXTRA_DIST = x86/dpdtable-x86.sh
