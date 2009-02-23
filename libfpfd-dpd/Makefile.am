@@ -23,14 +23,14 @@ dpdtable_SOURCES = dpdtable.c
 multable_SOURCES = multable.c
 
 x86/dpdtable-x86.s: dpdtable
-	./dpdtable > x86/dpdtable-x86.s
+	./dpdtable$(EXEEXT) >$@
 x86/multable-x86.s: multable
-	./multable > x86/multable-x86.s
+	./multable$(EXEEXT) >$@
 
 x86_64/dpdtable-x86_64.s: dpdtable
-	./dpdtable > x86_64/dpdtable-x86_64.s
+	./dpdtable$(EXEEXT) >$@
 x86_64/multable-x86_64.s: multable
-	./multable > x86_64/multable-x86_64.s
+	./multable$(EXEEXT) >$@
 
 lib_LTLIBRARIES = libfpfd-dpd.la
 
