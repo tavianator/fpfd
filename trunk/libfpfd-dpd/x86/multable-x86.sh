@@ -27,7 +27,7 @@ cat <<EOF
         .align 32
         .type fpfd_bcdmul, @object
         .size fpfd_bcdmul, 78336
-fpfd_bcd2dpd:
+fpfd_bcdmul:
 EOF
 
 for ((lhs=0x00; lhs<=0x99; ++lhs))
