@@ -37,6 +37,10 @@ fpfd32_impl_mul:
         addl 8(%rdx), %r8d      /* Add the exponents */
         movl %r8d, 8(%rdi)      /* Store the exponent */
         movl %ecx, 12(%rdi)     /* Store the sign */
+        movl (%rsi), %eax
+        movl (%rdx), %edx
+        mulq %rdx
+        movq %rax, (%rdi)       /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
         .size fpfd32_impl_mul, .-fpfd32_impl_mul
