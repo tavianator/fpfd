@@ -18,7 +18,7 @@ Makefile.in
 /doc/texinfo.tex
 
 # Automatically-generated look-up tables for the DPD encoding
-/libfpfd-dpd/*/dpdtable*.s
+/libfpfd-dpd/*/*table*.s
 
 # Test executables
 /tests/*-dpd
