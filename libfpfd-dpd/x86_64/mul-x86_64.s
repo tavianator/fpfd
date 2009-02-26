@@ -88,6 +88,11 @@ fpfd32_impl_mul:
         movb %r9b, %cl
         movl %ecx, %r9d
         shrl $16, %ecx
+        shrw $8, %r10w
+        addb %r10b, %cl
+        shll $16, %ecx
+        movw %r9w, %cx
+        movl %ecx, %r9d
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         popq %rbx
