@@ -86,12 +86,37 @@ fpfd32_impl_mul:
 .Lnocarry2:
         shll $8, %ecx
         movb %r9b, %cl
+        andw $0xFF00, %r10w
+        shll $8, %r10d
+        addl %r10d, %ecx        /* Carry is impossible; r10b <= 0x98 */
         movl %ecx, %r9d
         shrl $16, %ecx
-        shrw $8, %r10w
-        addb %r10b, %cl
+        movb %cl, %ch
+        movb %r11b, %sil
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl
+        cmpb $0x9, %cl
+        jbe .Lnocarry3
+        addb $0x6, %cl
+.Lnocarry3:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %r11b, %sil
+        andw $0x00F0, %si
+        addw %si, %cx
+        movw %cx, %si
+        andw $0x0F00, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry4
+        addw $0x60, %cx
+.Lnocarry4:
         shll $16, %ecx
         movw %r9w, %cx
+        andw $0xFF00, %r11w
+        shll $16, %r11d
+        addl %r11d, %ecx
         movl %ecx, %r9d
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
