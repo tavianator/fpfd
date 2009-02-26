@@ -79,7 +79,7 @@ fpfd32_impl_mul:
         andw $0x00F0, %si
         addw %si, %cx
         movw %cx, %si
-        andw $0x0F00, %si
+        andw $0x0FF0, %si
         cmpw $0x90, %si
         jbe .Lnocarry2
         addw $0x60, %cx
@@ -107,7 +107,7 @@ fpfd32_impl_mul:
         andw $0x00F0, %si
         addw %si, %cx
         movw %cx, %si
-        andw $0x0F00, %si
+        andw $0x0FF0, %si
         cmpw $0x90, %si
         jbe .Lnocarry4
         addw $0x60, %cx
@@ -118,6 +118,35 @@ fpfd32_impl_mul:
         shll $16, %r11d
         addl %r11d, %ecx
         movl %ecx, %r9d
+        shrl $24, %ecx
+        movb %cl, %ch
+        movb %dl, %sil
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl
+        cmpb $0x9, %cl
+        jbe .Lnocarry5
+        addb $0x6, %cl
+.Lnocarry5:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %dl, %sil
+        andw $0x00F0, %si
+        addw %si, %cx
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry6
+        addw $0x60, %cx
+.Lnocarry6:
+        shlq $24, %rcx
+        andl $0x00FFFFFF, %r9d
+        orq %r9, %rcx
+        andw $0xFF00, %dx
+        shlq $24, %rdx
+        addq %rdx, %rcx
+        movq %rcx, %r9
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         popq %rbx
