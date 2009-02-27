@@ -44,7 +44,6 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  arch_init(); /* Initialize architecture-specific things */
   x86_bench(trials);
   x86_bench_results();
 
@@ -62,6 +61,7 @@ void
 x86_bench_results()
 {
   FILE *file;
+  char overhead_key[16];
 
   file = fopen("x86-mulb.dat", "w");
   write_ticks("mulb", file);
@@ -87,7 +87,9 @@ x86_bench_results()
   write_ticks("divl", file);
   fclose(file);
 
+  snprintf(overhead_key, sizeof(overhead_key), "overhead%u", bench_loops);
+
   file = fopen("x86-overhead.dat", "w");
-  write_ticks("overhead", file);
+  write_ticks(overhead_key, file);
   fclose(file);
 }

@@ -21,10 +21,10 @@ EXTRA_LTLIBRARIES        = libfpfd-bench.la
 libfpfd_bench_la_SOURCES = bench.h htable.c random.c x.c
 
 if X86
-  libfpfd_bench_la_SOURCES += x86/arch_init-x86.c x86/ticks-x86.s
+  libfpfd_bench_la_SOURCES += x86/bench_loops-x86.c x86/ticks-x86.s
 endif
 if X86_64
-  libfpfd_bench_la_SOURCES += x86_64/arch_init-x86_64.c x86_64/ticks-x86_64.s
+  libfpfd_bench_la_SOURCES += x86_64/bench_loops-x86_64.c x86_64/ticks-x86_64.s
 endif
 
 EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid

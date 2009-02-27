@@ -30,11 +30,10 @@
 #define NO_UNROLL() __asm__ volatile ("")
 
 /*
- * The type that stores the tick count of each trial, which is used by the hash
- * table.
+ * This type stores a list of tick counts from trials.
  */
 typedef struct {
-  unsigned int trials;
+  unsigned int trials, loops;
   long *list;
   size_t size, capacity;
 } ticklist_t;
@@ -61,11 +60,6 @@ ENTRY *xhsearch(ENTRY item, ACTION action);
 long ticks();
 
 /*
- * This function is architecture-specific. It sets bench_loops correctly.
- */
-void arch_init();
-
-/*
  * The number of times to call a function in a loop between calls to ticks() -
  * should be 1 if ticks() is accurate to 1 CPU tick, equal to the multiplier if
  * ticks() is accurate to 1 bus tick, and very high if we are using the fallback
@@ -80,7 +74,7 @@ extern unsigned int bench_loops;
  *     standard deviation above and below it, to file, in a format readable by
  *     plotutils' graph, gnuplot, or similar.
  */
-void record_ticks(const char *key, long tick_count);
+void record_ticks(const char *key, long tick_count, unsigned int loops);
 void write_ticks(const char *key, FILE *file);
 
 /* Random number generation */
