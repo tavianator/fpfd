@@ -56,6 +56,6 @@ fpfd32_bench_impl_scale(unsigned int trials)
     }
     ticks3 = ticks();
 
-    record_ticks("fpfd32_impl_scale", (ticks3 - ticks2) - (ticks2 - ticks1));
+    record_ticks("fpfd32_impl_scale", (ticks3 - ticks2) - (ticks2 - ticks1), j);
   }
 }

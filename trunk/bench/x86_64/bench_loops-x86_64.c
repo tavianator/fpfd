@@ -18,9 +18,6 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <stdint.h> /* For uint64_6 */
-
-unsigned int bench_loops;
 
 /*
  * AMD chips seem to update the TSC every clock cycle, which is good. Old Intel
@@ -32,8 +29,4 @@ unsigned int bench_loops;
  * support this, we set bench_loops to 256, which has a small remainder when
  * divided into any concievable clock multiplier.
  */
-void
-arch_init()
-{
-  bench_loops = 256;
-}
+unsigned int bench_loops = 256;

@@ -49,7 +49,7 @@ fpfd32_bench_impl_addsub(unsigned int trials)
     }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_add", ticks2 - ticks1);
+    record_ticks("fpfd32_impl_add", ticks2 - ticks1, j);
 
     ticks1 = ticks();
     BENCH_LOOP(j) {
@@ -58,6 +58,6 @@ fpfd32_bench_impl_addsub(unsigned int trials)
     }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_sub", ticks2 - ticks1);
+    record_ticks("fpfd32_impl_sub", ticks2 - ticks1, j);
   }
 }

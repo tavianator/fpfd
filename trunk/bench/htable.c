@@ -18,28 +18,38 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <search.h> /* For hsearch      */
-#include <stdlib.h> /* For malloc, exit */
-#include <stdio.h>  /* For perror       */
-#include <math.h>   /* For sqrt         */
+#include <search.h> /* For hsearch        */
+#include <stdlib.h> /* For malloc, exit   */
+#include <stdio.h>  /* For perror         */
+#include <string.h> /* For strlen, strcpy */
+#include <math.h>   /* For sqrt           */
 
-static void save_ticks(const char *key, long ticks);
+static void save_ticks(const char *key, long tick_count, unsigned int loops);
 static double mean_ticks(const char *key);
 static double stddev_ticks(const char *key);
 
 void
-record_ticks(const char *key, long tick_count)
+record_ticks(const char *key, long tick_count, unsigned int loops)
 {
-  long i, ticks1, ticks2;
+  long ticks1, ticks2;
+  unsigned int i;
+  char overhead_key[16];
 
-  ticks1 = ticks();
-  BENCH_LOOP(i) {
-    NO_UNROLL();
+  if (tick_count > 1) {
+    ticks1 = ticks();
+    for (i = 0; i < loops; ++i) {
+      NO_UNROLL();
+    }
+    ticks2 = ticks();
+  } else {
+    ticks1 = ticks();
+    ticks2 = ticks();
   }
-  ticks2 = ticks();
 
-  save_ticks(key, tick_count);
-  save_ticks("overhead", ticks2 - ticks1);
+  snprintf(overhead_key, sizeof(overhead_key), "overhead%u", loops);
+
+  save_ticks(key, tick_count, loops);
+  save_ticks(overhead_key, ticks2 - ticks1, loops);
 }
 
 void
@@ -49,20 +59,22 @@ write_ticks(const char *key, FILE *file)
   ticklist_t *tl;
   double overhead, mean, stddev;
   size_t i;
-
-  overhead = mean_ticks("overhead");
-  mean = mean_ticks(key) - overhead;
-  stddev = stddev_ticks(key);
+  char overhead_key[16];
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
-
   tl = ep->data;
+
+  snprintf(overhead_key, sizeof(overhead_key), "overhead%u", tl->loops);
+
+  overhead = mean_ticks(overhead_key);
+  mean = mean_ticks(key) - overhead;
+  stddev = stddev_ticks(key);
 
   /* Each trial */
   for (i = 0; i < tl->size; ++i) {
     fprintf(file, "%ld\t%g\n", (long)i,
-            ((double)tl->list[i] / bench_loops) - overhead);
+            ((double)tl->list[i] / tl->loops) - overhead);
   }
 
   /* Mean */
@@ -77,7 +89,7 @@ write_ticks(const char *key, FILE *file)
 }
 
 static void
-save_ticks(const char *key, long tick_count)
+save_ticks(const char *key, long tick_count, unsigned int loops)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -93,6 +105,8 @@ save_ticks(const char *key, long tick_count)
     tl->size = 0;
     tl->capacity = 1;
 
+    e.key = xmalloc(strlen(key));
+    strcpy(e.key, key);
     e.data = tl;
 
     ep = xhsearch(e, ENTER);
@@ -108,6 +122,7 @@ save_ticks(const char *key, long tick_count)
   }
 
   tl->list[tl->size] = tick_count;
+  tl->loops = loops;
   ++tl->size;
 }
 
@@ -121,14 +136,13 @@ mean_ticks(const char *key)
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
-
   tl = ep->data;
 
   for (i = 0; i < tl->size; ++i) {
     ticks += tl->list[i];
   }
 
-  return (ticks / tl->trials) / bench_loops;
+  return (ticks / tl->trials) / tl->loops;
 }
 
 static double
@@ -141,12 +155,11 @@ stddev_ticks(const char *key)
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
-
   tl = ep->data;
 
   for (i = 0; i < tl->size; ++i) {
     ticks = tl->list[i];
-    ticks /= bench_loops;
+    ticks /= tl->loops;
     ticks *= ticks;
     ticks_sq += ticks;
   }
