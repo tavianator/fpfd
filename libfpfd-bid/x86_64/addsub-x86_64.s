@@ -108,8 +108,8 @@ fpfd32_impl_addsub:
         shrq %cl, %rdx          /* Find the first digit of the remainder */
         movl %edx, %eax
         movq %r11, %rdx
-        cmpl $0, %eax
-        je .Laddspecial
+        testl %eax, %eax
+        jz .Laddspecial
         cmpl $5, %eax
         jne .Lrem
 .Laddspecial:
@@ -147,8 +147,8 @@ fpfd32_impl_addsub:
         addl $10, %eax
 .Laddcarrynoadj:
         addl $1, %r9d           /* Correct the exponent */
-        cmpl $0, %eax
-        je .Laddcarryspecial
+        testl %eax, %eax
+        jz .Laddcarryspecial
         cmpl $5, %eax
         jne .Lrem
 .Laddcarryspecial:
@@ -230,8 +230,8 @@ fpfd32_impl_addsub:
         shrq %cl, %rdx          /* Find the first digit of the remainder */
         movl %edx, %eax
         movq %r11, %rdx
-        cmpl $0, %eax
-        je .Lsubspecial
+        testl %eax, %eax
+        jz .Lsubspecial
         cmpl $5, %eax
         jne .Lrem
 .Lsubspecial:

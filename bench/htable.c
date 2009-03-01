@@ -18,19 +18,33 @@
  *************************************************************************/
 
 #include "bench.h"
-#include <search.h> /* For hsearch      */
-#include <stdlib.h> /* For malloc, exit */
-#include <stdio.h>  /* For perror       */
-#include <math.h>   /* For sqrt         */
+#include <search.h> /* For hsearch        */
+#include <stdlib.h> /* For malloc, exit   */
+#include <stdio.h>  /* For perror         */
+#include <string.h> /* For strlen, strcpy */
+#include <math.h>   /* For sqrt           */
 
-static void save_ticks(const char *key, long ticks);
+/*
+ * AMD chips seem to update the TSC every clock cycle, which is good. Old Intel
+ * chips (PIII, Pentium-M, and earlier) do this also. However, new ones, with
+ * the CONSTANT_TSC feature, update the counter  as if the processor is being
+ * run at its highest multiplier, even when it isn't, and furthermore only
+ * increment the TSC at FSB ticks, not CPU ticks. Thus, every TSC returned by
+ * rdtsc will be a multiple of the highest multiplier supported by the CPU. To
+ * support this, we set bench_loops to 256, which has a small remainder when
+ * divided into any concievable clock multiplier.
+ */
+unsigned int bench_loops = 256;
+
+static void save_ticks(const char *key, long tick_count);
 static double mean_ticks(const char *key);
 static double stddev_ticks(const char *key);
 
 void
 record_ticks(const char *key, long tick_count)
 {
-  long i, ticks1, ticks2;
+  long ticks1, ticks2;
+  unsigned int i;
 
   ticks1 = ticks();
   BENCH_LOOP(i) {
@@ -50,14 +64,13 @@ write_ticks(const char *key, FILE *file)
   double overhead, mean, stddev;
   size_t i;
 
+  e.key = (char *)key;
+  ep = xhsearch(e, FIND);
+  tl = ep->data;
+
   overhead = mean_ticks("overhead");
   mean = mean_ticks(key) - overhead;
   stddev = stddev_ticks(key);
-
-  e.key = (char *)key;
-  ep = xhsearch(e, FIND);
-
-  tl = ep->data;
 
   /* Each trial */
   for (i = 0; i < tl->size; ++i) {
@@ -93,6 +106,8 @@ save_ticks(const char *key, long tick_count)
     tl->size = 0;
     tl->capacity = 1;
 
+    e.key = xmalloc(strlen(key));
+    strcpy(e.key, key);
     e.data = tl;
 
     ep = xhsearch(e, ENTER);
@@ -121,7 +136,6 @@ mean_ticks(const char *key)
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
-
   tl = ep->data;
 
   for (i = 0; i < tl->size; ++i) {
@@ -141,7 +155,6 @@ stddev_ticks(const char *key)
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
-
   tl = ep->data;
 
   for (i = 0; i < tl->size; ++i) {

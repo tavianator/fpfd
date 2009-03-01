@@ -193,7 +193,7 @@ fpfd32_impl_assert_ora2esfh(const char *op, const fpfd32_impl_t *res,
 }
 
 void
-fpfd32_impl_assert_ora2esfvh(const char *op, const fpfd32_impl_t *res,
+fpfd32_impl_assert_ora2esfhv(const char *op, const fpfd32_impl_t *res,
                              const fpfd32_impl_t *op1, const fpfd32_impl_t *op2,
                              int exp, int sign, fpfd_special_t special,
                              int cohort, int rexp, int rval)

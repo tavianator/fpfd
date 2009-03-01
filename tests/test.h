@@ -208,16 +208,16 @@ extern "C" {
    *                              exp, sign, special, cohort)
    */
 
-#define fpfd_impl_assert_ora2esfvh(op, res, arg1, arg2, exp, sign, special, \
+#define fpfd_impl_assert_ora2esfhv(op, res, arg1, arg2, exp, sign, special, \
                                    cohort, rval)                            \
-  fpfd32_impl_assert_ora2esfvh(#op, res##32, arg1##32, arg2##32,            \
+  fpfd32_impl_assert_ora2esfhv(#op, res##32, arg1##32, arg2##32,            \
                                exp, sign, special, cohort, rval,            \
                                fpfd32_##op(res##32, arg1##32, arg2##32))
   /*
-   * fpfd64_impl_assert_ora2esfvh(#op, res##64, arg1##64, arg2##64,
+   * fpfd64_impl_assert_ora2esfhv(#op, res##64, arg1##64, arg2##64,
    *                              exp, sign, special, cohort, rval,
    *                              fpfd64_##op(res##64, arg1##64, arg2##64))
-   * fpfd128_impl_assert_ora2esfvh(#op, res##128, arg1##128, arg2##128,
+   * fpfd128_impl_assert_ora2esfhv(#op, res##128, arg1##128, arg2##128,
    *                               exp, sign, special, cohort, rval,
    *                               fpfd128_##op(res##128, arg1##128, arg2##128))
    */
@@ -269,7 +269,7 @@ void fpfd32_impl_assert_ora2esfh(const char *op, const fpfd32_impl_t *res,
                                  const fpfd32_impl_t *op1,
                                  const fpfd32_impl_t *op2, int exp, int sign,
                                  fpfd_special_t special, int cohort);
-void fpfd32_impl_assert_ora2esfvh(const char *op, const fpfd32_impl_t *res,
+void fpfd32_impl_assert_ora2esfhv(const char *op, const fpfd32_impl_t *res,
                                   const fpfd32_impl_t *op1,
                                   const fpfd32_impl_t *op2,
                                   int exp, int sign, fpfd_special_t special,

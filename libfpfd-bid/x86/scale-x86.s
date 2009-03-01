@@ -39,7 +39,7 @@ fpfd32_impl_scale:
         jz .LLSW
         movl %eax, -8(%esp)
         movl %edx, -4(%esp)
-        movl fpfd32_msw_bsr2div+4(,%ebx,8), %ecx
+        movl msw_bsr2div+4(,%ebx,8), %ecx
         mull %ecx
         movl %eax, %edi
         movl %edx, %ebp
@@ -49,18 +49,18 @@ fpfd32_impl_scale:
         adcl $0, %edx
         movl %edx, %ecx
         movl -4(%esp), %eax
-        mull fpfd32_msw_bsr2div(,%ebx,8)
+        mull msw_bsr2div(,%ebx,8)
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
         movl -8(%esp), %eax
-        mull fpfd32_msw_bsr2div(,%ebx,8)
+        mull msw_bsr2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
         adcl $0, %ecx
         movl %ebp, %eax
         movl %ecx, %edx
-        movb fpfd32_msw_bsr2shr(,%ebx,1), %cl
+        movb msw_bsr2shr(,%ebx,1), %cl
         cmpb $32, %cl
         jb .LshrdMSW
         subb $32, %cl
@@ -69,20 +69,20 @@ fpfd32_impl_scale:
         xorb %cl, %cl
 .LshrdMSW:
         shrdl %cl, %edx, %eax
-        movl fpfd32_msw_bsr2exp(,%ebx,4), %ebx
+        movl msw_bsr2exp(,%ebx,4), %ebx
         movl %eax, -12(%esp)
         movl %eax, %edi
-        mull fpfd32_msw_exp2mul(,%ebx,8)
+        mull msw_exp2mul(,%ebx,8)
         movl %eax, %ebp
         movl %edx, %ecx
         movl %edi, %eax
-        mull fpfd32_msw_exp2mul+4(,%ebx,8)
+        mull msw_exp2mul+4(,%ebx,8)
         addl %ecx, %eax
         subl %ebp, -8(%esp)
         sbbl %eax, -4(%esp)
         movl -8(%esp), %eax
         subl $1, %ebx
-        movl fpfd32_msw_exp2div+4(,%ebx,8), %ecx
+        movl msw_exp2div+4(,%ebx,8), %ecx
         mull %ecx
         movl %eax, %edi
         movl %edx, %ebp
@@ -92,18 +92,18 @@ fpfd32_impl_scale:
         adcl $0, %edx
         movl %edx, %ecx
         movl -4(%esp), %eax
-        mull fpfd32_msw_exp2div(,%ebx,8)
+        mull msw_exp2div(,%ebx,8)
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
         movl -8(%esp), %eax
-        mull fpfd32_msw_exp2div(,%ebx,8)
+        mull msw_exp2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
         adcl $0, %ecx
         movl %ebp, %eax
         movl %ecx, %edx
-        movb fpfd32_msw_exp2shr(,%ebx,1), %cl
+        movb msw_exp2shr(,%ebx,1), %cl
         cmpb $32, %cl
         jb .LshrdremMSW
         subb $32, %cl
@@ -113,17 +113,17 @@ fpfd32_impl_scale:
 .LshrdremMSW:
         shrdl %cl, %edx, %eax
         movl -12(%esp), %edx
-        cmpl $0, %eax
-        je .LspecialMSW
+        testl %eax, %eax
+        jz .LspecialMSW
         cmpl $5, %eax
         jne .LexpcorrectLSW
 .LspecialMSW:
         movl %eax, %edi
-        mull fpfd32_msw_exp2mul(,%ebx,8)
+        mull msw_exp2mul(,%ebx,8)
         movl %eax, %ebp
         movl %edx, %ecx
         movl %edi, %eax
-        mull fpfd32_msw_exp2mul+4(,%ebx,8)
+        mull msw_exp2mul+4(,%ebx,8)
         addl %eax, %ecx
         movl %edi, %eax
         movl -12(%esp), %edx
@@ -147,8 +147,8 @@ fpfd32_impl_scale:
         jmp .Lnorm
 .LunderLSW:
         /* Scale the mantissa to within normalized range */
-        imull fpfd32_lsw_bsr2mul(,%ebx,4), %eax
-        movl fpfd32_lsw_bsr2exp(,%ebx,4), %ebx
+        imull lsw_bsr2mul(,%ebx,4), %eax
+        movl lsw_bsr2exp(,%ebx,4), %ebx
         addl 8(%esi), %ebx      /* Correct the exponent */
         movl %eax, %edx
         xorl %eax, %eax
@@ -159,30 +159,30 @@ fpfd32_impl_scale:
         jmp .Lnorm
 .LoverLSW:
         movl %eax, %edi
-        mull fpfd32_lsw_bsr2div(,%ebx,4)
-        movb fpfd32_lsw_bsr2shr(,%ebx,1), %cl
+        mull lsw_bsr2div(,%ebx,4)
+        movb lsw_bsr2shr(,%ebx,1), %cl
         shrl %cl, %edx
-        movl fpfd32_lsw_bsr2exp(,%ebx,4), %ebx
+        movl lsw_bsr2exp(,%ebx,4), %ebx
         movl %edx, %ebp
         movl %edx, %eax
-        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        mull lsw_exp2mul(,%ebx,4)
         subl %eax, %edi
         movl %edi, %eax
         movl %ebp, %edx
         subl $1, %ebx
         jz .LexpcorrectLSW
-        mull fpfd32_lsw_exp2div(,%ebx,4)
-        movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
+        mull lsw_exp2div(,%ebx,4)
+        movb lsw_exp2shr(,%ebx,1), %cl
         shrl %cl, %edx
         movl %edx, %eax
         movl %ebp, %edx
-        cmpl $0, %eax
-        je .LspecialLSW
+        testl %eax, %eax
+        jz .LspecialLSW
         cmpl $5, %eax
         jne .LexpcorrectLSW
 .LspecialLSW:
         movl %eax, %ecx
-        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        mull lsw_exp2mul(,%ebx,4)
         movl %ebp, %edx
         xchgl %eax, %ecx
         cmpl %ecx, %edi
@@ -203,13 +203,13 @@ fpfd32_impl_scale:
         shll %eax
         subl %ecx, %eax
         negl %eax               /* Calculate the remainder */
-        cmpl $0, %eax
-        je .LspecialLSW2
+        testl %eax, %eax
+        jz .LspecialLSW2
         cmpl $5, %eax
         jne .Lnorm
 .LspecialLSW2:
-        cmpl $0, %edi
-        je .Lnorm
+        testl %edi, %edi
+        jz .Lnorm
         addl $1, %eax           /* Correct it with the last remainder */
 .Lnorm:
         cmpl $90, %ebx
@@ -233,38 +233,38 @@ fpfd32_impl_scale:
         movl %eax, -4(%esp)
         movl %edx, %edi
         movl %edx, %eax
-        mull fpfd32_lsw_exp2div(,%ebx,4)
-        movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
+        mull lsw_exp2div(,%ebx,4)
+        movb lsw_exp2shr(,%ebx,1), %cl
         shrl %cl, %edx
         movl %edx, %ecx
         movl %edx, %eax
-        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        mull lsw_exp2mul(,%ebx,4)
         subl %eax, %edi
         movl %edi, %eax
         movl %ecx, %edx
         subl $1, %ebx
         jz .Lsubnormret
         movl %edx, %ebp
-        mull fpfd32_lsw_exp2div(,%ebx,4)
-        movb fpfd32_lsw_exp2shr(,%ebx,1), %cl
+        mull lsw_exp2div(,%ebx,4)
+        movb lsw_exp2shr(,%ebx,1), %cl
         shrl %cl, %edx
         movl %edx, %eax
         movl %ebp, %edx
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial:
         movl %eax, %ecx
-        mull fpfd32_lsw_exp2mul(,%ebx,4)
+        mull lsw_exp2mul(,%ebx,4)
         movl %ebp, %edx
         xchgl %eax, %ecx
         cmpl %ecx, %edi
         je .Lspecial2
         addl $1, %eax
 .Lspecial2:
-        cmpl $0, %eax
-        je .Lspecial3
+        testl %eax, %eax
+        jz .Lspecial3
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial3:
@@ -326,8 +326,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lspecial4:
-        cmpl $0, %ebx
-        je .Lspecial5
+        testl %ebx, %ebx
+        jz .Lspecial5
         addl $1, %eax           /* Correct it with the last remainder */
 .Lspecial5:
         cmpl $0x10, %eax
@@ -340,8 +340,8 @@ fpfd32_impl_scale:
         popl %ebx
         ret
 .Lspecial6:
-        cmpl $0, %ebp
-        je .Lspecial7
+        testl %ebp, %ebp
+        jz .Lspecial7
         addl $1, %eax
 .Lspecial7:
         popl %ebp
@@ -353,293 +353,289 @@ fpfd32_impl_scale:
 
         .section .rodata
         .align 32
-        .type fpfd32_msw_bsr2div, @object
-        .size fpfd32_msw_bsr2div, 256
-fpfd32_msw_bsr2div:
-        .quad 0x83126E978D4FDF3C        /* fpfd32_msw_bsr2div[0] = 10 ** -3 */
-        .quad 0x83126E978D4FDF3C        /* fpfd32_msw_bsr2div[1] = 10 ** -3 */
-        .quad 0xD1B71758E219652C        /* fpfd32_msw_bsr2div[2] = 10 ** -4 */
-        .quad 0xD1B71758E219652C        /* fpfd32_msw_bsr2div[3] = 10 ** -4 */
-        .quad 0xD1B71758E219652C        /* fpfd32_msw_bsr2div[4] = 10 ** -4 */
-        .quad 0xA7C5AC471B478424        /* fpfd32_msw_bsr2div[5] = 10 ** -5 */
-        .quad 0xA7C5AC471B478424        /* fpfd32_msw_bsr2div[6] = 10 ** -5 */
-        .quad 0xA7C5AC471B478424        /* fpfd32_msw_bsr2div[7] = 10 ** -5 */
-        .quad 0x8637BD05AF6C69B6        /* fpfd32_msw_bsr2div[8] = 10 ** -6 */
-        .quad 0x8637BD05AF6C69B6        /* fpfd32_msw_bsr2div[9] = 10 ** -6 */
-        .quad 0x8637BD05AF6C69B6        /* fpfd32_msw_bsr2div[10] = 10 ** -6 */
-        .quad 0x8637BD05AF6C69B6        /* fpfd32_msw_bsr2div[11] = 10 ** -6 */
-        .quad 0xD6BF94D5E57A42BD        /* fpfd32_msw_bsr2div[12] = 10 ** -7 */
-        .quad 0xD6BF94D5E57A42BD        /* fpfd32_msw_bsr2div[13] = 10 ** -7 */
-        .quad 0xD6BF94D5E57A42BD        /* fpfd32_msw_bsr2div[14] = 10 ** -7 */
-        .quad 0xABCC77118461CEFD        /* fpfd32_msw_bsr2div[15] = 10 ** -8 */
-        .quad 0xABCC77118461CEFD        /* fpfd32_msw_bsr2div[16] = 10 ** -8 */
-        .quad 0xABCC77118461CEFD        /* fpfd32_msw_bsr2div[17] = 10 ** -8 */
-        .quad 0x89705F4136B4A598        /* fpfd32_msw_bsr2div[18] = 10 ** -9 */
-        .quad 0x89705F4136B4A598        /* fpfd32_msw_bsr2div[19] = 10 ** -9 */
-        .quad 0x89705F4136B4A598        /* fpfd32_msw_bsr2div[20] = 10 ** -9 */
-        .quad 0x89705F4136B4A598        /* fpfd32_msw_bsr2div[21] = 10 ** -9 */
-        .quad 0xDBE6FECEBDEDD5BF        /* fpfd32_msw_bsr2div[22] = 10 ** -10 */
-        .quad 0xDBE6FECEBDEDD5BF        /* fpfd32_msw_bsr2div[23] = 10 ** -10 */
-        .quad 0xDBE6FECEBDEDD5BF        /* fpfd32_msw_bsr2div[24] = 10 ** -10 */
-        .quad 0xAFEBFF0BCB24AAFF        /* fpfd32_msw_bsr2div[25] = 10 ** -11 */
-        .quad 0xAFEBFF0BCB24AAFF        /* fpfd32_msw_bsr2div[26] = 10 ** -11 */
-        .quad 0xAFEBFF0BCB24AAFF        /* fpfd32_msw_bsr2div[27] = 10 ** -11 */
-        .quad 0x8CBCCC096F5088CC        /* fpfd32_msw_bsr2div[28] = 10 ** -12 */
-        .quad 0x8CBCCC096F5088CC        /* fpfd32_msw_bsr2div[29] = 10 ** -12 */
-        .quad 0x8CBCCC096F5088CC        /* fpfd32_msw_bsr2div[30] = 10 ** -12 */
-        .quad 0x8CBCCC096F5088CC        /* fpfd32_msw_bsr2div[31] = 10 ** -12 */
+        .type msw_bsr2div, @object
+        .size msw_bsr2div, 256
+msw_bsr2div:
+        .quad 0x83126E978D4FDF3C        /* msw_bsr2div[0] = 10 ** -3 */
+        .quad 0x83126E978D4FDF3C        /* msw_bsr2div[1] = 10 ** -3 */
+        .quad 0xD1B71758E219652C        /* msw_bsr2div[2] = 10 ** -4 */
+        .quad 0xD1B71758E219652C        /* msw_bsr2div[3] = 10 ** -4 */
+        .quad 0xD1B71758E219652C        /* msw_bsr2div[4] = 10 ** -4 */
+        .quad 0xA7C5AC471B478424        /* msw_bsr2div[5] = 10 ** -5 */
+        .quad 0xA7C5AC471B478424        /* msw_bsr2div[6] = 10 ** -5 */
+        .quad 0xA7C5AC471B478424        /* msw_bsr2div[7] = 10 ** -5 */
+        .quad 0x8637BD05AF6C69B6        /* msw_bsr2div[8] = 10 ** -6 */
+        .quad 0x8637BD05AF6C69B6        /* msw_bsr2div[9] = 10 ** -6 */
+        .quad 0x8637BD05AF6C69B6        /* msw_bsr2div[10] = 10 ** -6 */
+        .quad 0x8637BD05AF6C69B6        /* msw_bsr2div[11] = 10 ** -6 */
+        .quad 0xD6BF94D5E57A42BD        /* msw_bsr2div[12] = 10 ** -7 */
+        .quad 0xD6BF94D5E57A42BD        /* msw_bsr2div[13] = 10 ** -7 */
+        .quad 0xD6BF94D5E57A42BD        /* msw_bsr2div[14] = 10 ** -7 */
+        .quad 0xABCC77118461CEFD        /* msw_bsr2div[15] = 10 ** -8 */
+        .quad 0xABCC77118461CEFD        /* msw_bsr2div[16] = 10 ** -8 */
+        .quad 0xABCC77118461CEFD        /* msw_bsr2div[17] = 10 ** -8 */
+        .quad 0x89705F4136B4A598        /* msw_bsr2div[18] = 10 ** -9 */
+        .quad 0x89705F4136B4A598        /* msw_bsr2div[19] = 10 ** -9 */
+        .quad 0x89705F4136B4A598        /* msw_bsr2div[20] = 10 ** -9 */
+        .quad 0x89705F4136B4A598        /* msw_bsr2div[21] = 10 ** -9 */
+        .quad 0xDBE6FECEBDEDD5BF        /* msw_bsr2div[22] = 10 ** -10 */
+        .quad 0xDBE6FECEBDEDD5BF        /* msw_bsr2div[23] = 10 ** -10 */
+        .quad 0xDBE6FECEBDEDD5BF        /* msw_bsr2div[24] = 10 ** -10 */
+        .quad 0xAFEBFF0BCB24AAFF        /* msw_bsr2div[25] = 10 ** -11 */
+        .quad 0xAFEBFF0BCB24AAFF        /* msw_bsr2div[26] = 10 ** -11 */
+        .quad 0xAFEBFF0BCB24AAFF        /* msw_bsr2div[27] = 10 ** -11 */
+        .quad 0x8CBCCC096F5088CC        /* msw_bsr2div[28] = 10 ** -12 */
+        .quad 0x8CBCCC096F5088CC        /* msw_bsr2div[29] = 10 ** -12 */
+        .quad 0x8CBCCC096F5088CC        /* msw_bsr2div[30] = 10 ** -12 */
+        .quad 0x8CBCCC096F5088CC        /* msw_bsr2div[31] = 10 ** -12 */
 
         .align 32
-        .type fpfd32_msw_bsr2shr, @object
-        .size fpfd32_msw_bsr2shr, 32
-fpfd32_msw_bsr2shr:
-        .byte 9         /* fpfd32_msw_bsr2shr[0] */
-        .byte 9         /* fpfd32_msw_bsr2shr[1] */
-        .byte 13        /* fpfd32_msw_bsr2shr[2] */
-        .byte 13        /* fpfd32_msw_bsr2shr[3] */
-        .byte 13        /* fpfd32_msw_bsr2shr[4] */
-        .byte 16        /* fpfd32_msw_bsr2shr[5] */
-        .byte 16        /* fpfd32_msw_bsr2shr[6] */
-        .byte 16        /* fpfd32_msw_bsr2shr[7] */
-        .byte 19        /* fpfd32_msw_bsr2shr[8] */
-        .byte 19        /* fpfd32_msw_bsr2shr[9] */
-        .byte 19        /* fpfd32_msw_bsr2shr[10] */
-        .byte 19        /* fpfd32_msw_bsr2shr[11] */
-        .byte 23        /* fpfd32_msw_bsr2shr[12] */
-        .byte 23        /* fpfd32_msw_bsr2shr[13] */
-        .byte 23        /* fpfd32_msw_bsr2shr[14] */
-        .byte 26        /* fpfd32_msw_bsr2shr[15] */
-        .byte 26        /* fpfd32_msw_bsr2shr[16] */
-        .byte 26        /* fpfd32_msw_bsr2shr[17] */
-        .byte 29        /* fpfd32_msw_bsr2shr[18] */
-        .byte 29        /* fpfd32_msw_bsr2shr[19] */
-        .byte 29        /* fpfd32_msw_bsr2shr[20] */
-        .byte 29        /* fpfd32_msw_bsr2shr[21] */
-        .byte 33        /* fpfd32_msw_bsr2shr[22] */
-        .byte 33        /* fpfd32_msw_bsr2shr[23] */
-        .byte 33        /* fpfd32_msw_bsr2shr[24] */
-        .byte 36        /* fpfd32_msw_bsr2shr[25] */
-        .byte 36        /* fpfd32_msw_bsr2shr[26] */
-        .byte 36        /* fpfd32_msw_bsr2shr[27] */
-        .byte 39        /* fpfd32_msw_bsr2shr[28] */
-        .byte 39        /* fpfd32_msw_bsr2shr[29] */
-        .byte 39        /* fpfd32_msw_bsr2shr[30] */
-        .byte 39        /* fpfd32_msw_bsr2shr[31] */
+        .type msw_bsr2shr, @object
+        .size msw_bsr2shr, 32
+msw_bsr2shr:
+        .byte 9         /* msw_bsr2shr[0] */
+        .byte 9         /* msw_bsr2shr[1] */
+        .byte 13        /* msw_bsr2shr[2] */
+        .byte 13        /* msw_bsr2shr[3] */
+        .byte 13        /* msw_bsr2shr[4] */
+        .byte 16        /* msw_bsr2shr[5] */
+        .byte 16        /* msw_bsr2shr[6] */
+        .byte 16        /* msw_bsr2shr[7] */
+        .byte 19        /* msw_bsr2shr[8] */
+        .byte 19        /* msw_bsr2shr[9] */
+        .byte 19        /* msw_bsr2shr[10] */
+        .byte 19        /* msw_bsr2shr[11] */
+        .byte 23        /* msw_bsr2shr[12] */
+        .byte 23        /* msw_bsr2shr[13] */
+        .byte 23        /* msw_bsr2shr[14] */
+        .byte 26        /* msw_bsr2shr[15] */
+        .byte 26        /* msw_bsr2shr[16] */
+        .byte 26        /* msw_bsr2shr[17] */
+        .byte 29        /* msw_bsr2shr[18] */
+        .byte 29        /* msw_bsr2shr[19] */
+        .byte 29        /* msw_bsr2shr[20] */
+        .byte 29        /* msw_bsr2shr[21] */
+        .byte 33        /* msw_bsr2shr[22] */
+        .byte 33        /* msw_bsr2shr[23] */
+        .byte 33        /* msw_bsr2shr[24] */
+        .byte 36        /* msw_bsr2shr[25] */
+        .byte 36        /* msw_bsr2shr[26] */
+        .byte 36        /* msw_bsr2shr[27] */
+        .byte 39        /* msw_bsr2shr[28] */
+        .byte 39        /* msw_bsr2shr[29] */
+        .byte 39        /* msw_bsr2shr[30] */
+        .byte 39        /* msw_bsr2shr[31] */
 
         .align 32
-        .type fpfd32_msw_bsr2exp, @object
-        .size fpfd32_msw_bsr2exp, 128
-fpfd32_msw_bsr2exp:
-        .long 3         /* fpfd32_msw_bsr2exp[0] */
-        .long 3         /* fpfd32_msw_bsr2exp[1] */
-        .long 4         /* fpfd32_msw_bsr2exp[2] */
-        .long 4         /* fpfd32_msw_bsr2exp[3] */
-        .long 4         /* fpfd32_msw_bsr2exp[4] */
-        .long 5         /* fpfd32_msw_bsr2exp[5] */
-        .long 5         /* fpfd32_msw_bsr2exp[6] */
-        .long 5         /* fpfd32_msw_bsr2exp[7] */
-        .long 6         /* fpfd32_msw_bsr2exp[8] */
-        .long 6         /* fpfd32_msw_bsr2exp[9] */
-        .long 6         /* fpfd32_msw_bsr2exp[10] */
-        .long 6         /* fpfd32_msw_bsr2exp[11] */
-        .long 7         /* fpfd32_msw_bsr2exp[12] */
-        .long 7         /* fpfd32_msw_bsr2exp[13] */
-        .long 7         /* fpfd32_msw_bsr2exp[14] */
-        .long 8         /* fpfd32_msw_bsr2exp[15] */
-        .long 8         /* fpfd32_msw_bsr2exp[16] */
-        .long 8         /* fpfd32_msw_bsr2exp[17] */
-        .long 9         /* fpfd32_msw_bsr2exp[18] */
-        .long 9         /* fpfd32_msw_bsr2exp[19] */
-        .long 9         /* fpfd32_msw_bsr2exp[20] */
-        .long 9         /* fpfd32_msw_bsr2exp[21] */
-        .long 10        /* fpfd32_msw_bsr2exp[22] */
-        .long 10        /* fpfd32_msw_bsr2exp[23] */
-        .long 10        /* fpfd32_msw_bsr2exp[24] */
-        .long 11        /* fpfd32_msw_bsr2exp[25] */
-        .long 11        /* fpfd32_msw_bsr2exp[26] */
-        .long 11        /* fpfd32_msw_bsr2exp[27] */
-        .long 12        /* fpfd32_msw_bsr2exp[28] */
-        .long 12        /* fpfd32_msw_bsr2exp[29] */
-        .long 12        /* fpfd32_msw_bsr2exp[30] */
-        .long 12        /* fpfd32_msw_bsr2exp[31] */
+        .type msw_bsr2exp, @object
+        .size msw_bsr2exp, 128
+msw_bsr2exp:
+        .long 3         /* msw_bsr2exp[0] */
+        .long 3         /* msw_bsr2exp[1] */
+        .long 4         /* msw_bsr2exp[2] */
+        .long 4         /* msw_bsr2exp[3] */
+        .long 4         /* msw_bsr2exp[4] */
+        .long 5         /* msw_bsr2exp[5] */
+        .long 5         /* msw_bsr2exp[6] */
+        .long 5         /* msw_bsr2exp[7] */
+        .long 6         /* msw_bsr2exp[8] */
+        .long 6         /* msw_bsr2exp[9] */
+        .long 6         /* msw_bsr2exp[10] */
+        .long 6         /* msw_bsr2exp[11] */
+        .long 7         /* msw_bsr2exp[12] */
+        .long 7         /* msw_bsr2exp[13] */
+        .long 7         /* msw_bsr2exp[14] */
+        .long 8         /* msw_bsr2exp[15] */
+        .long 8         /* msw_bsr2exp[16] */
+        .long 8         /* msw_bsr2exp[17] */
+        .long 9         /* msw_bsr2exp[18] */
+        .long 9         /* msw_bsr2exp[19] */
+        .long 9         /* msw_bsr2exp[20] */
+        .long 9         /* msw_bsr2exp[21] */
+        .long 10        /* msw_bsr2exp[22] */
+        .long 10        /* msw_bsr2exp[23] */
+        .long 10        /* msw_bsr2exp[24] */
+        .long 11        /* msw_bsr2exp[25] */
+        .long 11        /* msw_bsr2exp[26] */
+        .long 11        /* msw_bsr2exp[27] */
+        .long 12        /* msw_bsr2exp[28] */
+        .long 12        /* msw_bsr2exp[29] */
+        .long 12        /* msw_bsr2exp[30] */
+        .long 12        /* msw_bsr2exp[31] */
 
         .align 32
-        .type fpfd32_msw_exp2mul, @object
-        .size fpfd32_msw_exp2mul, 104
-fpfd32_msw_exp2mul:
-        .zero 24                /* fpfd32_msw_exp2mul[i], i < 3, is undefined */
-        .quad 1000              /* fpfd32_msw_exp2mul[3] */
-        .quad 10000             /* fpfd32_msw_exp2mul[4] */
-        .quad 100000            /* fpfd32_msw_exp2mul[5] */
-        .quad 1000000           /* fpfd32_msw_exp2mul[6] */
-        .quad 10000000          /* fpfd32_msw_exp2mul[7] */
-        .quad 100000000         /* fpfd32_msw_exp2mul[8] */
-        .quad 1000000000        /* fpfd32_msw_exp2mul[9] */
-        .quad 10000000000       /* fpfd32_msw_exp2mul[10] */
-        .quad 100000000000      /* fpfd32_msw_exp2mul[11] */
-        .quad 1000000000000     /* fpfd32_msw_exp2mul[12] */
+        .type msw_exp2mul, @object
+        .size msw_exp2mul, 104
+msw_exp2mul:
+        .zero 24                /* msw_exp2mul[i], i < 3, is undefined */
+        .quad 1000              /* msw_exp2mul[3] */
+        .quad 10000             /* msw_exp2mul[4] */
+        .quad 100000            /* msw_exp2mul[5] */
+        .quad 1000000           /* msw_exp2mul[6] */
+        .quad 10000000          /* msw_exp2mul[7] */
+        .quad 100000000         /* msw_exp2mul[8] */
+        .quad 1000000000        /* msw_exp2mul[9] */
+        .quad 10000000000       /* msw_exp2mul[10] */
+        .quad 100000000000      /* msw_exp2mul[11] */
+        .quad 1000000000000     /* msw_exp2mul[12] */
 
         .align 32
-        .type fpfd32_msw_exp2div, @object
-        .size fpfd32_msw_exp2div, 96
-fpfd32_msw_exp2div:
-        .zero 24                        /* fpfd32_msw_exp2div[i], i < 3 */
-        .quad 0x83126E978D4FDF3C        /* fpfd32_msw_exp2div[3]  = 10 ** -3 */
-        .quad 0xD1B71758E219652C        /* fpfd32_msw_exp2div[4]  = 10 ** -4 */
-        .quad 0xA7C5AC471B478424        /* fpfd32_msw_exp2div[5]  = 10 ** -5 */
-        .quad 0x8637BD05AF6C69B6        /* fpfd32_msw_exp2div[6]  = 10 ** -6 */
-        .quad 0xD6BF94D5E57A42BD        /* fpfd32_msw_exp2div[7]  = 10 ** -7 */
-        .quad 0xABCC77118461CEFD        /* fpfd32_msw_exp2div[8]  = 10 ** -8 */
-        .quad 0x89705F4136B4A598        /* fpfd32_msw_exp2div[9]  = 10 ** -9 */
-        .quad 0xDBE6FECEBDEDD5BF        /* fpfd32_msw_exp2div[10] = 10 ** -10 */
-        .quad 0xAFEBFF0BCB24AAFF        /* fpfd32_msw_exp2div[11] = 10 ** -11 */
+        .type msw_exp2div, @object
+        .size msw_exp2div, 96
+msw_exp2div:
+        .zero 24                        /* msw_exp2div[i], i < 3 */
+        .quad 0x83126E978D4FDF3C        /* msw_exp2div[3]  = 10 ** -3 */
+        .quad 0xD1B71758E219652C        /* msw_exp2div[4]  = 10 ** -4 */
+        .quad 0xA7C5AC471B478424        /* msw_exp2div[5]  = 10 ** -5 */
+        .quad 0x8637BD05AF6C69B6        /* msw_exp2div[6]  = 10 ** -6 */
+        .quad 0xD6BF94D5E57A42BD        /* msw_exp2div[7]  = 10 ** -7 */
+        .quad 0xABCC77118461CEFD        /* msw_exp2div[8]  = 10 ** -8 */
+        .quad 0x89705F4136B4A598        /* msw_exp2div[9]  = 10 ** -9 */
+        .quad 0xDBE6FECEBDEDD5BF        /* msw_exp2div[10] = 10 ** -10 */
+        .quad 0xAFEBFF0BCB24AAFF        /* msw_exp2div[11] = 10 ** -11 */
 
         .align 32
-        .type fpfd32_msw_exp2shr, @object
-        .size fpfd32_msw_exp2shr, 12
-fpfd32_msw_exp2shr:
-        .zero 3         /* fpfd32_msw_exp2shr[i], i < 3, is undefined */
-        .byte 9         /* fpfd32_msw_exp2shr[3] */
-        .byte 13        /* fpfd32_msw_exp2shr[4] */
-        .byte 16        /* fpfd32_msw_exp2shr[5] */
-        .byte 19        /* fpfd32_msw_exp2shr[6] */
-        .byte 23        /* fpfd32_msw_exp2shr[7] */
-        .byte 26        /* fpfd32_msw_exp2shr[8] */
-        .byte 29        /* fpfd32_msw_exp2shr[9] */
-        .byte 33        /* fpfd32_msw_exp2shr[10] */
-        .byte 36        /* fpfd32_msw_exp2shr[11] */
+        .type msw_exp2shr, @object
+        .size msw_exp2shr, 12
+msw_exp2shr:
+        .zero 3         /* msw_exp2shr[i], i < 3, is undefined */
+        .byte 9         /* msw_exp2shr[3] */
+        .byte 13        /* msw_exp2shr[4] */
+        .byte 16        /* msw_exp2shr[5] */
+        .byte 19        /* msw_exp2shr[6] */
+        .byte 23        /* msw_exp2shr[7] */
+        .byte 26        /* msw_exp2shr[8] */
+        .byte 29        /* msw_exp2shr[9] */
+        .byte 33        /* msw_exp2shr[10] */
+        .byte 36        /* msw_exp2shr[11] */
 
         .align 32
-        .type fpfd32_lsw_bsr2mul, @object
-        .size fpfd32_lsw_bsr2mul, 92
-fpfd32_lsw_bsr2mul:
-        .long 1000000           /* fpfd32_lsw_bsr2mul[0] */
-        .long 1000000           /* fpfd32_lsw_bsr2mul[1] */
-        .long 1000000           /* fpfd32_lsw_bsr2mul[2] */
-        .long 100000            /* fpfd32_lsw_bsr2mul[3] */
-        .long 100000            /* fpfd32_lsw_bsr2mul[4] */
-        .long 100000            /* fpfd32_lsw_bsr2mul[5] */
-        .long 10000             /* fpfd32_lsw_bsr2mul[6] */
-        .long 10000             /* fpfd32_lsw_bsr2mul[7] */
-        .long 10000             /* fpfd32_lsw_bsr2mul[8] */
-        .long 1000              /* fpfd32_lsw_bsr2mul[9] */
-        .long 1000              /* fpfd32_lsw_bsr2mul[10] */
-        .long 1000              /* fpfd32_lsw_bsr2mul[11] */
-        .long 1000              /* fpfd32_lsw_bsr2mul[12] */
-        .long 100               /* fpfd32_lsw_bsr2mul[13] */
-        .long 100               /* fpfd32_lsw_bsr2mul[14] */
-        .long 100               /* fpfd32_lsw_bsr2mul[15] */
-        .long 10                /* fpfd32_lsw_bsr2mul[16] */
-        .long 10                /* fpfd32_lsw_bsr2mul[17] */
-        .long 10                /* fpfd32_lsw_bsr2mul[18] */
-        .long 1                 /* fpfd32_lsw_bsr2mul[19] */
-        .long 1                 /* fpfd32_lsw_bsr2mul[20] */
-        .long 1                 /* fpfd32_lsw_bsr2mul[21] */
-        .long 1                 /* fpfd32_lsw_bsr2mul[22] */
+        .type lsw_bsr2mul, @object
+        .size lsw_bsr2mul, 92
+lsw_bsr2mul:
+        .long 1000000           /* lsw_bsr2mul[0] */
+        .long 1000000           /* lsw_bsr2mul[1] */
+        .long 1000000           /* lsw_bsr2mul[2] */
+        .long 100000            /* lsw_bsr2mul[3] */
+        .long 100000            /* lsw_bsr2mul[4] */
+        .long 100000            /* lsw_bsr2mul[5] */
+        .long 10000             /* lsw_bsr2mul[6] */
+        .long 10000             /* lsw_bsr2mul[7] */
+        .long 10000             /* lsw_bsr2mul[8] */
+        .long 1000              /* lsw_bsr2mul[9] */
+        .long 1000              /* lsw_bsr2mul[10] */
+        .long 1000              /* lsw_bsr2mul[11] */
+        .long 1000              /* lsw_bsr2mul[12] */
+        .long 100               /* lsw_bsr2mul[13] */
+        .long 100               /* lsw_bsr2mul[14] */
+        .long 100               /* lsw_bsr2mul[15] */
+        .long 10                /* lsw_bsr2mul[16] */
+        .long 10                /* lsw_bsr2mul[17] */
+        .long 10                /* lsw_bsr2mul[18] */
+        .long 1                 /* lsw_bsr2mul[19] */
+        .long 1                 /* lsw_bsr2mul[20] */
+        .long 1                 /* lsw_bsr2mul[21] */
+        .long 1                 /* lsw_bsr2mul[22] */
 
         .align 32
-        .type fpfd32_lsw_bsr2div, @object
-        .size fpfd32_lsw_bsr2div, 128
-fpfd32_lsw_bsr2div:
-        .zero 92                /* fpfd32_lsw_bsr2div[i], i < 23, is
-                                   undefined */
-        .long 0xCCCCCCCD        /* fpfd32_lsw_bsr2div[23]
-                                     = (10 ** -1 << 35) + 1 */
-        .long 0xCCCCCCCD        /* fpfd32_lsw_bsr2div[24] */
-        .long 0xCCCCCCCD        /* fpfd32_lsw_bsr2div[25] */
-        .long 0xCCCCCCCD        /* fpfd32_lsw_bsr2div[26] */
-        .long 0xA3D70A3E        /* fpfd32_lsw_bsr2div[27]
-                                     = (10 ** -2 << 38) + 1 */
-        .long 0xA3D70A3E        /* fpfd32_lsw_bsr2div[28] */
-        .long 0xA3D70A3E        /* fpfd32_lsw_bsr2div[29] */
-        .long 0x83126E98        /* fpfd32_lsw_bsr2div[30]
-                                     = (10 ** -3 << 41) + 1 */
-        .long 0x83126E98        /* fpfd32_lsw_bsr2div[31] */
+        .type lsw_bsr2div, @object
+        .size lsw_bsr2div, 128
+lsw_bsr2div:
+        .zero 92                /* lsw_bsr2div[i], i < 23, is undefined */
+        .long 0xCCCCCCCD        /* lsw_bsr2div[23] = (10 ** -1 << 35) + 1 */
+        .long 0xCCCCCCCD        /* lsw_bsr2div[24] */
+        .long 0xCCCCCCCD        /* lsw_bsr2div[25] */
+        .long 0xCCCCCCCD        /* lsw_bsr2div[26] */
+        .long 0xA3D70A3E        /* lsw_bsr2div[27] = (10 ** -2 << 38) + 1 */
+        .long 0xA3D70A3E        /* lsw_bsr2div[28] */
+        .long 0xA3D70A3E        /* lsw_bsr2div[29] */
+        .long 0x83126E98        /* lsw_bsr2div[30] = (10 ** -3 << 41) + 1 */
+        .long 0x83126E98        /* lsw_bsr2div[31] */
 
         .align 32
-        .type fpfd32_lsw_bsr2shr, @object
-        .size fpfd32_lsw_bsr2shr, 32
-fpfd32_lsw_bsr2shr:
-        .zero 23        /* fpfd32_lsw_bsr2shr[i], i < 23, is undefined */
-        .byte 3         /* fpfd32_lsw_bsr2shr[23] */
-        .byte 3         /* fpfd32_lsw_bsr2shr[24] */
-        .byte 3         /* fpfd32_lsw_bsr2shr[25] */
-        .byte 3         /* fpfd32_lsw_bsr2shr[26] */
-        .byte 6         /* fpfd32_lsw_bsr2shr[27] */
-        .byte 6         /* fpfd32_lsw_bsr2shr[28] */
-        .byte 6         /* fpfd32_lsw_bsr2shr[29] */
-        .byte 9         /* fpfd32_lsw_bsr2shr[30] */
-        .byte 9         /* fpfd32_lsw_bsr2shr[31] */
+        .type lsw_bsr2shr, @object
+        .size lsw_bsr2shr, 32
+lsw_bsr2shr:
+        .zero 23        /* lsw_bsr2shr[i], i < 23, is undefined */
+        .byte 3         /* lsw_bsr2shr[23] */
+        .byte 3         /* lsw_bsr2shr[24] */
+        .byte 3         /* lsw_bsr2shr[25] */
+        .byte 3         /* lsw_bsr2shr[26] */
+        .byte 6         /* lsw_bsr2shr[27] */
+        .byte 6         /* lsw_bsr2shr[28] */
+        .byte 6         /* lsw_bsr2shr[29] */
+        .byte 9         /* lsw_bsr2shr[30] */
+        .byte 9         /* lsw_bsr2shr[31] */
 
         .align 32
-        .type fpfd32_lsw_bsr2exp, @object
-        .size fpfd32_lsw_bsr2exp, 128
-fpfd32_lsw_bsr2exp:
-        .long -6        /* fpfd32_lsw_bsr2exp[0] */
-        .long -6        /* fpfd32_lsw_bsr2exp[1] */
-        .long -6        /* fpfd32_lsw_bsr2exp[2] */
-        .long -5        /* fpfd32_lsw_bsr2exp[3] */
-        .long -5        /* fpfd32_lsw_bsr2exp[4] */
-        .long -5        /* fpfd32_lsw_bsr2exp[5] */
-        .long -4        /* fpfd32_lsw_bsr2exp[6] */
-        .long -4        /* fpfd32_lsw_bsr2exp[7] */
-        .long -4        /* fpfd32_lsw_bsr2exp[8] */
-        .long -3        /* fpfd32_lsw_bsr2exp[9] */
-        .long -3        /* fpfd32_lsw_bsr2exp[10] */
-        .long -3        /* fpfd32_lsw_bsr2exp[11] */
-        .long -3        /* fpfd32_lsw_bsr2exp[12] */
-        .long -2        /* fpfd32_lsw_bsr2exp[13] */
-        .long -2        /* fpfd32_lsw_bsr2exp[14] */
-        .long -2        /* fpfd32_lsw_bsr2exp[15] */
-        .long -1        /* fpfd32_lsw_bsr2exp[16] */
-        .long -1        /* fpfd32_lsw_bsr2exp[17] */
-        .long -1        /* fpfd32_lsw_bsr2exp[18] */
-        .long 0         /* fpfd32_lsw_bsr2exp[19] */
-        .long 0         /* fpfd32_lsw_bsr2exp[20] */
-        .long 0         /* fpfd32_lsw_bsr2exp[21] */
-        .long 0         /* fpfd32_lsw_bsr2exp[22] */
-        .long 1         /* fpfd32_lsw_bsr2exp[23] */
-        .long 1         /* fpfd32_lsw_bsr2exp[24] */
-        .long 1         /* fpfd32_lsw_bsr2exp[25] */
-        .long 1         /* fpfd32_lsw_bsr2exp[26] */
-        .long 2         /* fpfd32_lsw_bsr2exp[27] */
-        .long 2         /* fpfd32_lsw_bsr2exp[28] */
-        .long 2         /* fpfd32_lsw_bsr2exp[29] */
-        .long 3         /* fpfd32_lsw_bsr2exp[30] */
-        .long 3         /* fpfd32_lsw_bsr2exp[31] */
+        .type lsw_bsr2exp, @object
+        .size lsw_bsr2exp, 128
+lsw_bsr2exp:
+        .long -6        /* lsw_bsr2exp[0] */
+        .long -6        /* lsw_bsr2exp[1] */
+        .long -6        /* lsw_bsr2exp[2] */
+        .long -5        /* lsw_bsr2exp[3] */
+        .long -5        /* lsw_bsr2exp[4] */
+        .long -5        /* lsw_bsr2exp[5] */
+        .long -4        /* lsw_bsr2exp[6] */
+        .long -4        /* lsw_bsr2exp[7] */
+        .long -4        /* lsw_bsr2exp[8] */
+        .long -3        /* lsw_bsr2exp[9] */
+        .long -3        /* lsw_bsr2exp[10] */
+        .long -3        /* lsw_bsr2exp[11] */
+        .long -3        /* lsw_bsr2exp[12] */
+        .long -2        /* lsw_bsr2exp[13] */
+        .long -2        /* lsw_bsr2exp[14] */
+        .long -2        /* lsw_bsr2exp[15] */
+        .long -1        /* lsw_bsr2exp[16] */
+        .long -1        /* lsw_bsr2exp[17] */
+        .long -1        /* lsw_bsr2exp[18] */
+        .long 0         /* lsw_bsr2exp[19] */
+        .long 0         /* lsw_bsr2exp[20] */
+        .long 0         /* lsw_bsr2exp[21] */
+        .long 0         /* lsw_bsr2exp[22] */
+        .long 1         /* lsw_bsr2exp[23] */
+        .long 1         /* lsw_bsr2exp[24] */
+        .long 1         /* lsw_bsr2exp[25] */
+        .long 1         /* lsw_bsr2exp[26] */
+        .long 2         /* lsw_bsr2exp[27] */
+        .long 2         /* lsw_bsr2exp[28] */
+        .long 2         /* lsw_bsr2exp[29] */
+        .long 3         /* lsw_bsr2exp[30] */
+        .long 3         /* lsw_bsr2exp[31] */
 
         .align 32
-        .type fpfd32_lsw_exp2mul, @object
-        .size fpfd32_lsw_exp2mul, 16
-fpfd32_lsw_exp2mul:
-        .long 1         /* fpfd32_lsw_exp2mul[0] */
-        .long 10        /* fpfd32_lsw_exp2mul[1] */
-        .long 100       /* fpfd32_lsw_exp2mul[2] */
-        .long 1000      /* fpfd32_lsw_exp2mul[3] */
-        .long 10000     /* fpfd32_lsw_exp2mul[4] */
-        .long 100000    /* fpfd32_lsw_exp2mul[5] */
-        .long 1000000   /* fpfd32_lsw_exp2mul[6] */
+        .type lsw_exp2mul, @object
+        .size lsw_exp2mul, 16
+lsw_exp2mul:
+        .long 1         /* lsw_exp2mul[0] */
+        .long 10        /* lsw_exp2mul[1] */
+        .long 100       /* lsw_exp2mul[2] */
+        .long 1000      /* lsw_exp2mul[3] */
+        .long 10000     /* lsw_exp2mul[4] */
+        .long 100000    /* lsw_exp2mul[5] */
+        .long 1000000   /* lsw_exp2mul[6] */
 
         .align 32
-        .type fpfd32_lsw_exp2div, @object
-        .size fpfd32_lsw_exp2div, 16
-fpfd32_lsw_exp2div:
-        .long 0                 /* fpfd32_lsw_exp2div[0] is undefined */
-        .long 0xCCCCCCCD        /* fpfd32_lsw_exp2div[1] = 10 ** -1 */
-        .long 0xA3D70A3E        /* fpfd32_lsw_exp2div[2] = 10 ** -2 */
-        .long 0x83126E98        /* fpfd32_lsw_exp2div[3] = 10 ** -3 */
-        .long 0xD1B71759        /* fpfd32_lsw_exp2div[4] = 10 ** -4 */
-        .long 0xA7C5AC48        /* fpfd32_lsw_exp2div[5] = 10 ** -5 */
-        .long 0x8637BD06        /* fpfd32_lsw_exp2div[6] = 10 ** -6 */
+        .type lsw_exp2div, @object
+        .size lsw_exp2div, 16
+lsw_exp2div:
+        .long 0                 /* lsw_exp2div[0] is undefined */
+        .long 0xCCCCCCCD        /* lsw_exp2div[1] = 10 ** -1 */
+        .long 0xA3D70A3E        /* lsw_exp2div[2] = 10 ** -2 */
+        .long 0x83126E98        /* lsw_exp2div[3] = 10 ** -3 */
+        .long 0xD1B71759        /* lsw_exp2div[4] = 10 ** -4 */
+        .long 0xA7C5AC48        /* lsw_exp2div[5] = 10 ** -5 */
+        .long 0x8637BD06        /* lsw_exp2div[6] = 10 ** -6 */
 
         .align 32
-        .type fpfd32_lsw_exp2shr, @object
-        .size fpfd32_lsw_exp2shr, 4
-fpfd32_lsw_exp2shr:
-        .byte 0         /* fpfd32_lsw_exp2shr[0] is undefined */
-        .byte 3         /* fpfd32_lsw_exp2shr[1] */
-        .byte 6         /* fpfd32_lsw_exp2shr[2] */
-        .byte 9         /* fpfd32_lsw_exp2shr[3] */
-        .byte 13        /* fpfd32_lsw_exp2shr[4] */
-        .byte 16        /* fpfd32_lsw_exp2shr[5] */
-        .byte 19        /* fpfd32_lsw_exp2shr[6] */
+        .type lsw_exp2shr, @object
+        .size lsw_exp2shr, 4
+lsw_exp2shr:
+        .byte 0         /* lsw_exp2shr[0] is undefined */
+        .byte 3         /* lsw_exp2shr[1] */
+        .byte 6         /* lsw_exp2shr[2] */
+        .byte 9         /* lsw_exp2shr[3] */
+        .byte 13        /* lsw_exp2shr[4] */
+        .byte 16        /* lsw_exp2shr[5] */
+        .byte 19        /* lsw_exp2shr[6] */

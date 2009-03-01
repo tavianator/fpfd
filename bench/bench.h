@@ -30,8 +30,7 @@
 #define NO_UNROLL() __asm__ volatile ("")
 
 /*
- * The type that stores the tick count of each trial, which is used by the hash
- * table.
+ * This type stores a list of tick counts from trials.
  */
 typedef struct {
   unsigned int trials;
@@ -59,11 +58,6 @@ ENTRY *xhsearch(ENTRY item, ACTION action);
  * tick, or sometimes, one FSB tick.
  */
 long ticks();
-
-/*
- * This function is architecture-specific. It sets bench_loops correctly.
- */
-void arch_init();
 
 /*
  * The number of times to call a function in a loop between calls to ticks() -

@@ -18,63 +18,16 @@
  * <http://www.gnu.org/licenses/>.                                       *
  *************************************************************************/
 
-#include "bench.h"
-#include <limits.h> /* For UCHAR_MAX */
+/* fpfd_enc_t fpfd_encoding(); */
 
-/* A local rand() implementation */
-static unsigned int FPFD_RAND_MAX = 32767;
-static unsigned int fpfd_rand();
-static void fpfd_srand(unsigned int seed);
+/*
+ * Return FPFD_ENCBID.
+ */
 
-void
-fpfd_srandom(unsigned int seed)
-{
-  fpfd_srand(seed);
-}
-
-void
-fpfd32_random(fpfd32_ptr dest)
-{
-  fpfd32_impl_t impl;
-  long bits = 0, bits_left = 0;
-  unsigned int i;
-
-  do {
-    for (i = 0; i < sizeof(dest->data); ++i) {
-      if (bits_left <= UCHAR_MAX) {
-        bits = fpfd_rand();
-        bits_left = FPFD_RAND_MAX;
-      }
-
-      dest->data[i] = bits;
-      bits >>= CHAR_BIT;
-      bits_left >>= CHAR_BIT;
-    }
-
-    fpfd32_impl_expand(&impl, dest);
-
-    /*
-     * Addition and subtraction only really do stuff when the exponents are
-     * close enough; otherwise, we benchmark mostly no-ops.
-     */
-    impl.fields.exp = fpfd_rand() % 7;
-
-    /* Ensure that fpfd_add performs an addition, and fpfd_sub a subtraction. */
-    impl.fields.sign = 1;
-  } while (impl.fields.special != FPFD_NUMBER);
-  fpfd32_impl_compress(dest, &impl);
-}
-
-/* This local rand() implementation taken from POSIX.1-2001 */
-
-static unsigned long next = 1;
-
-/* FPFD_RAND_MAX assumed to be 32767 */
-static unsigned int fpfd_rand() {
-  next = next*1103515245 + 12345;
-  return (unsigned int)(next/65536) % 32768;
-}
-
-static void fpfd_srand(unsigned int seed) {
-  next = seed;
-}
+        .text
+.globl fpfd_encoding
+        .type fpfd_encoding, @function
+fpfd_encoding:
+        movl $1, %eax
+        ret
+        .size fpfd_encoding, .-fpfd_encoding

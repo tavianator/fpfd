@@ -44,7 +44,6 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  arch_init(); /* Initialize architecture-specific things */
   x86_bench(trials);
   x86_bench_results();
 

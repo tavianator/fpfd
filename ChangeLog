@@ -1,3 +1,34 @@
+Version 0.0.5 (February 16, 2009, Revision 287)
+
+        Addition and subtraction are now implemented for the BID encoding on the
+        x86_64 target, which means that the binary encoding is now complete on
+        the x86_64.  This does however mean that the new impl_addsub-bid test
+        will fail on the x86, where the BID impl_addsub routine is incomplete;
+        any other test suite failures should be reported. Additionally, an
+        important BID division bug has been fixed on both the x86 and x86_64
+        architectures.  Following are the routines which are not complete, for
+        each encoding and architecture:
+
+        =======
+        x86 DPD
+        =======
+
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
+        =======
+        x86 BID
+        =======
+
+         - fpfd32_impl_addsub: Non-functional stub.
+
+        ==========
+        x86_64 DPD
+        ==========
+
+         - fpfd32_impl_mul: Non-functional stub.
+         - fpfd32_impl_div: Ditto.
+
 Version 0.0.4 (January 29, 2009, Revision 252)
 
         The only change from 0.0.3 is that division is now implemented for the
