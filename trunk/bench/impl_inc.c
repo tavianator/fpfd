@@ -43,6 +43,6 @@ fpfd32_bench_impl_inc(unsigned int trials)
     }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_impl_inc", ticks2 - ticks1, j);
+    record_ticks("fpfd32_impl_inc", ticks2 - ticks1);
   }
 }

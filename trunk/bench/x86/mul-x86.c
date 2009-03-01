@@ -35,7 +35,7 @@ x86_bench_mul(unsigned int trials)
                         : "%al", "%dl");
     }
     ticks2 = ticks();
-    record_ticks("mulb", ticks2 - ticks1, j);
+    record_ticks("mulb", ticks2 - ticks1);
 
     /* mulw */
     ticks1 = ticks();
@@ -46,7 +46,7 @@ x86_bench_mul(unsigned int trials)
                         : "%ax", "%dx");
     }
     ticks2 = ticks();
-    record_ticks("mulw", ticks2 - ticks1, j);
+    record_ticks("mulw", ticks2 - ticks1);
 
     /* mull */
     ticks1 = ticks();
@@ -57,6 +57,6 @@ x86_bench_mul(unsigned int trials)
                         : "%eax", "%edx");
     }
     ticks2 = ticks();
-    record_ticks("mull", ticks2 - ticks1, j);
+    record_ticks("mull", ticks2 - ticks1);
   }
 }

@@ -24,7 +24,7 @@ gcc32_bench_div(unsigned int trials)
 {
   fpfd32_union_t fp, lhs, rhs;
   long ticks1, ticks2;
-  unsigned int i;
+  unsigned int i, j;
 
   /* Warm up cache */
   fpfd32_random(lhs.fpfd);
@@ -40,17 +40,20 @@ gcc32_bench_div(unsigned int trials)
     fpfd32_random(rhs.fpfd);
 
     ticks1 = ticks();
+    BENCH_LOOP(j) {
+      NO_UNROLL();
 #if GCC_DPD
-    fp.dec = __dpd_divsd3(lhs.dec, rhs.dec);
+      fp.dec = __dpd_divsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
-    fp.dec = __bid_divsd3(lhs.dec, rhs.dec);
+      fp.dec = __bid_divsd3(lhs.dec, rhs.dec);
 #endif
+    }
     ticks2 = ticks();
 
     if (GCC_DPD) {
-      record_ticks("__dpd_divsd3", ticks2 - ticks1, 1);
+      record_ticks("__dpd_divsd3", ticks2 - ticks1);
     } else if (GCC_BID) {
-      record_ticks("__bid_divsd3", ticks2 - ticks1, 1);
+      record_ticks("__bid_divsd3", ticks2 - ticks1);
     }
   }
 }

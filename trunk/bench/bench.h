@@ -33,7 +33,7 @@
  * This type stores a list of tick counts from trials.
  */
 typedef struct {
-  unsigned int trials, loops;
+  unsigned int trials;
   long *list;
   size_t size, capacity;
 } ticklist_t;
@@ -74,7 +74,7 @@ extern unsigned int bench_loops;
  *     standard deviation above and below it, to file, in a format readable by
  *     plotutils' graph, gnuplot, or similar.
  */
-void record_ticks(const char *key, long tick_count, unsigned int loops);
+void record_ticks(const char *key, long tick_count);
 void write_ticks(const char *key, FILE *file);
 
 /* Random number generation */

@@ -24,7 +24,7 @@ fpfd32_bench_fma(unsigned int trials)
 {
   fpfd32_t fp, a, b, c;
   long ticks1, ticks2;
-  unsigned int i;
+  unsigned int i, j;
   fpfd_flags_t flags = FPFD_NONE;
 
   /* Warm up cache */
@@ -39,9 +39,12 @@ fpfd32_bench_fma(unsigned int trials)
     fpfd32_random(c);
 
     ticks1 = ticks();
-    fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags);
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+      fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags);
+    }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_fma", ticks2 - ticks1, 1);
+    record_ticks("fpfd32_fma", ticks2 - ticks1);
   }
 }
