@@ -37,9 +37,12 @@ fpfd32_bench_add(unsigned int trials)
     fpfd32_random(rhs);
 
     ticks1 = ticks();
-    fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+      fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
+    }
     ticks2 = ticks();
 
-    record_ticks("fpfd32_add", ticks2 - ticks1, 1);
+    record_ticks("fpfd32_add", ticks2 - ticks1);
   }
 }

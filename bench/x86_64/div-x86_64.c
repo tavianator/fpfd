@@ -37,7 +37,7 @@ x86_64_bench_div(unsigned int trials)
     }
     ticks2 = ticks();
     /* The mov takes 1 cycle */
-    record_ticks("divb", ticks2 - ticks1 - j, j);
+    record_ticks("divb", ticks2 - ticks1 - j);
 
     /* divw */
     ticks1 = ticks();
@@ -51,7 +51,7 @@ x86_64_bench_div(unsigned int trials)
     }
     ticks2 = ticks();
     /* The two mov's take 2 cycles */
-    record_ticks("divw", ticks2 - ticks1 - (2 * j), j);
+    record_ticks("divw", ticks2 - ticks1 - (2 * j));
 
     /* divl */
     ticks1 = ticks();
@@ -64,7 +64,7 @@ x86_64_bench_div(unsigned int trials)
                         : "%eax", "%edx");
     }
     ticks2 = ticks();
-    record_ticks("divl", ticks2 - ticks1 - (2 * j), j);
+    record_ticks("divl", ticks2 - ticks1 - (2 * j));
 
     /* divq */
     ticks1 = ticks();
@@ -77,6 +77,6 @@ x86_64_bench_div(unsigned int trials)
                         : "%rax", "%rdx");
     }
     ticks2 = ticks();
-    record_ticks("divq", ticks2 - ticks1 - (2 * j), j);
+    record_ticks("divq", ticks2 - ticks1 - (2 * j));
   }
 }

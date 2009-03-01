@@ -24,32 +24,24 @@
 #include <string.h> /* For strlen, strcpy */
 #include <math.h>   /* For sqrt           */
 
-static void save_ticks(const char *key, long tick_count, unsigned int loops);
+static void save_ticks(const char *key, long tick_count);
 static double mean_ticks(const char *key);
 static double stddev_ticks(const char *key);
 
 void
-record_ticks(const char *key, long tick_count, unsigned int loops)
+record_ticks(const char *key, long tick_count)
 {
   long ticks1, ticks2;
   unsigned int i;
-  char overhead_key[16];
 
-  if (tick_count > 1) {
-    ticks1 = ticks();
-    for (i = 0; i < loops; ++i) {
-      NO_UNROLL();
-    }
-    ticks2 = ticks();
-  } else {
-    ticks1 = ticks();
-    ticks2 = ticks();
+  ticks1 = ticks();
+  BENCH_LOOP(i) {
+    NO_UNROLL();
   }
+  ticks2 = ticks();
 
-  snprintf(overhead_key, sizeof(overhead_key), "overhead%u", loops);
-
-  save_ticks(key, tick_count, loops);
-  save_ticks(overhead_key, ticks2 - ticks1, loops);
+  save_ticks(key, tick_count);
+  save_ticks("overhead", ticks2 - ticks1);
 }
 
 void
@@ -59,22 +51,19 @@ write_ticks(const char *key, FILE *file)
   ticklist_t *tl;
   double overhead, mean, stddev;
   size_t i;
-  char overhead_key[16];
 
   e.key = (char *)key;
   ep = xhsearch(e, FIND);
   tl = ep->data;
 
-  snprintf(overhead_key, sizeof(overhead_key), "overhead%u", tl->loops);
-
-  overhead = mean_ticks(overhead_key);
+  overhead = mean_ticks("overhead");
   mean = mean_ticks(key) - overhead;
   stddev = stddev_ticks(key);
 
   /* Each trial */
   for (i = 0; i < tl->size; ++i) {
     fprintf(file, "%ld\t%g\n", (long)i,
-            ((double)tl->list[i] / tl->loops) - overhead);
+            ((double)tl->list[i] / bench_loops) - overhead);
   }
 
   /* Mean */
@@ -89,7 +78,7 @@ write_ticks(const char *key, FILE *file)
 }
 
 static void
-save_ticks(const char *key, long tick_count, unsigned int loops)
+save_ticks(const char *key, long tick_count)
 {
   ENTRY e, *ep;
   ticklist_t *tl;
@@ -122,7 +111,6 @@ save_ticks(const char *key, long tick_count, unsigned int loops)
   }
 
   tl->list[tl->size] = tick_count;
-  tl->loops = loops;
   ++tl->size;
 }
 
@@ -142,7 +130,7 @@ mean_ticks(const char *key)
     ticks += tl->list[i];
   }
 
-  return (ticks / tl->trials) / tl->loops;
+  return (ticks / tl->trials) / bench_loops;
 }
 
 static double
@@ -159,7 +147,7 @@ stddev_ticks(const char *key)
 
   for (i = 0; i < tl->size; ++i) {
     ticks = tl->list[i];
-    ticks /= tl->loops;
+    ticks /= bench_loops;
     ticks *= ticks;
     ticks_sq += ticks;
   }
