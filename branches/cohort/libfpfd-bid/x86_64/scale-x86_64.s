@@ -78,8 +78,8 @@ fpfd32_impl_scale:
         shrq %cl, %rdx
         movl %edx, %eax
         movl %r8d, %edx
-        cmpl $0, %eax
-        je .Lspecial
+        testl %eax, %eax
+        jz .Lspecial
         cmpl $5, %eax
         jne .Lexpcorrect
 .Lspecial:
@@ -106,13 +106,13 @@ fpfd32_impl_scale:
         shll %eax
         subl %ecx, %eax
         negl %eax               /* Calculate the remainder */
-        cmpl $0, %eax
-        je .Lspecial2
+        testl %eax, %eax
+        jz .Lspecial2
         cmpl $5, %eax
         jne .Lnorm
 .Lspecial2:
-        cmpl $0, %r8d
-        je .Lnorm
+        testl %r8d, %r8d
+        jz .Lnorm
         addl $1, %eax           /* Correct it with the last remainder */
 .Lnorm:
         cmpl $90, %esi
@@ -152,8 +152,8 @@ fpfd32_impl_scale:
         shrq %cl, %rdx
         movl %edx, %eax
         movl %r10d, %edx
-        cmpl $0, %eax
-        je .Lspecial3
+        testl %eax, %eax
+        jz .Lspecial3
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial3:
@@ -166,13 +166,13 @@ fpfd32_impl_scale:
         je .Lspecial4
         addl $1, %eax
 .Lspecial4:
-        cmpl $0, %eax
-        je .Lspecial5
+        testl %eax, %eax
+        jz .Lspecial5
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial5:
-        cmpl $0, %r8d
-        je .Lsubnormret
+        testl %r8d, %r8d
+        jz .Lsubnormret
         addl $1, %eax
 .Lsubnormret:
         orl $0x10, %eax
@@ -210,8 +210,8 @@ fpfd32_impl_scale:
         je .Lspecial4
         ret
 .Lspecial6:
-        cmpl $0, %esi
-        je .Lspecial7
+        testl %esi, %esi
+        jz .Lspecial7
         addl $1, %eax           /* Correct it with the last remainder */
 .Lspecial7:
         cmpl $0x10, %eax
@@ -220,8 +220,8 @@ fpfd32_impl_scale:
         je .Lspecial8
         ret
 .Lspecial8:
-        cmpl $0, %r8d
-        je .Lspecial9
+        testl %r8d, %r8d
+        jz .Lspecial9
         addl $1, %eax
 .Lspecial9:
         ret

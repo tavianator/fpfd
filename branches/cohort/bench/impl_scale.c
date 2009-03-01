@@ -42,6 +42,7 @@ fpfd32_bench_impl_scale(unsigned int trials)
     fpfd32_impl_expand(&rhs_impl, rhs);
 
     ticks1 = ticks();
+
     BENCH_LOOP(j) {
       NO_UNROLL();
       fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
@@ -54,6 +55,7 @@ fpfd32_bench_impl_scale(unsigned int trials)
       fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
       fpfd32_impl_scale(&impl);
     }
+
     ticks3 = ticks();
 
     record_ticks("fpfd32_impl_scale", (ticks3 - ticks2) - (ticks2 - ticks1));

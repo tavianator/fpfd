@@ -51,8 +51,8 @@ fpfd32_impl_expand:
         subl $101, %edx
         movl %edx, 8(%eax)      /* Subtract bias and store exponent */
         andl $0x007FFFFF, %ecx
-        cmpl $0, %ecx
-        je .Lzero               /* Test for a zero mantissa to support
+        testl %ecx, %ecx
+        jz .Lzero               /* Test for a zero mantissa to support
                                    FPFD_ZERO */
         movl %ecx, (%eax)       /* Return concatenated significand */
         movl $0, 4(%eax)        /* Set the high-order significand bits to 0 */

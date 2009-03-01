@@ -43,7 +43,6 @@ main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  arch_init(); /* Initialize architecture-specific things */
   fpfd_bench(trials);
   fpfd_bench_results();
 

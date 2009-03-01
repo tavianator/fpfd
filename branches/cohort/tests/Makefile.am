@@ -18,7 +18,7 @@
 ###########################################################################
 
 check_LTLIBRARIES = libfpfd-test.la
-check_PROGRAMS    = impl_expand-dpd impl_expand-bid impl_addsub-dpd impl_addsub-bid impl_mul-bid impl_div-bid impl_inc-dpd impl_inc-bid impl_scale-dpd impl_scale-bid impl_compress-dpd impl_compress-bid signedzero-dpd signedzero-bid C++-dpd C++-bid
+check_PROGRAMS    = impl_expand-dpd impl_expand-bid impl_addsub-dpd impl_addsub-bid impl_mul-dpd impl_mul-bid impl_div-bid impl_inc-dpd impl_inc-bid impl_scale-dpd impl_scale-bid impl_compress-dpd impl_compress-bid signedzero-dpd signedzero-bid C++-dpd C++-bid
 TESTS             = $(check_PROGRAMS)
 
 libfpfd_test_la_SOURCES = test.c test.h
@@ -33,6 +33,8 @@ impl_addsub_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../lib
 impl_addsub_bid_SOURCES = impl_addsub-bid.c
 impl_addsub_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 
+impl_mul_dpd_SOURCES = impl_mul-dpd.c
+impl_mul_dpd_LDADD   = ./libfpfd-test.la ../libfpfd-dpd/libfpfd-dpd.la ../libfpfd/libfpfd.la
 impl_mul_bid_SOURCES = impl_mul-bid.c
 impl_mul_bid_LDADD   = ./libfpfd-test.la ../libfpfd-bid/libfpfd-bid.la ../libfpfd/libfpfd.la
 

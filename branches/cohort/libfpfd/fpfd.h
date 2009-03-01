@@ -62,6 +62,16 @@ enum {
  */
 typedef unsigned int fpfd_flags_t;
 
+/*
+ * Determine which encoding is being used.
+ */
+
+typedef enum {
+  FPFD_ENCDPD, FPFD_ENCBID
+} fpfd_enc_t;
+
+fpfd_enc_t fpfd_encoding();
+
 /* Struct wrapper for the actual data of the decimal types. */
 
 typedef struct {
