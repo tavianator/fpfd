@@ -62,38 +62,39 @@ fpfd32_impl_mul:
         movw (%r8,%rdx,2), %dx          /* dx   = fg * h  */
         movw %r9w, %cx
         movb %ch, %cl
-        movb %r10b, %sil
+        movb %r10b, %sil        /* Add r10w*100 to r9 */
         andb $0x0F, %cl
         andb $0x0F, %sil
-        addb %sil, %cl
-        cmpb $0x9, %cl
-        jbe .Lnocarry1
-        addb $0x6, %cl
+        addb %sil, %cl          /* First digit */
+        cmpb $0x9, %cl          /* Test for carry */
+        jbe .Lnocarry1          /* Not using cmov, because it's slower */
+        addb $0x6, %cl          /* Correct BCD sum */
 .Lnocarry1:
         andb $0xF0, %ch
         addb %ch, %cl
         xorb %ch, %ch
         movb %r10b, %sil
         andw $0x00F0, %si
-        addw %si, %cx
+        addw %si, %cx           /* Second digit */
         movw %cx, %si
         andw $0x0FF0, %si
-        cmpw $0x90, %si
+        cmpw $0x90, %si         /* Test for carry */
         jbe .Lnocarry2
-        addw $0x60, %cx
+        addw $0x60, %cx         /* Correct BCD sum */
 .Lnocarry2:
         shll $8, %ecx
-        movb %r9b, %cl
+        movb %r9b, %cl          /* Get the low two digits of r9 */
         andw $0xFF00, %r10w
         shll $8, %r10d
-        addl %r10d, %ecx        /* Carry is impossible; r10b <= 0x98 */
+        addl %r10d, %ecx        /* Add the two highest digits of r10w*100 to r9.
+                                   Carry is impossible; r10d <= 0x980000 */
         movl %ecx, %r9d
         shrl $16, %ecx
         movb %cl, %ch
-        movb %r11b, %sil
+        movb %r11b, %sil        /* Add r11w*10000 to r9 */
         andb $0x0F, %cl
         andb $0x0F, %sil
-        addb %sil, %cl
+        addb %sil, %cl          /* First digit */
         cmpb $0x9, %cl
         jbe .Lnocarry3
         addb $0x6, %cl
@@ -103,7 +104,7 @@ fpfd32_impl_mul:
         xorb %ch, %ch
         movb %r11b, %sil
         andw $0x00F0, %si
-        addw %si, %cx
+        addw %si, %cx           /* Second digit */
         movw %cx, %si
         andw $0x0FF0, %si
         cmpw $0x90, %si
@@ -111,17 +112,18 @@ fpfd32_impl_mul:
         addw $0x60, %cx
 .Lnocarry4:
         shll $16, %ecx
-        movw %r9w, %cx
+        movw %r9w, %cx          /* Get the low four digits of r9 */
         andw $0xFF00, %r11w
         shll $16, %r11d
-        addl %r11d, %ecx
+        addl %r11d, %ecx        /* Add the two highest digits of r11w*10000 to
+                                   r9 */
         movl %ecx, %r9d
         shrl $24, %ecx
         movb %cl, %ch
-        movb %dl, %sil
+        movb %dl, %sil          /* Add dx*1000000 to r9 */
         andb $0x0F, %cl
         andb $0x0F, %sil
-        addb %sil, %cl
+        addb %sil, %cl          /* First digit */
         cmpb $0x9, %cl
         jbe .Lnocarry5
         addb $0x6, %cl
@@ -131,7 +133,7 @@ fpfd32_impl_mul:
         xorb %ch, %ch
         movb %dl, %sil
         andw $0x00F0, %si
-        addw %si, %cx
+        addw %si, %cx           /* Second digit */
         movw %cx, %si
         andw $0x0FF0, %si
         cmpw $0x90, %si
@@ -140,20 +142,21 @@ fpfd32_impl_mul:
 .Lnocarry6:
         shlq $24, %rcx
         andl $0x00FFFFFF, %r9d
-        orq %r9, %rcx
+        orq %r9, %rcx           /* Get the low six digits of r9 */
         andw $0xFF00, %dx
         shlq $24, %rdx
-        addq %rdx, %rcx
+        addq %rdx, %rcx         /* Add the two highest digits of dx*1000000 to
+                                   r9 */
         movq %rcx, %r9
-        shrl $8, %eax
+        shrl $8, %eax           /* We're done the 2x7 multiplication */
         xorl %ecx, %ecx
         xorl %edx, %edx
         movb %al, %cl
         movb %bl, %ch
         movb %al, %dl
         movb %bh, %dh
-        movw (%r8,%rcx,2), %r10w        /* r9w  = de * ij */
-        movw (%r8,%rdx,2), %r11w        /* r10w = de * h  */
+        movw (%r8,%rcx,2), %r10w        /* r10w = de * ij */
+        movw (%r8,%rdx,2), %r11w        /* r11w = de * h  */
         rorl $16, %ebx
         movb %bl, %ch
         movb %bh, %dh
@@ -161,10 +164,10 @@ fpfd32_impl_mul:
         movw (%r8,%rdx,2), %dx          /* dx   = de * kl */
         movw %r9w, %cx
         movb %ch, %cl
-        movb %r12b, %sil
+        movb %r12b, %sil        /* Add r12w*100 to r9 */
         andb $0x0F, %cl
         andb $0x0F, %sil
-        addb %sil, %cl
+        addb %sil, %cl          /* First digit */
         cmpb $0x9, %cl
         jbe .Lnocarry7
         addb $0x6, %cl
@@ -174,7 +177,7 @@ fpfd32_impl_mul:
         xorb %ch, %ch
         movb %r12b, %sil
         andw $0x00F0, %si
-        addw %si, %cx
+        addw %si, %cx           /* Second digit */
         movw %cx, %si
         andw $0x0FF0, %si
         cmpw $0x90, %si
@@ -183,17 +186,17 @@ fpfd32_impl_mul:
 .Lnocarry8:
         shll $8, %ecx
         movb %r9b, %cl
-        movw %cx, %r9w
+        movw %cx, %r9w          /* Store the low four digits of r9 */
         movl %r9d, %esi
         shrl $16, %esi
         shrl $16, %ecx
         addw %si, %cx
         movb %cl, %ch
-        movw %r12w, %si
-        shrw $8, %si
+        shrw $8, %r12w
+        movb %r12b, %sil
         andb $0x0F, %cl
         andb $0x0F, %sil
-        addb %sil, %cl
+        addb %sil, %cl          /* Third digit */
         cmpb $0x9, %cl
         jbe .Lnocarry9
         addb $0x6, %cl
@@ -201,10 +204,9 @@ fpfd32_impl_mul:
         andb $0xF0, %ch
         addb %ch, %cl
         xorb %ch, %ch
-        movw %r12w, %si
-        shrw $8, %si
+        movb %r12b, %sil
         andw $0x00F0, %si
-        addw %si, %cx
+        addw %si, %cx           /* Fourth digit */
         movw %cx, %si
         andw $0x0FF0, %si
         cmpw $0x90, %si
@@ -213,10 +215,136 @@ fpfd32_impl_mul:
 .Lnocarry10:
         shll $16, %ecx
         movw %r9w, %cx
-        movq $0xFFFFFFFFFF000000, %r10
-        andq %r10, %r9
+        movq $0xFFFFFFFFFF000000, %r12
+        andq %r12, %r9
+        addq %r9, %rcx          /* Store the low six digits of r9 */
+        movq %rcx, %r9
+        shrl $16, %ecx
+        movb %cl, %ch
+        movb %dl, %sil          /* Add dl*10000 to r9 */
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl          /* First digit */
+        cmpb $0x9, %cl
+        jbe .Lnocarry11
+        addb $0x6, %cl
+.Lnocarry11:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %dl, %sil
+        andw $0x00F0, %si
+        addw %si, %cx           /* Second digit */
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry12
+        addw $0x60, %cx
+.Lnocarry12:
+        shll $16, %ecx
+        movw %r9w, %cx
+        movq $0xFFFFFFFFFF000000, %r12
+        andq %r12, %r9
+        addq %rcx, %r9          /* Get the low six digits of r9 */
+        movl %r9d, %esi
+        shrl $24, %esi
+        shrl $24, %ecx
+        addw %si, %cx
+        movb %cl, %ch
+        movb %dh, %dl
+        movb %dl, %sil
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl          /* Third digit */
+        cmpb $0x9, %cl
+        jbe .Lnocarry13
+        addb $0x6, %cl
+.Lnocarry13:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %dl, %sil
+        andw $0x00F0, %si
+        addw %si, %cx           /* Fourth digit */
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry14
+        addw $0x60, %cx
+.Lnocarry14:
+        shlq $24, %rcx
+        movl %r9d, %r12d
+        andl $0x00FFFFFF, %r12d
+        orq %r12, %rcx
+        movq $0xFFFFFFFF00000000, %rdx
+        andq %rdx, %r9
         addq %r9, %rcx
         movq %rcx, %r9
+        shrq $24, %rcx
+        movb %r10b, %sil
+        movb %cl, %ch           /* Add r10w*1000000 to r9 */
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl          /* First digit */
+        cmpb $0x9, %cl
+        jbe .Lnocarry15
+        addb $0x6, %cl
+.Lnocarry15:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %r10b, %sil
+        andw $0x00F0, %si
+        addw %si, %cx           /* Second digit */
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry16
+        addw $0x60, %cx
+.Lnocarry16:
+        shlq $24, %rcx
+        movl %r9d, %r12d
+        andl $0x00FFFFFF, %r12d
+        orq %r12, %rcx          /* Get the low six digits of r9 */
+        movq $0xFFFFFFFF00000000, %r12
+        andq %r12, %r9
+        addq %rcx, %r9
+        movq %r9, %rsi
+        shrq $32, %rsi
+        shrq $32, %rcx
+        addw %si, %cx
+        movb %cl, %ch
+        shrw $8, %r10w
+        movb %r10b, %sil
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl          /* Third digit */
+        cmpb $0x9, %cl
+        jbe .Lnocarry17
+        addb $0x6, %cl
+.Lnocarry17:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %r10b, %sil
+        andw $0x00F0, %si
+        addw %si, %cx           /* Fourth digit */
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry18
+        addw $0x60, %cx
+.Lnocarry18:
+        shlq $32, %rcx
+        movl %r9d, %r12d
+        orq %r12, %rcx
+        movq $0xFFFFFF0000000000, %rdx
+        andq %rdx, %r9
+        addq %r9, %rcx
+        movq %rcx, %r9
+        shrq $40, %rcx
+        movb %r11b, %sil
+        movb %cl, %ch           /* Add r11w*100000000 to r9 */
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         popq %r12
