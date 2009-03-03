@@ -30,6 +30,7 @@
         .type fpfd32_impl_mul, @function
 fpfd32_impl_mul:
         pushq %rbx
+        pushq %r12
         movl 12(%rsi), %ecx
         xorl 12(%rdx), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
                                    gives -2 (...1110), x XOR x gives 0 */
@@ -42,10 +43,7 @@ fpfd32_impl_mul:
         movl (%rdx), %ebx
         movq fpfd_bcdmul@GOTPCREL(%rip), %r8
         xorl %ecx, %ecx
-        xorl %edx, %edx
-        xorl %r9d, %r9d
-        xorl %r10d, %r10d
-        xorl %r11d, %r11d       /* Zero some registers */
+        xorl %edx, %edx         /* Zero some registers */
         /* We use the fpfd_bcdmul table to multiply digits two at a time.  So,
            if we have abcdefg * hijklmn, perform the multiplication like
            this: */
@@ -147,8 +145,81 @@ fpfd32_impl_mul:
         shlq $24, %rdx
         addq %rdx, %rcx
         movq %rcx, %r9
+        shrl $8, %eax
+        xorl %ecx, %ecx
+        xorl %edx, %edx
+        movb %al, %cl
+        movb %bl, %ch
+        movb %al, %dl
+        movb %bh, %dh
+        movw (%r8,%rcx,2), %r10w        /* r9w  = de * ij */
+        movw (%r8,%rdx,2), %r11w        /* r10w = de * h  */
+        rorl $16, %ebx
+        movb %bl, %ch
+        movb %bh, %dh
+        movw (%r8,%rcx,2), %r12w        /* r12w = de * mn */
+        movw (%r8,%rdx,2), %dx          /* dx   = de * kl */
+        movw %r9w, %cx
+        movb %ch, %cl
+        movb %r12b, %sil
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl
+        cmpb $0x9, %cl
+        jbe .Lnocarry7
+        addb $0x6, %cl
+.Lnocarry7:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %r12b, %sil
+        andw $0x00F0, %si
+        addw %si, %cx
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry8
+        addw $0x60, %cx
+.Lnocarry8:
+        shll $8, %ecx
+        movb %r9b, %cl
+        movw %cx, %r9w
+        movl %r9d, %esi
+        shrl $16, %esi
+        shrl $16, %ecx
+        addw %si, %cx
+        movb %cl, %ch
+        movw %r12w, %si
+        shrw $8, %si
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl
+        cmpb $0x9, %cl
+        jbe .Lnocarry9
+        addb $0x6, %cl
+.Lnocarry9:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movw %r12w, %si
+        shrw $8, %si
+        andw $0x00F0, %si
+        addw %si, %cx
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry10
+        addw $0x60, %cx
+.Lnocarry10:
+        shll $16, %ecx
+        movw %r9w, %cx
+        movq $0xFFFFFFFFFF000000, %r10
+        andq %r10, %r9
+        addq %r9, %rcx
+        movq %rcx, %r9
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        popq %r12
         popq %rbx
         ret
         .size fpfd32_impl_mul, .-fpfd32_impl_mul
