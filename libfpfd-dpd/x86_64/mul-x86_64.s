@@ -342,9 +342,37 @@ fpfd32_impl_mul:
         andq %rdx, %r9
         addq %r9, %rcx
         movq %rcx, %r9
-        shrq $40, %rcx
+        shrq $32, %rcx
         movb %r11b, %sil
         movb %cl, %ch           /* Add r11w*100000000 to r9 */
+        andb $0x0F, %cl
+        andb $0x0F, %sil
+        addb %sil, %cl          /* First digit */
+        cmpb $0x9, %cl
+        jbe .Lnocarry19
+        addb $0x6, %cl
+.Lnocarry19:
+        andb $0xF0, %ch
+        addb %ch, %cl
+        xorb %ch, %ch
+        movb %r11b, %sil
+        andw $0x00F0, %si
+        addw %si, %cx           /* Second digit */
+        movw %cx, %si
+        andw $0x0FF0, %si
+        cmpw $0x90, %si
+        jbe .Lnocarry20
+        addw $0x60, %cx
+.Lnocarry20:
+        shlq $32, %rcx
+        movl %r9d, %r12d
+        orq %r12, %rcx          /* Get the low eight digits of r9 */
+        movq $0xFFFFFF0000000000, %r12
+        andq %r12, %r9
+        addq %rcx, %r9
+        andl $0xFF00, %r11d
+        shlq $32, %r11
+        addq %r11, %r9          /* We are done the 4x7 multiplication */
         movq %r9, (%rdi)        /* Store the mantissa */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         popq %r12
