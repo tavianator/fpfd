@@ -107,6 +107,22 @@ fpfd32_impl_addsub:
                                            0.1 */
         jmp .Lrem
 .Ladd:
+        /*
+         * We can perform a BCD addition using binary operations, as follows:
+         *   - First, add 0x6666... to rhs.
+         *   - Add lhs to rhs, in binary.  This will cause a binary carry
+         *     wherever a decimal carry should have been, due to 6 being added
+         *     to the digit.
+         *   - Now the digits which produced a carry will be correct, but those
+         *     that didn't will be 6 greater than the correct value.  To fix
+         *     this, xor the last result with (lhs ^ rhs), or
+         *     ((lhs + 0x6666...) ^ rhs), then mask off all but the lowest bit
+         *     of every digit.
+         *   - The last value will have a 1 after all digits that carried.
+         *     One's complement this value, and multiply by 6/8, to get 6's in
+         *     the right places.
+         *   - Subtract these sixes from the original sum.
+         */
         movq $0x6666666666666666, %rcx
         addq %rcx, %rdx
         movq %rdx, %rcx
@@ -214,89 +230,34 @@ fpfd32_impl_addsub:
         movq $0x9000000000000000, %rax  /* Remainder is equivalent to 0.9 */
         jmp .Lrem
 .Lsub:
-        movq %rax, %rsi         /* Store rax in rsi */
-        movq %rdx, %r11         /* Store rdx in r11 */
-        xorq %rdx, %rdx         /* rdx will hold the final sum */
-        /*
-         * HUGE OPTIMIZATION (~57 cycles, on average):
-         *   Rather than do all 16 digit subtractions of rsi and r11 in a loop,
-         *   we can eliminate as many as possible by finding the trailing zero
-         *   digit count of r11, and put that many digits of rsi in rdx.
-         */
+        /* Negate rdx, then add rax to rdx as in .Ladd */
+        bsfq %rax, %rcx
+        andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
+        movq $0x999999999999999A, %rsi
+        shlq %cl, %rsi          /* Shift ...999A left to line up with the first
+                                   non-zero digit in rdx */
+        subq %rax, %rsi         /* Subtract rdx from 0x...9999A000... */
+        movq %rsi, %rax
+        movq $0x6666666666666666, %rcx
         testq %r9, %r9
-        jz .Lsubopt2            /* Test for a zero remainder from r11 */
-        bsfq %rsi, %rax
-        andl $0x3C, %eax        /* eax = bsf/4; trailing zero digit count */
-        jz .Lsubopt1            /* Test for no trailing zeros */
-        movl $64, %ecx
-        subl %eax, %ecx
-        movq $0x6666666666666666, %rax
-        shrq %cl, %rax          /* Shift 0x666... right to line up with the
-                                   trailing zeros in rsi */
-        subq %rax, %rsi         /* Subtract 0x...666 from rsi */
-.Lsubopt1:
-        subq $1, %rsi           /* Subtract 1 from rsi */
-        cmpq %rsi, %r11         /* rsi could now have fewer digits than r11 */
-        jbe .Lsubopt2
-        xchgq %rsi, %r11        /* If so, swap rsi and r11... */
-        negl -4(%rsp)           /* ...and flip the resultant sign */
-.Lsubopt2:
-        bsfq %r11, %r10
-        andl $0x3C, %r10d       /* r10d = bsf/4; trailing zero digit count */
-        jz .Lsubloopinit        /* Test for no trailing zeros */
-        movl $64, %ecx
-        subl %r10d, %ecx
-        movq $0xFFFFFFFFFFFFFFFF, %rax
-        shrq %cl, %rax          /* Shift 0xFFF... right to line up with the
-                                   trailing zeros of r11 */
-        movq %rsi, %rdx         /* Mask off the matching digits in rsi of r11's
-                                   trailing digits */
-        andq %rax, %rdx         /* Capture these digits in rdx */
-        movl %r10d, %ecx
-        rorq %cl, %rdx
-        shrq %cl, %rsi
-        shrq %cl, %r11          /* Rotate rdx and shift rsi and r11 right
-                                   appropriately */
-.Lsubloopinit:
-        movb %sil, %al
-        movb %r11b, %cl
-        andb $0x0F, %al         /* al is the next digit of rsi to be
-                                   subtracted */
-        andb $0x0F, %cl         /* cl is the next digit of r11 to be subtracted.
-                                   The `and' instruction clears the carry flag
-                                   for sbb. */
-.Lsubloop:
-        /* This loop subtracts the digits of rsi and r11, storing the result in
-           rdx. It terminates when rsi == 0. */
-        sbbb %cl, %al           /* Subtract cl from al */
-        jc .Lsubborrow          /* Test for borrow */
-        orb %al, %dl            /* Store the digit in rdx */
-        rorq $4, %rdx
-        shrq $4, %r11
-        shrq $4, %rsi           /* Queue up the next digits to be subtracted */
-        jz .Lsubdone            /* If rsi is zero, we are done */
-        movb %sil, %al
-        movb %r11b, %cl
-        andb $0x0F, %al
-        andb $0x0F, %cl         /* Otherwise, load the next digits */
-        jmp .Lsubloop
-.Lsubborrow:
-        addb $0x0A, %al         /* There was a borrow, so add 10 to correct the
-                                   BCD difference */
-        orb %al, %dl            /* Store the digit in rdx */
-        rorq $4, %rdx
-        shrq $4, %r11
-        shrq $4, %rsi           /* Queue up the next digits to be subtracted */
-        jz .Lsubdoneborrow      /* If rsi is zero, we are done, but ended on a
-                                   borrow. */
-        movb %sil, %al
-        movb %r11b, %cl
-        andb $0x0F, %al
-        andb $0x0F, %cl         /* Otherwise, load the next digits */
-        stc                     /* Set the carry flag */
-        jmp .Lsubloop
-.Lsubdoneborrow:
-        /* We finished on a borrow, so negate rdx */
+        jz .Lsubnorem
+        addq $1, %rcx
+.Lsubnorem:
+        addq %rcx, %rdx
+        movq %rdx, %rcx
+        addq %rax, %rdx
+        jc .Lsubborrow
+        xorq %rax, %rcx
+        xorq %rdx, %rcx
+        notq %rcx
+        movq $0x1111111111111110, %rax
+        andq %rax, %rcx
+        shrq $3, %rcx
+        shlq $57, %rax
+        orq %rax, %rcx
+        leaq (%rcx,%rcx,2), %rcx
+        subq %rcx, %rdx
+        /* Negate the result */
         bsfq %rdx, %rcx
         andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
         movq $0x999999999999999A, %rax
@@ -304,14 +265,7 @@ fpfd32_impl_addsub:
                                    non-zero digit in rdx */
         subq %rdx, %rax         /* Subtract rdx from 0x...9999A000... */
         movq %rax, %rdx
-        xorq %rax, %rax         /* r9 must be zero, because in order for r11 to
-                                   be > than rsi, they must both be shifted all
-                                   the way to the left */
-        negl -4(%rsp)           /* ...and flip the resultant sign */
-        jmp .Lrem
-.Lsubdone:
-        /* We didn't finish on a borrow, so don't negate rdx. However, we need
-           to negate r9. */
+        /* Negate the remainder */
         xorq %rax, %rax         /* In case r9 == 0 */
         bsfq %r9, %rcx
         jz .Lrem                /* Test for r9 == 0 */
@@ -320,6 +274,20 @@ fpfd32_impl_addsub:
         shlq %cl, %rax          /* Shift ...999A left to line up with the first
                                    non-zero digit in r9 */
         subq %r9, %rax          /* Subtract r9 from 0x...9999A000... */
+        jmp .Lrem
+.Lsubborrow:
+        xorq %rax, %rcx
+        xorq %rdx, %rcx
+        notq %rcx
+        movq $0x1111111111111110, %rax
+        andq %rax, %rcx
+        shrq $3, %rcx
+        leaq (%rcx,%rcx,2), %rcx
+        subq %rcx, %rdx
+        xorq %rax, %rax         /* r9 must be zero, because in order for rax to
+                                   be > than rdx, they must both be shifted all
+                                   the way to the left */
+        negl -4(%rsp)           /* Flip the resultant sign */
 .Lrem:
         movq %rdx, (%rdi)       /* Save the mantissa in dest->mant */
         movl -8(%rsp), %edx
