@@ -32,28 +32,29 @@ fpfd32_impl_scale:
         pushl %esi
         pushl %edi
         pushl %ebp
-        movl 20(%esp), %esi     /* Put dest in esi */
+        subl $12, %esp
+        movl 32(%esp), %esi     /* Put dest in esi */
         movl (%esi), %eax        
         movl 4(%esi), %edx      /* Put dest->mant in edx:eax */
         bsrl %edx, %ebx         /* Find the leading non-zero bit */
         jz .LLSW
-        movl %eax, -8(%esp)
-        movl %edx, -4(%esp)
+        movl %eax, 4(%esp)
+        movl %edx, 8(%esp)
         movl msw_bsr2div+4(,%ebx,8), %ecx
         mull %ecx
         movl %eax, %edi
         movl %edx, %ebp
-        movl -4(%esp), %eax
+        movl 8(%esp), %eax
         mull %ecx
         addl %eax, %ebp
         adcl $0, %edx
         movl %edx, %ecx
-        movl -4(%esp), %eax
+        movl 8(%esp), %eax
         mull msw_bsr2div(,%ebx,8)
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
-        movl -8(%esp), %eax
+        movl 4(%esp), %eax
         mull msw_bsr2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
@@ -70,7 +71,7 @@ fpfd32_impl_scale:
 .LshrdMSW:
         shrdl %cl, %edx, %eax
         movl msw_bsr2exp(,%ebx,4), %ebx
-        movl %eax, -12(%esp)
+        movl %eax, (%esp)
         movl %eax, %edi
         mull msw_exp2mul(,%ebx,8)
         movl %eax, %ebp
@@ -78,25 +79,25 @@ fpfd32_impl_scale:
         movl %edi, %eax
         mull msw_exp2mul+4(,%ebx,8)
         addl %ecx, %eax
-        subl %ebp, -8(%esp)
-        sbbl %eax, -4(%esp)
-        movl -8(%esp), %eax
+        subl %ebp, 4(%esp)
+        sbbl %eax, 8(%esp)
+        movl 4(%esp), %eax
         subl $1, %ebx
         movl msw_exp2div+4(,%ebx,8), %ecx
         mull %ecx
         movl %eax, %edi
         movl %edx, %ebp
-        movl -4(%esp), %eax
+        movl 8(%esp), %eax
         mull %ecx
         addl %eax, %ebp
         adcl $0, %edx
         movl %edx, %ecx
-        movl -4(%esp), %eax
+        movl 8(%esp), %eax
         mull msw_exp2div(,%ebx,8)
         addl %eax, %edi
         adcl %edx, %ebp
         adcl $0, %ecx
-        movl -8(%esp), %eax
+        movl 4(%esp), %eax
         mull msw_exp2div(,%ebx,8)
         addl %edx, %edi
         adcl $0, %ebp
@@ -112,7 +113,7 @@ fpfd32_impl_scale:
         xorb %cl, %cl
 .LshrdremMSW:
         shrdl %cl, %edx, %eax
-        movl -12(%esp), %edx
+        movl (%esp), %edx
         testl %eax, %eax
         jz .LspecialMSW
         cmpl $5, %eax
@@ -126,10 +127,10 @@ fpfd32_impl_scale:
         mull msw_exp2mul+4(,%ebx,8)
         addl %eax, %ecx
         movl %edi, %eax
-        movl -12(%esp), %edx
-        cmpl %ebp, -8(%esp)
+        movl (%esp), %edx
+        cmpl %ebp, 4(%esp)
         jne .LremcorrectMSW
-        cmpl %ecx, -4(%esp)
+        cmpl %ecx, 8(%esp)
         je .LexpcorrectLSW
 .LremcorrectMSW:
         addl $1, %eax
@@ -222,6 +223,7 @@ fpfd32_impl_scale:
         movl %edx, (%esi)
         movl $0, 4(%esi)
         movl %ebx, 8(%esi)
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -230,7 +232,7 @@ fpfd32_impl_scale:
 .Lsubnorm:
         negl %ebx
         subl $101, %ebx
-        movl %eax, -4(%esp)
+        movl %eax, 8(%esp)
         movl %edx, %edi
         movl %edx, %eax
         mull lsw_exp2div(,%ebx,4)
@@ -268,7 +270,7 @@ fpfd32_impl_scale:
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial3:
-        cmpl $0, -4(%esp)
+        cmpl $0, 8(%esp)
         je .Lsubnormret
         addl $1, %eax
 .Lsubnormret:
@@ -276,6 +278,7 @@ fpfd32_impl_scale:
         movl %edx, (%esi)
         movl $0, 4(%esi)
         movl $-101, 8(%esi)
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -286,6 +289,7 @@ fpfd32_impl_scale:
         movl $0, 4(%esi)        /* Set to the highest significand possible */
         movl $90, 8(%esi)       /* Set the exponent to the maximum exponent */
         movl $10, %eax          /* Return the special 10 value */
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -294,6 +298,7 @@ fpfd32_impl_scale:
 .Luflow:
         movl $0, 16(%esi)       /* Set the special flag to FPFD_ZERO */
         movl $0x1A, %eax
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -320,6 +325,7 @@ fpfd32_impl_scale:
         je .Lspecial4
         cmpl $0x15, %eax
         je .Lspecial4
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -334,6 +340,7 @@ fpfd32_impl_scale:
         je .Lspecial6
         cmpl $0x15, %eax
         je .Lspecial6
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -344,6 +351,7 @@ fpfd32_impl_scale:
         jz .Lspecial7
         addl $1, %eax
 .Lspecial7:
+        addl $12, %esp
         popl %ebp
         popl %edi
         popl %esi
