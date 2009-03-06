@@ -106,7 +106,7 @@ save_ticks(const char *key, long tick_count)
     tl->size = 0;
     tl->capacity = 1;
 
-    e.key = xmalloc(strlen(key));
+    e.key = xmalloc(strlen(key) + 1); /* + 1 for trailing null */
     strcpy(e.key, key);
     e.data = tl;
 
