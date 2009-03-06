@@ -26,11 +26,13 @@
         .type ticks, @function
 ticks:
         pushl %ebx              # Callee-save register, clobbered by cpuid
+        pushl %esi
         cpuid                   # Serialize
         rdtsc                   # Read time stamp counter
-        movl %eax, -4(%esp)     # Store tsc
+        movl %eax, %esi         # Store tsc
         cpuid                   # Serialize again
-        movl -4(%esp), %eax
+        movl %esi, %eax
+        popl %esi
         popl %ebx
         ret
         .size ticks, .-ticks
