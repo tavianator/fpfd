@@ -35,9 +35,10 @@ fpfd32_impl_addsub:
         pushl %esi
         pushl %edi
         pushl %ebp              /* Callee-save registers */
-        movl 28(%esp), %esi     /* Put lhs in esi */
-        movl 32(%esp), %edi     /* Put rhs in edi */
-        movl 24(%esp), %ebx     /* Put sign in ebx */
+        subl $24, %esp
+        movl 52(%esp), %esi     /* Put lhs in esi */
+        movl 56(%esp), %edi     /* Put rhs in edi */
+        movl 48(%esp), %ebx     /* Put sign in ebx */
         xorl 12(%edi), %ebx     /* ebx = sign ^ rhs->fields.sign */
         xorl $1, %ebx           /* Find the effective sign of rhs
                                    (sign * rhs->fields.sign */
@@ -70,7 +71,7 @@ fpfd32_impl_addsub:
                                    digit count of lhs and rhs, in ecx and edx,
                                    respectively. */
         movl 12(%esi), %eax
-        movl %eax, -4(%esp)     /* Store lhs->fields.sign on the stack; this
+        movl %eax, 20(%esp)     /* Store lhs->fields.sign on the stack; this
                                    will be the resultant sign if we don't flip
                                    our operands. */
         movl %edx, %ebp
@@ -83,17 +84,17 @@ fpfd32_impl_addsub:
                                    rhs needs to be shifted further. In this
                                    case, we swap lhs and rhs, so that lhs can
                                    always be the one shifted further */
-        movl %ebx, -4(%esp)     /* esi will be our resultant sign */
+        movl %ebx, 20(%esp)     /* esi will be our resultant sign */
         xchgl %esi, %edi        /* Swap our lhs and rhs pointers */
         xchgl %ecx, %edx        /* Swap our leading zero digit counts */
         negl %ebp               /* Re-calculate ebp */
 .Lnoswitch:
         xorl %eax, %ebx         /* ebx ^= (original lhs)->fields.sign */
         movl 8(%esi), %eax
-        movl %eax, -8(%esp)     /* Store lhs->fields.exp, the resultant
+        movl %eax, 16(%esp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
-        movl %ecx, -12(%esp)
-        movl %edx, -16(%esp)    /* Store ecx and edx on the stack */
+        movl %ecx, 12(%esp)
+        movl %edx, 8(%esp)      /* Store ecx and edx on the stack */
         movl (%esi), %eax
         movl 4(%esi), %edx      /* Put lhs->mant in edx:eax */
         leal (,%ecx,4), %ecx    /* ecx *= 4 */
@@ -112,15 +113,15 @@ fpfd32_impl_addsub:
         testl %ebx, %ebx
         jnz .Lsubshift          /* If ebx == 0, we are adding digits. If not, we
                                    are subtracting. */
-        movl -16(%esp), %ecx
+        movl 8(%esp), %ecx
         subl %ebp, %ecx         /* ecx now stores the necessary digit shift
                                    count of rhs */
         movl (%edi), %ebx
         movl 4(%edi), %edi      /* Put lhs->mant in edi:ebx */
         js .Laddshr             /* If ecx is negative, we shift right; otherwise
                                    we shift left */
-        movl $0, -24(%esp)
-        movl $0, -20(%esp)      /* Remainder is zero */
+        movl $0, (%esp)
+        movl $0, 4(%esp)        /* Remainder is zero */
         leal (,%ecx,4), %ecx    /* ecx *= 4 */
         cmpb $32, %cl
         jb .Laddrhsshld
@@ -147,8 +148,8 @@ fpfd32_impl_addsub:
         shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
         shrl %cl, %edi          /* Shift edi.ebx:ebp right by cl - 32 bits */
-        movl %ebp, -24(%esp)
-        movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
+        movl %ebp, (%esp)
+        movl %ebx, 4(%esp)      /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
         xorl %edi, %edi         /* Move edi to ebx, and zero edi */
         jmp .Ladd
@@ -157,15 +158,15 @@ fpfd32_impl_addsub:
         shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
-        movl %ebp, -20(%esp)
-        movl $0, -24(%esp)      /* Store 0.ebp as the remainder */
+        movl %ebp, 4(%esp)
+        movl $0, (%esp)         /* Store 0.ebp as the remainder */
         jmp .Ladd
 .Laddshrtoofar:
-        movl %ebx, -24(%esp)
-        movl %edi, -20(%esp)    /* Store 0.edi:ebx as the remainder on the
+        movl %ebx, (%esp)
+        movl %edi, 4(%esp)      /* Store 0.edi:ebx as the remainder on the
                                    stack in case ecx == 64 */
         je .Lrem
-        movl $0x10000000, -20(%esp)     /* If ecx != 64, treat the remainder as
+        movl $0x10000000, 4(%esp)       /* If ecx != 64, treat the remainder as
                                            0.1 */
         jmp .Lrem
 .Ladd:
@@ -218,29 +219,29 @@ fpfd32_impl_addsub:
            falloff in edi:ebx, and set the leading digit to 1 */
         movl %edi, %edx
         movl %ebx, %eax
-        movl -24(%esp), %ebx
-        movl -20(%esp), %edi    /* Get the previous remainder from the stack,
+        movl (%esp), %ebx
+        movl 4(%esp), %edi      /* Get the previous remainder from the stack,
                                    and store it in edi:ebx */
         shrdl $4, %edi, %ebx
         shrdl $4, %eax, %edi
         shrdl $4, %edx, %eax
         shrl $4, %edx           /* Shift edx:eax.edi:ebx right one digit */
         orl $0x10000000, %edx   /* Set the leading digit to 1 */
-        movl %ebx, -24(%esp)
-        movl %edi, -20(%esp)    /* Store 0.edi:ebx as the remainder on the
+        movl %ebx, (%esp)
+        movl %edi, 4(%esp)      /* Store 0.edi:ebx as the remainder on the
                                    stack */
-        subl $1, -12(%esp)      /* Correct the exponent */
+        subl $1, 12(%esp)       /* Correct the exponent */
         jmp .Lrem
 .Lsubshift:
-        movl -16(%esp), %ecx
+        movl 8(%esp), %ecx
         subl %ebp, %ecx         /* ecx now stores the necessary digit shift
                                    count of rhs */
         movl (%edi), %ebx
         movl 4(%edi), %edi      /* Put lhs->mant in edi:ebx */
         js .Lsubshr             /* If ecx is negative, we shift right; otherwise
                                    we shift left */
-        movl $0, -24(%esp)
-        movl $0, -20(%esp)      /* Remainder is zero */
+        movl $0, (%esp)
+        movl $0, 4(%esp)        /* Remainder is zero */
         leal (,%ecx,4), %ecx    /* ecx *= 4 */
         cmpb $32, %cl
         jb .Lsubrhsshld
@@ -267,8 +268,8 @@ fpfd32_impl_addsub:
         shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl - 32 bits */
-        movl %ebp, -24(%esp)
-        movl %ebx, -20(%esp)    /* Store 0.ebx:ebp as the remainder */
+        movl %ebp, (%esp)
+        movl %ebx, 4(%esp)      /* Store 0.ebx:ebp as the remainder */
         movl %edi, %ebx
         xorl %edi, %edi         /* Move edi to ebx, and zero edi */
         jmp .Lsub
@@ -277,8 +278,8 @@ fpfd32_impl_addsub:
         shrdl %cl, %ebx, %ebp
         shrdl %cl, %edi, %ebx
         shrl %cl, %edi          /* Shift edi:ebx.ebp right by cl bits */
-        movl %ebp, -20(%esp)
-        movl $0, -24(%esp)
+        movl $0, (%esp)
+        movl %ebp, 4(%esp)
         jmp .Lsub
 .Lsubshrjusttoofar:
         /*
@@ -311,8 +312,8 @@ fpfd32_impl_addsub:
 .Lsubshrjusttoofar2:
         subl %ebx, %ebp
         sbbl %edi, %esi         /* Subtract rdx from 0x...9999A000... */
-        movl %ebp, -24(%esp)
-        movl %esi, -20(%esp)    /* Store the remainder on the stack */
+        movl %ebp, (%esp)
+        movl %esi, 4(%esp)      /* Store the remainder on the stack */
         movl $0x66666666, %esi
         movl $0x66666666, %ebp  /* Move 0x6666666666666666 into esi:ebp */
         bsfl %eax, %ecx
@@ -369,11 +370,11 @@ fpfd32_impl_addsub:
 .Lsubshrtoofar3:
         subl $1, %eax
         sbbl $0, %edx           /* Subtract 1 from edx:eax */
-        movl $0x90000000, -20(%esp)
+        movl $0x90000000, 4(%esp)
         jmp .Lrem
 .Lsub:
-        movl -24(%esp), %ebp
-        movl -20(%esp), %esi
+        movl (%esp), %ebp
+        movl 4(%esp), %esi
         testl %ebp, %ebp
         stc
         jnz .Lsubloop
@@ -445,7 +446,7 @@ fpfd32_impl_addsub:
         sbbl %edi, %esi         /* Subtract rdx from 0x...9999A000... */
         movl %ebp, %eax
         movl %esi, %edx
-        negl -4(%esp)           /* Flip the resultant sign */
+        negl 20(%esp)           /* Flip the resultant sign */
         /* Remainder must be zero, because in order for edi:ebx to be > than
            edx:eax, they must both be shifted all the way to the left. */
         jmp .Lrem
@@ -454,7 +455,7 @@ fpfd32_impl_addsub:
            .Lsubshrjusttoofar. */
         movl %edi, %edx
         movl %ebx, %eax
-        movl -20(%esp), %esi    /* Get the high-order remainder word (the low-
+        movl 4(%esp), %esi      /* Get the high-order remainder word (the low-
                                    order word remains in ebp) */
         movl $0x99999999, %edi
         movl $0x9999999A, %ebx  /* Move 0x999999999999999A into edi:ebx */
@@ -476,27 +477,28 @@ fpfd32_impl_addsub:
 .Lsubdone2:
         subl %ebp, %ebx
         sbbl %esi, %edi         /* Subtract rdx from 0x...9999A000... */
-        movl %ebx, -24(%esp)
-        movl %edi, -20(%esp)    /* Store the remainder on the stack */
+        movl %ebx, (%esp)
+        movl %edi, 4(%esp)      /* Store the remainder on the stack */
 .Lrem:
-        movl 20(%esp), %esi     /* Put dest in esi */
+        movl 44(%esp), %esi     /* Put dest in esi */
         movl %eax, (%esi)
         movl %edx, 4(%esi)
-        movl -8(%esp), %eax
-        movl -12(%esp), %edx
+        movl 16(%esp), %eax
+        movl 12(%esp), %edx
         subl %edx, %eax         /* Adjust the exponent */
         movl %eax, 8(%esi)      /* Save the exponent in dest->fields.exp */
-        movl -4(%esp), %eax
+        movl 20(%esp), %eax
         movl %eax, 12(%esi)     /* Save the sign in dest->fields.sign */
         movl $1, 16(%esi)       /* Set the special flag to FPFD_NUMBER */
-        movl -20(%esp), %eax
-        movl -24(%esp), %edx    /* Retrieve the remainder from the stack */
+        movl 4(%esp), %eax
+        movl (%esp), %edx       /* Retrieve the remainder from the stack */
         movl %eax, %ecx
         shrl $28, %eax
         testl %eax, %eax
         jz .Lspecial
         cmpl $5, %eax
         je .Lspecial            /* Return values of 0 and 5 are special cases */
+        addl $24, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -506,6 +508,7 @@ fpfd32_impl_addsub:
         andl $0x0FFFFFFF, %ecx
         jz .Lspecial1
         addl $1, %eax
+        addl $24, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -516,6 +519,7 @@ fpfd32_impl_addsub:
         jz .Lspecial2
         addl $1, %eax
 .Lspecial2:
+        addl $24, %esp
         popl %ebp
         popl %edi
         popl %esi
