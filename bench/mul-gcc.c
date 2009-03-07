@@ -26,19 +26,18 @@ gcc32_bench_mul(unsigned int trials)
   long ticks1, ticks2;
   unsigned int i, j;
 
-  /* Warm up cache */
-  fpfd32_random(lhs.fpfd);
-  fpfd32_random(rhs.fpfd);
-#if GCC_DPD
-  fp.dec = __dpd_mulsd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-  fp.dec = __bid_mulsd3(lhs.dec, rhs.dec);
-#endif
-
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs.fpfd);
     fpfd32_random(rhs.fpfd);
 
+    /* Warm up cache */
+#if GCC_DPD
+    fp.dec = __dpd_mulsd3(lhs.dec, rhs.dec);
+#elif GCC_BID
+    fp.dec = __bid_mulsd3(lhs.dec, rhs.dec);
+#endif
+
+    /* Perform the benchmark */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();

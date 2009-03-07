@@ -27,21 +27,17 @@ fpfd32_bench_impl_addsub(unsigned int trials)
   long ticks1, ticks2;
   unsigned int i, j;
 
-  /* Warm up cache */
-
-  fpfd32_random(lhs);
-  fpfd32_random(rhs);
-  fpfd32_impl_expand(&lhs_impl, lhs);
-  fpfd32_impl_expand(&rhs_impl, rhs);
-  fpfd32_impl_addsub(&impl, 1, &lhs_impl, &rhs_impl);
-  fpfd32_impl_addsub(&impl, -1, &lhs_impl, &rhs_impl);
-
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
     fpfd32_random(rhs);
     fpfd32_impl_expand(&lhs_impl, lhs);
     fpfd32_impl_expand(&rhs_impl, rhs);
 
+    /* Warm up cache */
+    fpfd32_impl_addsub(&impl, 1, &lhs_impl, &rhs_impl);
+    fpfd32_impl_addsub(&impl, -1, &lhs_impl, &rhs_impl);
+
+    /* Benchmark addition */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();
@@ -51,6 +47,7 @@ fpfd32_bench_impl_addsub(unsigned int trials)
 
     record_ticks("fpfd32_impl_add", ticks2 - ticks1);
 
+    /* Benchmark subtraction */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();
