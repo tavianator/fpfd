@@ -27,15 +27,14 @@ fpfd32_bench_impl_compress(unsigned int trials)
   long ticks1, ticks2;
   unsigned int i, j;
 
-  /* Warm up cache */
-  fpfd32_random(fp);
-  fpfd32_impl_expand(&impl, fp);
-  fpfd32_impl_compress(fp, &impl);
-
   for (i = 0; i < trials; ++i) {
     fpfd32_random(fp);
     fpfd32_impl_expand(&impl, fp);
 
+    /* Warm up cache */
+    fpfd32_impl_compress(fp, &impl);
+
+    /* Perform the benchmark */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();

@@ -27,15 +27,14 @@ fpfd32_bench_add(unsigned int trials)
   unsigned int i, j;
   fpfd_flags_t flags = FPFD_NONE;
 
-  /* Warm up cache */
-  fpfd32_random(lhs);
-  fpfd32_random(rhs);
-  fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
-
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
     fpfd32_random(rhs);
 
+    /* Warm up cache */
+    fpfd32_add(fp, lhs, rhs, FPFD_RNDN, &flags);
+
+    /* Perform the benchmark */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();

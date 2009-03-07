@@ -27,17 +27,15 @@ fpfd32_bench_fma(unsigned int trials)
   unsigned int i, j;
   fpfd_flags_t flags = FPFD_NONE;
 
-  /* Warm up cache */
-  fpfd32_random(a);
-  fpfd32_random(b);
-  fpfd32_random(c);
-  fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags);
-
   for (i = 0; i < trials; ++i) {
     fpfd32_random(a);
     fpfd32_random(b);
     fpfd32_random(c);
 
+    /* Warm up cache */
+    fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags);
+
+    /* Perform the benchmark */
     ticks1 = ticks();
     BENCH_LOOP(j) {
       NO_UNROLL();
