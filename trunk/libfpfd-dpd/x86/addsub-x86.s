@@ -172,44 +172,44 @@ fpfd32_impl_addsub:
 .Ladd:
         addl $0x66666666, %eax
         addl $0x66666666, %edx
-        movl %eax, %ecx
-        movl %edx, %ebp
+        movl %eax, %ebp
+        movl %edx, %esi
         addl %ebx, %eax
         adcl %edi, %edx
         jc .Laddcarry
-        xorl %ebx, %ecx
-        xorl %edi, %ebp
-        xorl %eax, %ecx
-        xorl %edx, %ebp
-        notl %ecx
+        xorl %ebx, %ebp
+        xorl %edi, %esi
+        xorl %eax, %ebp
+        xorl %edx, %esi
         notl %ebp
-        andl $0x11111110, %ecx
-        andl $0x11111111, %ebp
-        shrdl $3, %ebp, %ecx
-        shrl $3, %ebp
-        leal (%ecx,%ecx,2), %ecx
+        notl %esi
+        andl $0x11111110, %ebp
+        andl $0x11111111, %esi
+        shrdl $3, %esi, %ebp
+        shrl $3, %esi
         leal (%ebp,%ebp,2), %ebp
-        subl %ecx, %eax
-        subl %ebp, %edx
+        leal (%esi,%esi,2), %esi
+        subl %ebp, %eax
+        subl %esi, %edx
         subl $0x60000000, %edx
         jmp .Lrem
 .Laddcarry:
         /* We carried, so shift the digits right by one, saving the falloff in
            edi:ebx, and set the leading digit to 1 */
-        xorl %ebx, %ecx
-        xorl %edi, %ebp
-        xorl %eax, %ecx
-        xorl %edx, %ebp
-        notl %ecx
+        xorl %ebx, %ebp
+        xorl %edi, %esi
+        xorl %eax, %ebp
+        xorl %edx, %esi
         notl %ebp
-        andl $0x11111110, %ecx
-        andl $0x11111111, %ebp
-        shrdl $3, %ebp, %ecx
-        shrl $3, %ebp
-        leal (%ecx,%ecx,2), %ecx
+        notl %esi
+        andl $0x11111110, %ebp
+        andl $0x11111111, %esi
+        shrdl $3, %esi, %ebp
+        shrl $3, %esi
         leal (%ebp,%ebp,2), %ebp
-        subl %ecx, %eax
-        subl %ebp, %edx
+        leal (%esi,%esi,2), %esi
+        subl %ebp, %eax
+        subl %esi, %edx
         movl (%esp), %ebx
         movl 4(%esp), %edi      /* Get the previous remainder from the stack,
                                    and store it in edi:ebx */
@@ -275,7 +275,7 @@ fpfd32_impl_addsub:
 .Lsubshrjusttoofar:
         /*
          * Shift count == 16. This means we have edx:eax - 0.edi:ebx. So,
-         * subtract 0.edi:ebx from 1, and subtract 1 from rax.
+         * subtract 0.edi:ebx from 1, and subtract 1 from edx:eax.
          *
          * Subtracting 0.edi:ebx from 1 is equivalent to subtracting the lowest
          * non-zero digit from 10, and all higher digits from 9.
@@ -302,7 +302,7 @@ fpfd32_impl_addsub:
                                    non-zero digit in edi:ebx */
 .Lsubshrjusttoofar2:
         subl %ebx, %ebp
-        sbbl %edi, %esi         /* Subtract rdx from 0x...9999A000... */
+        sbbl %edi, %esi         /* Subtract edi:ebx from 0x...9999A000... */
         movl %ebp, (%esp)
         movl %esi, 4(%esp)      /* Store the remainder on the stack */
         movl $0x66666666, %esi
@@ -333,8 +333,8 @@ fpfd32_impl_addsub:
         sbbl $0, %edx           /* Subtract 1 from edx:eax */
         jmp .Lrem
 .Lsubshrtoofar:
-        /* Shift count > 16; just subtract one from rax as above, and treat the
-           remainder as 0.9 */
+        /* Shift count > 16; just subtract one from edx:eax as above, and treat
+           the remainder as 0.9 */
         movl $0x66666666, %esi
         movl $0x66666666, %ebp  /* Move 0x6666666666666666 into esi:ebp */
         bsfl %eax, %ecx
@@ -364,100 +364,96 @@ fpfd32_impl_addsub:
         movl $0x90000000, 4(%esp)
         jmp .Lrem
 .Lsub:
-        movl (%esp), %ebp
-        movl 4(%esp), %esi
-        testl %ebp, %ebp
-        stc
-        jnz .Lsubloop
-        testl %esi, %esi
-        jz .Lsubloop            /* testl clears the carry flag for sbbb */
-        stc                     /* Set the carry flag if remainder != 0 */
-.Lsubloop:
-        /* This loop subtracts the digits of edi:ebx from edx:eax, four at a
-           time, storing the result in edi:ebx. It terminates when
-           edx:eax == 0. */
-        sbbb %bl, %al           /* Subtract bl from al in binary */
-        das                     /* Decimal adjust after subtraction - uses AF
-                                   flag to correct al after two BCD digits are
-                                   subtracted from the two already in it. Only
-                                   on x86. */
-        movb %al, %bl           /* Store the result in bl */
-        movb %ah, %al           /* Move the next two digits to al */
-        sbbb %bh, %al           /* Add bh to al in binary */
-        das                     /* Decimal adjust after subtraction */
-        jc .Lsubborrow          /* Test for borrow */
-        movb %al, %bh           /* Store the result in bh */
-        shrdl $16, %edx, %eax
-        shrl $16, %edx
-        movl %ebx, %esi
-        shrdl $16, %edi, %ebx
-        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
-                                   the result in edi:ebx right 4 digits */
-        testl %edx, %edx        /* Test for edx == 0 */
-        jnz .Lsubloop           /* testl clears the carry flag for adcb */
-        testl %eax, %eax        /* Test for eax == 0 */
-        jnz .Lsubloop
-        jmp .Lsubdone
-.Lsubborrow:
-        movb %al, %bh
-        shrdl $16, %edx, %eax
-        shrl $16, %edx
-        movl %ebx, %esi
-        shrdl $16, %edi, %ebx
-        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
-                                   the result in edi:ebx right 4 digits */
-        testl %edx, %edx
-        stc
-        jnz .Lsubloop
-        testl %eax, %eax
-        stc
-        jnz .Lsubloop
-        jmp .Lsubdoneborrow      /* We are done, but finished on a borrow */
-.Lsubdoneborrow:
-        /* We finished on a borrow, so subtract the result from 1:0:0 as in
-           .Lsubshrjusttoofar, and flip the result's sign. */
+        /* Negate edx:eax, then add edi:ebx to it as in .Ladd */
         movl $0x99999999, %esi
         movl $0x9999999A, %ebp  /* Move 0x999999999999999A into esi:ebp */
-        bsfl %ebx, %ecx         /* Forward bit scan this time */
-        jz .Lsubdoneborrow1
+        bsfl %eax, %ecx
+        jz .Lsub1
         andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
         shldl %cl, %ebp, %esi
         shll %cl, %ebp          /* Shift ...999A left to line up with the first
-                                   non-zero digit in edi:ebx */
-        jmp .Lsubdoneborrow2
-.Lsubdoneborrow1:
-        bsfl %edi, %ecx         /* edi:ebx can't be zero */
+                                   non-zero digit in edx:eax */
+        jmp .Lsub2
+.Lsub1:
+        bsfl %edx, %ecx
         andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
         movl %ebp, %esi
         xorl %ebp, %ebp
         shll %cl, %esi          /* Shift ...999A left to line up with the first
-                                   non-zero digit in edi:ebx */
-.Lsubdoneborrow2:
-        subl %ebx, %ebp
-        sbbl %edi, %esi         /* Subtract rdx from 0x...9999A000... */
+                                   non-zero digit in edx:eax */
+.Lsub2:
+        subl %eax, %ebp
+        sbbl %edx, %esi         /* Subtract edx:eax from 0x...9999A000... */
         movl %ebp, %eax
         movl %esi, %edx
-        negl 20(%esp)           /* Flip the resultant sign */
-        /* Remainder must be zero, because in order for edi:ebx to be > than
-           edx:eax, they must both be shifted all the way to the left. */
-        jmp .Lrem
-.Lsubdone:
+        addl $0x66666666, %eax
+        addl $0x66666666, %edx
+        movl (%esp), %ebp
+        movl 4(%esp), %esi
+        testl %ebp, %ebp
+        jnz .Lsubrem
+        testl %esi, %esi
+        jz .Lsubnorem
+.Lsubrem:
+        addl $1, %eax
+        adcl $0, %edx
+.Lsubnorem:
+        movl %eax, %ebp
+        movl %edx, %esi
+        addl %ebx, %eax
+        adcl %edi, %edx
+        jc .Lsubborrow
+        xorl %ebx, %ebp
+        xorl %edi, %esi
+        xorl %eax, %ebp
+        xorl %edx, %esi
+        notl %ebp
+        notl %esi
+        andl $0x11111110, %ebp
+        andl $0x11111111, %esi
+        shrdl $3, %esi, %ebp
+        shrl $3, %esi
+        leal (%ebp,%ebp,2), %ebp
+        leal (%esi,%esi,2), %esi
+        subl %ebp, %eax
+        subl %esi, %edx
+        subl $0x60000000, %edx
+        /* Negate the result */
+        movl $0x99999999, %esi
+        movl $0x9999999A, %ebp  /* Move 0x999999999999999A into esi:ebp */
+        bsfl %eax, %ecx
+        jz .Lsub3
+        andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
+        shldl %cl, %ebp, %esi
+        shll %cl, %ebp          /* Shift ...999A left to line up with the first
+                                   non-zero digit in edx:eax */
+        jmp .Lsub4
+.Lsub3:
+        bsfl %edx, %ecx
+        andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
+        movl %ebp, %esi
+        xorl %ebp, %ebp
+        shll %cl, %esi          /* Shift ...999A left to line up with the first
+                                   non-zero digit in edx:eax */
+.Lsub4:
+        subl %eax, %ebp
+        sbbl %edx, %esi         /* Subtract edx:eax from 0x...9999A000... */
+        movl %ebp, %eax
+        movl %esi, %edx
         /* We must now subtract the remainder from 1, as in
            .Lsubshrjusttoofar. */
-        movl %edi, %edx
-        movl %ebx, %eax
         movl 4(%esp), %esi      /* Get the high-order remainder word (the low-
                                    order word remains in ebp) */
         movl $0x99999999, %edi
         movl $0x9999999A, %ebx  /* Move 0x999999999999999A into edi:ebx */
         bsfl %ebp, %ecx
-        jz .Lsubdone1
+        jz .Lsub5
         andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
         shldl %cl, %ebx, %edi
         shll %cl, %ebx          /* Shift ...999A left to line up with the first
                                    non-zero digit in edi:ebx */
-        jmp .Lsubdone2
-.Lsubdone1:
+        jmp .Lsub6
+.Lsub5:
         bsfl %esi, %ecx
         jz .Lrem
         andl $0x1C, %ecx        /* ecx = bsf/4; the trailing zero digit count */
@@ -465,11 +461,30 @@ fpfd32_impl_addsub:
         xorl %ebx, %ebx
         shll %cl, %edi          /* Shift ...999A left to line up with the first
                                    non-zero digit in edi:ebx */
-.Lsubdone2:
+.Lsub6:
         subl %ebp, %ebx
-        sbbl %esi, %edi         /* Subtract rdx from 0x...9999A000... */
+        sbbl %esi, %edi         /* Subtract esi:ebp from 0x...9999A000... */
         movl %ebx, (%esp)
         movl %edi, 4(%esp)      /* Store the remainder on the stack */
+        jmp .Lrem
+.Lsubborrow:
+        xorl %ebx, %ebp
+        xorl %edi, %esi
+        xorl %eax, %ebp
+        xorl %edx, %esi
+        notl %ebp
+        notl %esi
+        andl $0x11111110, %ebp
+        andl $0x11111111, %esi
+        shrdl $3, %esi, %ebp
+        shrl $3, %esi
+        leal (%ebp,%ebp,2), %ebp
+        leal (%esi,%esi,2), %esi
+        subl %ebp, %eax
+        subl %esi, %edx
+        negl 20(%esp)           /* Flip the resultant sign */
+        /* Remainder must be zero, because in order for edi:ebx to be > than
+           edx:eax, they must both be shifted all the way to the left. */
 .Lrem:
         movl 44(%esp), %esi     /* Put dest in esi */
         movl %eax, (%esi)
