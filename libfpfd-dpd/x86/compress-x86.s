@@ -30,7 +30,16 @@
         .type fpfd32_impl_compress, @function
 fpfd32_impl_compress:
         pushl %ebx
-        movl 12(%esp), %ecx
+        movl 12(%esp), %ecx     /* Put src in ecx */
+        movl 16(%ecx), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
+        testl %edx, %edx
+        jz .Lzero
+        cmpl $2, %edx
+        je .LsNaN
+        cmpl $3, %edx
+        je .LqNaN
+        cmpl $4, %edx
+        je .Linf
         movl (%ecx), %eax
         movl %eax, %edx
         andl $0xFFF, %edx
@@ -44,20 +53,10 @@ fpfd32_impl_compress:
         andl $0xF000000, %eax
         shll $2, %eax
         orl %edx, %eax          /* Put the leading significand digit in place */
-        movl 12(%ecx), %ebx
-        subl $1, %ebx
-        negl %ebx
+        movl $1, %ebx
+        subl 12(%ecx), %ebx
         shll $30, %ebx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
-        movl 16(%ecx), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
-        testl %edx, %edx
-        jz .Lzero
-        cmpl $2, %edx
-        je .LsNaN
-        cmpl $3, %edx
-        je .LqNaN
-        cmpl $4, %edx
-        je .Linf
         movl 8(%ecx), %edx
         addl $101, %edx         /* Get the biased exponent */
         testl $0x20000000, %eax
@@ -90,6 +89,10 @@ fpfd32_impl_compress:
         popl %ebx
         ret
 .Lzero:
+        movl $1, %ebx
+        subl 12(%ecx), %ebx
+        shll $30, %ebx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         movl $0x22500000, %eax
         orl %ebx, %eax          /* The sign bit */
         movl 8(%esp), %ecx
@@ -97,6 +100,20 @@ fpfd32_impl_compress:
         popl %ebx
         ret
 .LsNaN:
+        movl (%ecx), %edx
+        movl %edx, %eax
+        andl $0xFFF, %eax
+        movw fpfd_bcd2dpd(,%eax,2), %ax
+        movl %edx, %ebx
+        shrl $12, %ebx
+        andl $0xFFF, %ebx
+        movw fpfd_bcd2dpd(,%ebx,2), %bx
+        shll $10, %ebx
+        orl %ebx, %eax          /* Get the trailing significand */
+        movl $1, %ebx
+        subl 12(%ecx), %ebx
+        shll $30, %ebx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         orl $0x7E000000, %eax
         orl %ebx, %eax          /* The sign bit */
         movl 8(%esp), %ecx
@@ -104,6 +121,20 @@ fpfd32_impl_compress:
         popl %ebx
         ret
 .LqNaN:
+        movl (%ecx), %edx
+        movl %edx, %eax
+        andl $0xFFF, %eax
+        movw fpfd_bcd2dpd(,%eax,2), %ax
+        movl %edx, %ebx
+        shrl $12, %ebx
+        andl $0xFFF, %ebx
+        movw fpfd_bcd2dpd(,%ebx,2), %bx
+        shll $10, %ebx
+        orl %ebx, %eax          /* Get the trailing significand */
+        movl $1, %ebx
+        subl 12(%ecx), %ebx
+        shll $30, %ebx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         orl $0x7C000000, %eax
         orl %ebx, %eax          /* The sign bit */
         movl 8(%esp), %ecx
@@ -111,6 +142,10 @@ fpfd32_impl_compress:
         popl %ebx
         ret
 .Linf:   
+        movl $1, %ebx
+        subl 12(%ecx), %ebx
+        shll $30, %ebx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         movl $0x78000000, %eax
         orl %ebx, %eax          /* The sign bit */
         movl 8(%esp), %ecx
