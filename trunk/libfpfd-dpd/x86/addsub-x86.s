@@ -170,55 +170,46 @@ fpfd32_impl_addsub:
                                            0.1 */
         jmp .Lrem
 .Ladd:
-        clc                     /* Clear the carry flag for adcb */
-.Laddloop:
-        /* This loop adds the digits of edx:eax and edi:ebx, four at a time,
-           storing the result in edi:ebx. It terminates when edx:eax == 0. */
-        adcb %bl, %al           /* Add bl to al in binary */
-        daa                     /* Decimal adjust after addition - uses AF flag
-                                   to correct al after two BCD digits are added
-                                   to the two already in it. Only on x86. */
-        movb %al, %bl           /* Store the result in bl */
-        movb %ah, %al           /* Move the next two digits to al */
-        adcb %bh, %al           /* Add bh to al in binary */
-        daa                     /* Decimal adjust after addition */
-        jc .Laddcarry           /* Test for carry */
-        movb %al, %bh           /* Store the result in bh */
-        shrdl $16, %edx, %eax
-        shrl $16, %edx
-        movl %ebx, %esi
-        shrdl $16, %edi, %ebx
-        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
-                                   the result in edi:ebx right 4 digits */
-        testl %edx, %edx        /* Test for edx == 0 */
-        jnz .Laddloop           /* testl clears the carry flag for adcb */
-        testl %eax, %eax        /* Test for eax == 0 */
-        jnz .Laddloop
-        jmp .Ladddone
-.Laddcarry:
-        movb %al, %bh
-        shrdl $16, %edx, %eax
-        shrl $16, %edx
-        movl %ebx, %esi
-        shrdl $16, %edi, %ebx
-        shrdl $16, %esi, %edi   /* Shift edx:eax right 4 digits, and rotate
-                                   the result in edi:ebx right 4 digits */
-        testl %edx, %edx
-        stc
-        jnz .Laddloop
-        testl %eax, %eax
-        stc
-        jnz .Laddloop
-        jmp .Ladddonecarry      /* We are done, but finished on a carry */
-.Ladddone:
-        movl %edi, %edx
-        movl %ebx, %eax
+        addl $0x66666666, %eax
+        addl $0x66666666, %edx
+        movl %eax, %ecx
+        movl %edx, %ebp
+        addl %ebx, %eax
+        adcl %edi, %edx
+        jc .Laddcarry
+        xorl %ebx, %ecx
+        xorl %edi, %ebp
+        xorl %eax, %ecx
+        xorl %edx, %ebp
+        notl %ecx
+        notl %ebp
+        andl $0x11111110, %ecx
+        andl $0x11111111, %ebp
+        shrdl $3, %ebp, %ecx
+        shrl $3, %ebp
+        leal (%ecx,%ecx,2), %ecx
+        leal (%ebp,%ebp,2), %ebp
+        subl %ecx, %eax
+        subl %ebp, %edx
+        subl $0x60000000, %edx
         jmp .Lrem
-.Ladddonecarry:
-        /* We finished on a carry, so shift the digits right by one, saving the
-           falloff in edi:ebx, and set the leading digit to 1 */
-        movl %edi, %edx
-        movl %ebx, %eax
+.Laddcarry:
+        /* We carried, so shift the digits right by one, saving the falloff in
+           edi:ebx, and set the leading digit to 1 */
+        xorl %ebx, %ecx
+        xorl %edi, %ebp
+        xorl %eax, %ecx
+        xorl %edx, %ebp
+        notl %ecx
+        notl %ebp
+        andl $0x11111110, %ecx
+        andl $0x11111111, %ebp
+        shrdl $3, %ebp, %ecx
+        shrl $3, %ebp
+        leal (%ecx,%ecx,2), %ecx
+        leal (%ebp,%ebp,2), %ebp
+        subl %ecx, %eax
+        subl %ebp, %edx
         movl (%esp), %ebx
         movl 4(%esp), %edi      /* Get the previous remainder from the stack,
                                    and store it in edi:ebx */
