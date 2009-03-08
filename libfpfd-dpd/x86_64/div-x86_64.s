@@ -36,6 +36,8 @@ fpfd32_impl_div:
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 8(%rsi), %r8d
         subl 8(%rdx), %r8d      /* Subtract the exponents */
+        subl $7, %ecx           /* We multiply the quotient by 10000000 to
+                                   ensure full precision */
         movl %r8d, 8(%rdi)      /* Store the exponent */
         movl %ecx, 12(%rdi)     /* Store the sign */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
