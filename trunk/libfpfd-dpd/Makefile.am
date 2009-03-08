@@ -17,33 +17,38 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>. ##
 ###########################################################################
 
-EXTRA_PROGRAMS = dpdtable multable
-BUILT_SOURCES  = dpdtable$(EXEEXT) multable$(EXEEXT)
+EXTRA_PROGRAMS = dpdtable multable divtable
+BUILT_SOURCES  = dpdtable$(EXEEXT) multable$(EXEEXT) divtable$(EXEEXT)
 CLEANFILES     = $(BUILT_SOURCES)
 
 dpdtable_SOURCES = dpdtable.c
 multable_SOURCES = multable.c
+divtable_SOURCES = divtable.c
 
 $(srcdir)/x86/dpdtable-x86.s: dpdtable.c
 	./dpdtable$(EXEEXT) >$@
 $(srcdir)/x86/multable-x86.s: multable.c
 	./multable$(EXEEXT) >$@
+$(srcdir)/x86/divtable-x86.s: divtable.c
+	./divtable$(EXEEXT) >$@
 
 $(srcdir)/x86_64/dpdtable-x86_64.s: dpdtable.c
 	./dpdtable$(EXEEXT) >$@
 $(srcdir)/x86_64/multable-x86_64.s: multable.c
 	./multable$(EXEEXT) >$@
+$(srcdir)/x86_64/divtable-x86_64.s: divtable.c
+	./divtable$(EXEEXT) >$@
 
 lib_LTLIBRARIES = libfpfd-dpd.la
 
 libfpfd_dpd_la_SOURCES =
 
 if X86
-  libfpfd_dpd_la_SOURCES += x86/addsub-x86.s x86/compress-x86.s x86/div-x86.s x86/dpdtable-x86.s x86/encoding-x86.s x86/expand-x86.s x86/inc-x86.s x86/mul-x86.s x86/multable-x86.s x86/odd-x86.s x86/scale-x86.s
+  libfpfd_dpd_la_SOURCES += x86/addsub-x86.s x86/compress-x86.s x86/div-x86.s x86/divtable-x86.s x86/dpdtable-x86.s x86/encoding-x86.s x86/expand-x86.s x86/inc-x86.s x86/mul-x86.s x86/multable-x86.s x86/odd-x86.s x86/scale-x86.s
 endif
 
 if X86_64
-  libfpfd_dpd_la_SOURCES += x86_64/addsub-x86_64.s x86_64/compress-x86_64.s x86_64/div-x86_64.s x86_64/dpdtable-x86_64.s x86_64/encoding-x86_64.s x86_64/expand-x86_64.s x86_64/mul-x86_64.s x86_64/multable-x86_64.s x86_64/inc-x86_64.s x86_64/odd-x86_64.s x86_64/scale-x86_64.s
+  libfpfd_dpd_la_SOURCES += x86_64/addsub-x86_64.s x86_64/compress-x86_64.s x86_64/div-x86_64.s x86_64/divtable-x86_64.s x86_64/dpdtable-x86_64.s x86_64/encoding-x86_64.s x86_64/expand-x86_64.s x86_64/mul-x86_64.s x86_64/multable-x86_64.s x86_64/inc-x86_64.s x86_64/odd-x86_64.s x86_64/scale-x86_64.s
 endif
 
 if GCC_OVERRIDE
