@@ -16,8 +16,8 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ(2.63)
-AC_INIT(The FPFD Library, 0.0.5, tavianator@gmail.com, fpfd)
-AM_INIT_AUTOMAKE(fpfd, 0.0.5)
+AC_INIT(The FPFD Library, 0.0.6, tavianator@gmail.com, fpfd)
+AM_INIT_AUTOMAKE(fpfd, 0.0.6)
 
 dnl Programs
 AC_PROG_CC
