@@ -19,6 +19,7 @@
 
 EXTRA_PROGRAMS = dpdtable multable
 BUILT_SOURCES  = dpdtable$(EXEEXT) multable$(EXEEXT)
+CLEANFILES     = $(BUILT_SOURCES)
 
 dpdtable_SOURCES = dpdtable.c
 multable_SOURCES = multable.c
