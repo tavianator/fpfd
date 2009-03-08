@@ -29,35 +29,34 @@
 .globl fpfd32_impl_compress
         .type fpfd32_impl_compress, @function
 fpfd32_impl_compress:
+        movl 16(%rsi), %r9d     /* Handle zeros and infinities */
+        testl %r9d, %r9d
+        jz .Lzero
+        cmpl $4, %r9d
+        je .Linf
         movl (%rsi), %eax       /* Put src->mant in eax */
         movl %eax, %ecx
         movl %eax, %edx
         /* Convert the BCD digits to DPD */
         movq fpfd_bcd2dpd@GOTPCREL(%rip), %r8   /* For position-independance */
-        andq $0xFFF, %rcx
+        andl $0xFFF, %ecx
         movw (%r8,%rcx,2), %cx  /* Lowest three digits */
         shrl $12, %edx
-        andq $0xFFF, %rdx
+        andl $0xFFF, %edx
         movw (%r8,%rdx,2), %dx  /* Highest three digits */
         shll $10, %edx
         orl %ecx, %edx          /* Complete trailing significand */
         andl $0xF000000, %eax   /* Leading digit */
         shll $2, %eax
         orl %edx, %eax          /* Put the leading significand digit in place */
-        movl 12(%rsi), %ecx     /* Put src->fields.sign in ecx */
-        subl $1, %ecx
-        negl %ecx
+        movl $1, %ecx
+        subl 12(%rsi), %ecx
         shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
-        movl 16(%rsi), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
-        testl %edx, %edx
-        jz .Lzero
-        cmpl $2, %edx
+        cmpl $2, %r9d           /* Handle NaNs */
         je .LsNaN
-        cmpl $3, %edx
+        cmpl $3, %r9d
         je .LqNaN
-        cmpl $4, %edx
-        je .Linf
         movl 8(%rsi), %edx      /* Put src->fields.exp in edx */
         addl $101, %edx         /* Add the bias */
         testl $0x20000000, %eax
@@ -86,6 +85,10 @@ fpfd32_impl_compress:
         movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .Lzero:
+        movl $1, %ecx
+        subl 12(%rsi), %ecx
+        shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         movl $0x22500000, %eax  /* A zero mantissa and exponent */
         orl %ecx, %eax          /* The sign bit */
         movl %eax, (%rdi)       /* Store the result in dest */
@@ -101,6 +104,10 @@ fpfd32_impl_compress:
         movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .Linf:   
+        movl $1, %ecx
+        subl 12(%rsi), %ecx
+        shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
+                                   shift it to the MSB */
         movl $0x78000000, %eax  /* An infinity, with zero payload */
         orl %ecx, %eax          /* The sign bit */
         movl %eax, (%rdi)       /* Store the result in dest */
