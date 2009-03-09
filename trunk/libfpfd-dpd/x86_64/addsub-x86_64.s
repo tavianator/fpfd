@@ -230,40 +230,33 @@ fpfd32_impl_addsub:
         movq $0x9000000000000000, %rax  /* Remainder is equivalent to 0.9 */
         jmp .Lrem
 .Lsub:
-        /* Negate rdx, then add rax to rdx as in .Ladd */
-        bsfq %rax, %rcx
-        andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
-        movq $0x999999999999999A, %rsi
-        shlq %cl, %rsi          /* Shift ...999A left to line up with the first
-                                   non-zero digit in rdx */
-        subq %rax, %rsi         /* Subtract rdx from 0x...9999A000... */
-        movq %rsi, %rax
-        movq $0x6666666666666666, %rcx
         testq %r9, %r9
         jz .Lsubnorem
-        addq $1, %rcx
+        addq $1, %rdx
 .Lsubnorem:
-        addq %rcx, %rdx
-        movq %rdx, %rcx
-        addq %rax, %rdx
+        /*
+         * We can perform a BCD subtraction using binary operations, as follows:
+         *   - Subtract rhs from lhs, in binary.  This will cause a binary
+         *     borrow wherever a decimal carry should have been.
+         *   - Now the digits which didn't produce a carry will be correct, but
+         *     those that did will be 6 greater than the correct value.  To fix
+         *     this, xor the last result with (lhs ^ rhs), or
+         *     ((lhs + 0x6666...) ^ rhs), then mask off all but the lowest bit
+         *     of every digit.
+         *   - The last value will have a 1 after all digits that carried.
+         *     Multiply by 6/8, to get 6's in the right places.
+         *   - Subtract these sixes from the original sum.
+         */
+        movq %rax, %rcx
+        subq %rdx, %rax
         jc .Lsubborrow
-        xorq %rax, %rcx
         xorq %rdx, %rcx
-        notq %rcx
-        movq $0x1111111111111110, %rax
-        andq %rax, %rcx
+        xorq %rax, %rcx
+        movq $0x1111111111111110, %rdx
+        andq %rdx, %rcx
         shrq $3, %rcx
-        shlq $57, %rax
-        orq %rax, %rcx
         leaq (%rcx,%rcx,2), %rcx
-        subq %rcx, %rdx
-        /* Negate the result */
-        bsfq %rdx, %rcx
-        andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
-        movq $0x999999999999999A, %rax
-        shlq %cl, %rax          /* Shift ...999A left to line up with the first
-                                   non-zero digit in rdx */
-        subq %rdx, %rax         /* Subtract rdx from 0x...9999A000... */
+        subq %rcx, %rax
         movq %rax, %rdx
         /* Negate the remainder */
         xorq %rax, %rax         /* In case r9 == 0 */
@@ -276,14 +269,24 @@ fpfd32_impl_addsub:
         subq %r9, %rax          /* Subtract r9 from 0x...9999A000... */
         jmp .Lrem
 .Lsubborrow:
-        xorq %rax, %rcx
         xorq %rdx, %rcx
-        notq %rcx
-        movq $0x1111111111111110, %rax
-        andq %rax, %rcx
+        xorq %rax, %rcx
+        movq $0x1111111111111110, %rdx
+        andq %rdx, %rcx
         shrq $3, %rcx
+        shlq $57, %rdx
+        orq %rdx, %rcx
         leaq (%rcx,%rcx,2), %rcx
-        subq %rcx, %rdx
+        subq %rcx, %rax
+        movq %rax, %rdx
+        /* Negate the result */
+        bsfq %rdx, %rcx
+        andl $0x3C, %ecx        /* ecx = bsf/4; trailing zero digit count */
+        movq $0x999999999999999A, %rax
+        shlq %cl, %rax          /* Shift ...999A left to line up with the first
+                                   non-zero digit in rdx */
+        subq %rdx, %rax         /* Subtract rdx from 0x...9999A000... */
+        movq %rax, %rdx
         xorq %rax, %rax         /* r9 must be zero, because in order for rax to
                                    be > than rdx, they must both be shifted all
                                    the way to the left */
