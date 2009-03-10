@@ -29,7 +29,7 @@ int main() {
          ".globl fpfd_bcddiv\n"
          "        .align 32\n"
          "        .type fpfd_bcddiv, @object\n"
-         "        .size fpfd_bcddiv, 78848\n"
+         "        .size fpfd_bcddiv, 39419\n"
          "fpfd_bcddiv:\n");
 
   lhs_dec = 0;
@@ -39,14 +39,13 @@ int main() {
       if ((lhs & 0xE) <= 0x8 && (lhs & 0xE0) <= 0x80
           && (rhs & 0xE) <= 0x8 && (rhs & 0xE0) <= 0x80) {
         if (rhs_dec != 0) {
-          printf("        .value 0x%.2u%.2u\n",
-                 lhs_dec/rhs_dec, lhs_dec%rhs_dec);
+          printf("        .byte 0x%u\n", lhs_dec/rhs_dec);
         } else {
-          printf("        .value 0x0\n");
+          printf("        .byte 0x0\n");
         }
         ++rhs_dec;
       } else {
-        printf("        .value 0x0\n");
+        printf("        .byte 0x0\n");
       }
     }
     if ((lhs & 0xE) <= 0x8 && (lhs & 0xE0) <= 0x80) {
