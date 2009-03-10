@@ -82,12 +82,12 @@ fpfd32_impl_div:
         jnz .Lcheckestimate
         /* Estimate is zero, so store zero as the next digit, and guess 9 for
            the new estimate */
-        shll $4, %esi
+        shlq $4, %rsi
         shll $4, %r10d
         subl $1, %r13d
         movb $9, %cl
 .Lcheckestimate:
-        shll $4, %esi
+        shlq $4, %rsi
         addb %cl, %sil
         xorl %eax, %eax
         xorl %edx, %edx
@@ -143,7 +143,7 @@ fpfd32_impl_div:
         cmpl %eax, %r10d
         jae .Ldivrem
 .Ldivfixestimate:
-        subl $1, %esi
+        subq $1, %rsi
         movl %eax, %ecx
         subl %r11d, %eax
         xorl %eax, %ecx
@@ -164,13 +164,13 @@ fpfd32_impl_div:
         leal (%ecx,%ecx,2), %ecx
         subl %ecx, %r10d
         shll $4, %r10d
-        cmpl $0x10000000, %esi
+        cmpq $0x10000000, %rsi
         jae .Ldone
         subl $1, %r13d          /* Correct the exponent */
         jmp .Ldiv
 .Ldone:
         movl %esi, %eax
-        shrl $4, %esi
+        shrq $4, %rsi
         movq %rsi, (%rdi)       /* Store the mantissa */
         movl %r13d, 8(%rdi)     /* Store the exponent */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
