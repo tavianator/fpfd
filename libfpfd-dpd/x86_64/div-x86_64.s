@@ -39,7 +39,7 @@ fpfd32_impl_div:
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl 8(%rsi), %r13d
         subl 8(%rdx), %r13d     /* Subtract the exponents */
-        addl $1, %r13d
+        addl $2, %r13d
         movl %ecx, 12(%rdi)     /* Store the sign */
         movq fpfd_bcddiv@GOTPCREL(%rip), %r8
         movq fpfd_bcdmul@GOTPCREL(%rip), %r9
@@ -47,13 +47,13 @@ fpfd32_impl_div:
         movl (%rdx), %r11d
         bsrl %r10d, %ecx
         bsrl %r11d, %edx
-        subl $27, %ecx
+        subl $31, %ecx
         subl $27, %edx
         negl %ecx
         negl %edx
-        andl $0x1C, %ecx
+        andl $0x3C, %ecx
         andl $0x1C, %edx
-        shll %cl, %r10d         /* Shift lhs left to the 7th digit */
+        shlq %cl, %r10          /* Shift lhs left to the 7th digit */
         shrl $2, %ecx
         subl %ecx, %r13d        /* Correct the exponent */
         movl %edx, %ecx
@@ -62,33 +62,40 @@ fpfd32_impl_div:
         addl %ecx, %r13d        /* Correct the exponent */
         xorl %esi, %esi
 .Ldiv:
-        movl %r10d, %eax
+        movq %r10, %rax
         movl %r11d, %ebx
         xorl %ecx, %ecx
-        shrl $20, %eax
+        shrq $16, %rax
         shrl $20, %ebx
-        cmpl $0x99, %eax
-        jb .Ldivgoodnum
-        /* Numerator is too large for estimation; guess 9 */
-        movb $9, %cl
+        cmpl $0x10000, %eax
+        jb .Lgoodnumerator
+        /* Numerator is too large for estimation; guess 99 */
+        movb $0x99, %cl
         jmp .Lcheckestimate
-.Ldivgoodnum:
+.Lgoodnumerator:
         movb %bl, %cl
-        movb %al, %ch
+        movb %ah, %ch
         movb (%r8,%rcx), %cl    /* Use fpfd_bcddiv to find the quotient of the
                                    first two digits of lhs and rhs, an estimate
                                    of the next quotient digit */
-        testb %cl, %cl
-        jnz .Lcheckestimate
-        /* Estimate is zero, so store zero as the next digit, and guess 9 for
-           the new estimate */
-        shlq $4, %rsi
-        shll $4, %r10d
-        subl $1, %r13d
-        movb $9, %cl
+        xorl %edx, %edx
+        shlb $4, %cl
+        shrw $4, %ax
+.Lfindestimate:
+        movb %cl, %dl
+        addb $1, %dl
+        movb %bl, %dh
+        movw (%r9,%rdx,2), %dx
+        cmpw %ax, %dx
+        ja .Lcheckestimate
+        addb $1, %cl
+        cmpb $9, %cl
+        je .Lcheckestimate
+        cmpw %ax, %dx
+        jb .Lfindestimate
 .Lcheckestimate:
-        shlq $4, %rsi
-        addb %cl, %sil
+        shlq $8, %rsi
+        movb %cl, %sil
         xorl %eax, %eax
         xorl %edx, %edx
         movl %r11d, %ebx
@@ -115,7 +122,7 @@ fpfd32_impl_div:
         shrl $3, %r12d
         leal (%r12d,%r12d,2), %r12d
         subl %r12d, %eax
-        /* Add ecx*100 to eax */
+        /* Add ecx*10000 to eax */
         shll $16, %ecx
         addl $0x06666666, %eax
         movl %eax, %edx
@@ -127,48 +134,57 @@ fpfd32_impl_div:
         shrl $3, %edx
         leal (%edx,%edx,2), %edx
         subl %edx, %eax
-        /* Add ebx*1000000 to eax */
+        /* Add ebx*1000000 to rax */
         shll $24, %ebx
-        addl $0x06666666, %eax
-        movl %eax, %edx
-        addl %ebx, %eax
-        xorl %ebx, %edx
-        xorl %eax, %edx
-        notl %edx
-        andl $0x11111110, %edx
-        shrl $3, %edx
-        leal (%edx,%edx,2), %edx
-        subl %edx, %eax
+        movq $0x0666666666666666, %rcx
+        addq %rcx, %rax
+        movq %rax, %rdx
+        addq %rbx, %rax
+        xorq %rbx, %rdx
+        xorq %rax, %rdx
+        notq %rdx
+        movq $0x1111111111111110, %rcx
+        andq %rcx, %rdx
+        shrq $3, %rdx
+        leaq (%rdx,%rdx,2), %rdx
+        subq %rdx, %rax
         /* See if the product is greater than lhs */
-        cmpl %eax, %r10d
-        jae .Ldivrem
-.Ldivfixestimate:
-        subq $1, %rsi
-        movl %eax, %ecx
-        subl %r11d, %eax
-        xorl %eax, %ecx
-        xorl %r11d, %ecx
-        andl $0x11111110, %ecx
-        shrl $3, %ecx
-        leal (%ecx,%ecx,2), %ecx
-        subl %ecx, %eax
-        cmpl %eax, %r10d
-        jb .Ldivfixestimate
-.Ldivrem:
-        movl %r10d, %ecx
-        subl %eax, %r10d
-        xorl %eax, %ecx
-        xorl %r10d, %ecx
-        andl $0x11111110, %ecx
-        shrl $3, %ecx
-        leal (%ecx,%ecx,2), %ecx
-        subl %ecx, %r10d
-        shll $4, %r10d
+        cmpq %rax, %r10
+        jae .Lrem
+.Lfixestimate:
+        movb %sil, %dl
+        subb $1, %sil
+        xorb %sil, %dl
+        andb $0x10, %dl
+        shrb $3, %dl
+        leal (%edx,%edx,2), %edx
+        subb %dl, %sil
+        movq %rax, %rdx
+        subq %r11, %rax
+        xorq %rax, %rdx
+        xorq %r11, %rdx
+        andq %rcx, %rdx
+        shrq $3, %rdx
+        leaq (%rdx,%rdx,2), %rdx
+        subq %rdx, %rax
+        cmpq %rax, %r10
+        jb .Lfixestimate
+.Lrem:
+        movq %r10, %rdx
+        subq %rax, %r10
+        xorq %rax, %rdx
+        xorq %r10, %rdx
+        andq %rcx, %rdx
+        shrq $3, %rdx
+        leaq (%rdx,%rdx,2), %rdx
+        subq %rdx, %r10
+        shlq $8, %r10
         cmpq $0x10000000, %rsi
         jae .Ldone
-        subl $1, %r13d          /* Correct the exponent */
+        subl $2, %r13d          /* Correct the exponent */
         jmp .Ldiv
 .Ldone:
+        subl $1, %r13d
         movl %esi, %eax
         shrq $4, %rsi
         movq %rsi, (%rdi)       /* Store the mantissa */
