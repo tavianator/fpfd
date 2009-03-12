@@ -41,8 +41,8 @@ fpfd32_impl_expand:
         movl %edx, %eax
         andl $0x600, %eax
         cmpl $0x600, %eax
-        je .L32_c1i             /* If the combination field begins with 11,
-                                   follow 754-2008, S3.5.2, c.1.i */
+        je .L32_c2ii            /* If the combination field begins with 11,
+                                   follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
         subl $101, %edx
         movl %edx, 8(%rdi)      /* Subtract bias and store exponent */
@@ -54,7 +54,7 @@ fpfd32_impl_expand:
         movl $0, 4(%rdi)        /* Set the high-order significand bits to 0 */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
-.L32_c1i:
+.L32_c2ii:
         movl %edx, %eax
         andl $0x7E0, %eax
         cmpl $0x7E0, %eax
@@ -131,8 +131,8 @@ fpfd64_impl_expand:
         movl %edx, %eax
         andl $0x1700, %eax
         cmpl $0x1700, %eax
-        je .L64_c1i             /* If the combination field begins with 11,
-                                   follow 754-2008, S3.5.2, c.1.i */
+        je .L64_c2ii            /* If the combination field begins with 11,
+                                   follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
         subl $398, %edx
         movl %edx, 16(%rdi)      /* Subtract bias and store exponent */
@@ -145,7 +145,7 @@ fpfd64_impl_expand:
         movq $0, 8(%rdi)        /* Set the high-order significand bits to 0 */
         movl $1, 24(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
-.L64_c1i:
+.L64_c2ii:
         movl %edx, %eax
         andl $0x1F80, %eax
         cmpl $0x1F80, %eax
@@ -233,8 +233,8 @@ fpfd128_impl_expand:
         movl %edx, %eax
         andl $0x17000, %eax
         cmpl $0x17000, %eax
-        je .L128_c1i            /* If the combination field begins with 11,
-                                   follow 754-2008, S3.5.2, c.1.i */
+        je .L128_c2ii           /* If the combination field begins with 11,
+                                   follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
         subl $6176, %edx
         movl %edx, 32(%rdi)      /* Subtract bias and store exponent */
@@ -252,7 +252,7 @@ fpfd128_impl_expand:
         movq $0, 24(%rdi)       /* Set the high-order significand bits to 0 */
         movl $1, 40(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
-.L128_c1i:
+.L128_c2ii:
         movl %edx, %eax
         andl $0x1F800, %eax
         cmpl $0x1F800, %eax
