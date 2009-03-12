@@ -145,7 +145,7 @@ fpfd32_impl_div:
         notl %edx
         andl $0x11111110, %edx
         shrl $3, %edx
-        leal (%rdx,%rdx,2), %rdx
+        leal (%rdx,%rdx,2), %edx
         subl %edx, %eax
         /* Add ebx*1000000 to rax */
         shlq $24, %rbx
