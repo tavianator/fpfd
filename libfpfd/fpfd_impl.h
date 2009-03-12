@@ -75,6 +75,16 @@ typedef struct {
   fpfd_impl_t fields;
 } fpfd32_impl_t;
 
+typedef struct {
+  unsigned char mant[16];
+  fpfd_impl_t fields;
+} fpfd64_impl_t;
+
+typedef struct {
+  unsigned char mant[32];
+  fpfd_impl_t fields;
+} fpfd128_impl_t;
+
 /*
  * These routines work on expanded fpfdX_t's. A void return type signifies that
  * the result is always exact. Functions which return an unsigned int return a
@@ -99,7 +109,12 @@ typedef struct {
  */
 
 void fpfd32_impl_expand(fpfd32_impl_t *dest, fpfd32_srcptr src);
+void fpfd64_impl_expand(fpfd64_impl_t *dest, fpfd64_srcptr src);
+void fpfd128_impl_expand(fpfd128_impl_t *dest, fpfd128_srcptr src);
+
 void fpfd32_impl_compress(fpfd32_ptr dest, const fpfd32_impl_t *src);
+void fpfd64_impl_compress(fpfd64_ptr dest, const fpfd64_impl_t *src);
+void fpfd128_impl_compress(fpfd128_ptr dest, const fpfd128_impl_t *src);
 
 unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
                                 const fpfd32_impl_t *lhs,

@@ -78,17 +78,31 @@ typedef struct {
   unsigned char data[4];
 } fpfd32_struct_t;
 
+typedef struct {
+  unsigned char data[8];
+} fpfd64_struct_t;
+
+typedef struct {
+  unsigned char data[16];
+} fpfd128_struct_t;
+
 /*
  * Arrays are allocated on the stack, but passed by reference. We don't simply
  * do
  *   typedef unsigned char fpfd32_t[4];
  * because there would be no type safety between different fpfd*_t's.
  */
-typedef fpfd32_struct_t fpfd32_t[1];
+typedef fpfd32_struct_t  fpfd32_t[1];
+typedef fpfd64_struct_t  fpfd64_t[1];
+typedef fpfd128_struct_t fpfd128_t[1];
 
 /* --- Pointer types --- */
-typedef       fpfd32_struct_t *fpfd32_ptr;
-typedef const fpfd32_struct_t *fpfd32_srcptr;
+typedef       fpfd32_struct_t  *fpfd32_ptr;
+typedef const fpfd32_struct_t  *fpfd32_srcptr;
+typedef       fpfd64_struct_t  *fpfd64_ptr;
+typedef const fpfd64_struct_t  *fpfd64_srcptr;
+typedef       fpfd128_struct_t *fpfd128_ptr;
+typedef const fpfd128_struct_t *fpfd128_srcptr;
 
 /* --- Assignment --- */
 
