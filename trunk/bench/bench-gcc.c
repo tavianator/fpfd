@@ -53,9 +53,20 @@ void
 gcc_bench(unsigned int trials)
 {
   gcc32_bench_add(trials);
+  gcc64_bench_add(trials);
+  gcc128_bench_add(trials);
+
   gcc32_bench_sub(trials);
+  gcc64_bench_sub(trials);
+  gcc128_bench_sub(trials);
+
   gcc32_bench_mul(trials);
+  gcc64_bench_mul(trials);
+  gcc128_bench_mul(trials);
+
   gcc32_bench_div(trials);
+  gcc64_bench_div(trials);
+  gcc128_bench_div(trials);
 }
 
 void
@@ -69,32 +80,96 @@ gcc_bench_results()
     write_ticks("__dpd_addsd3", file);
     fclose(file);
 
+    file = fopen("__dpd_adddd3.dat", "w");
+    write_ticks("__dpd_adddd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_addtd3.dat", "w");
+    write_ticks("__dpd_addtd3", file);
+    fclose(file);
+
     file = fopen("__dpd_subsd3.dat", "w");
     write_ticks("__dpd_subsd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_subdd3.dat", "w");
+    write_ticks("__dpd_subdd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_subtd3.dat", "w");
+    write_ticks("__dpd_subtd3", file);
     fclose(file);
 
     file = fopen("__dpd_mulsd3.dat", "w");
     write_ticks("__dpd_mulsd3", file);
     fclose(file);
 
+    file = fopen("__dpd_muldd3.dat", "w");
+    write_ticks("__dpd_muldd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_multd3.dat", "w");
+    write_ticks("__dpd_multd3", file);
+    fclose(file);
+
     file = fopen("__dpd_divsd3.dat", "w");
     write_ticks("__dpd_divsd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_divdd3.dat", "w");
+    write_ticks("__dpd_divdd3", file);
+    fclose(file);
+
+    file = fopen("__dpd_divtd3.dat", "w");
+    write_ticks("__dpd_divtd3", file);
     fclose(file);
   } else if (GCC_BID) {
     file = fopen("__bid_addsd3.dat", "w");
     write_ticks("__bid_addsd3", file);
     fclose(file);
 
+    file = fopen("__bid_adddd3.dat", "w");
+    write_ticks("__bid_adddd3", file);
+    fclose(file);
+
+    file = fopen("__bid_addtd3.dat", "w");
+    write_ticks("__bid_addtd3", file);
+    fclose(file);
+
     file = fopen("__bid_subsd3.dat", "w");
     write_ticks("__bid_subsd3", file);
+    fclose(file);
+
+    file = fopen("__bid_subdd3.dat", "w");
+    write_ticks("__bid_subdd3", file);
+    fclose(file);
+
+    file = fopen("__bid_subtd3.dat", "w");
+    write_ticks("__bid_subtd3", file);
     fclose(file);
 
     file = fopen("__bid_mulsd3.dat", "w");
     write_ticks("__bid_mulsd3", file);
     fclose(file);
 
+    file = fopen("__bid_muldd3.dat", "w");
+    write_ticks("__bid_muldd3", file);
+    fclose(file);
+
+    file = fopen("__bid_multd3.dat", "w");
+    write_ticks("__bid_multd3", file);
+    fclose(file);
+
     file = fopen("__bid_divsd3.dat", "w");
     write_ticks("__bid_divsd3", file);
+    fclose(file);
+
+    file = fopen("__bid_divdd3.dat", "w");
+    write_ticks("__bid_divdd3", file);
+    fclose(file);
+
+    file = fopen("__bid_divtd3.dat", "w");
+    write_ticks("__bid_divtd3", file);
     fclose(file);
   }
 }

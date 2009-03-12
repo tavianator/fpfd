@@ -24,24 +24,68 @@
  */
 
 void gcc32_bench_add(unsigned int trials);
+void gcc64_bench_add(unsigned int trials);
+void gcc128_bench_add(unsigned int trials);
+
 void gcc32_bench_sub(unsigned int trials);
+void gcc64_bench_sub(unsigned int trials);
+void gcc128_bench_sub(unsigned int trials);
+
 void gcc32_bench_mul(unsigned int trials);
+void gcc64_bench_mul(unsigned int trials);
+void gcc128_bench_mul(unsigned int trials);
+
 void gcc32_bench_div(unsigned int trials);
+void gcc64_bench_div(unsigned int trials);
+void gcc128_bench_div(unsigned int trials);
 
 /* For casting between fpfd*_t and _Decimal* */
+
 typedef union {
   fpfd32_t fpfd;
   _Decimal32 dec;
 } fpfd32_union_t;
 
+typedef union {
+  fpfd64_t fpfd;
+  _Decimal64 dec;
+} fpfd64_union_t;
+
+typedef union {
+  fpfd128_t fpfd;
+  _Decimal128 dec;
+} fpfd128_union_t;
+
 /* Prototypes for internal GCC functions */
 
 _Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __dpd_adddd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __dpd_addtd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __dpd_subsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __dpd_subdd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __dpd_subtd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __dpd_mulsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __dpd_muldd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __dpd_multd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __dpd_divsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __dpd_divdd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __dpd_divtd3(_Decimal128 lhs, _Decimal128 rhs);
 
 _Decimal32 __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __bid_adddd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __bid_addtd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __bid_subsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __bid_subdd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __bid_subtd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __bid_mulsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __bid_muldd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __bid_multd3(_Decimal128 lhs, _Decimal128 rhs);
+
 _Decimal32 __bid_divsd3(_Decimal32 lhs, _Decimal32 rhs);
+_Decimal64 __bid_divdd3(_Decimal64 lhs, _Decimal64 rhs);
+_Decimal128 __bid_divtd3(_Decimal128 lhs, _Decimal128 rhs);

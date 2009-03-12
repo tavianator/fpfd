@@ -56,3 +56,79 @@ gcc32_bench_div(unsigned int trials)
     }
   }
 }
+
+void
+gcc64_bench_div(unsigned int trials)
+{
+  fpfd64_union_t fp, lhs, rhs;
+  long ticks1, ticks2;
+  unsigned int i, j;
+
+  for (i = 0; i < trials; ++i) {
+    fpfd64_random(lhs.fpfd);
+    fpfd64_random(rhs.fpfd);
+
+    /* Warm up cache */
+#if GCC_DPD
+    fp.dec = __dpd_divdd3(lhs.dec, rhs.dec);
+#elif GCC_BID
+    fp.dec = __bid_divdd3(lhs.dec, rhs.dec);
+#endif
+
+    /* Perform the benchmark */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+#if GCC_DPD
+      fp.dec = __dpd_divdd3(lhs.dec, rhs.dec);
+#elif GCC_BID
+      fp.dec = __bid_divdd3(lhs.dec, rhs.dec);
+#endif
+    }
+    ticks2 = ticks();
+
+    if (GCC_DPD) {
+      record_ticks("__dpd_divdd3", ticks2 - ticks1);
+    } else if (GCC_BID) {
+      record_ticks("__bid_divdd3", ticks2 - ticks1);
+    }
+  }
+}
+
+void
+gcc128_bench_div(unsigned int trials)
+{
+  fpfd128_union_t fp, lhs, rhs;
+  long ticks1, ticks2;
+  unsigned int i, j;
+
+  for (i = 0; i < trials; ++i) {
+    fpfd128_random(lhs.fpfd);
+    fpfd128_random(rhs.fpfd);
+
+    /* Warm up cache */
+#if GCC_DPD
+    fp.dec = __dpd_divtd3(lhs.dec, rhs.dec);
+#elif GCC_BID
+    fp.dec = __bid_divtd3(lhs.dec, rhs.dec);
+#endif
+
+    /* Perform the benchmark */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+#if GCC_DPD
+      fp.dec = __dpd_divtd3(lhs.dec, rhs.dec);
+#elif GCC_BID
+      fp.dec = __bid_divtd3(lhs.dec, rhs.dec);
+#endif
+    }
+    ticks2 = ticks();
+
+    if (GCC_DPD) {
+      record_ticks("__dpd_divtd3", ticks2 - ticks1);
+    } else if (GCC_BID) {
+      record_ticks("__bid_divtd3", ticks2 - ticks1);
+    }
+  }
+}

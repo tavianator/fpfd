@@ -37,6 +37,6 @@ can be used to find the granularity of the benchmarks (usually within +/-0.05
 cycles).  Lastly, FPFD can benchmark GCC's built-in arithmetic types, for
 comparison, but ONLY if --enable-gcc-override is not specified.  These results
 are found in bench/gcc/__<encoding>_<operation><operand size>.dat.  Here,
-<operand size> is `sd' for decimal32, `dd' for decimal64, and `ld' for
+<operand size> is `sd' for decimal32, `dd' for decimal64, and `td' for
 decimal128.  For the BID encoding, gcc uses Intel's IDFPL implementation, and
 for the DPD encoding, gcc uses IBM's decNumber implementation.

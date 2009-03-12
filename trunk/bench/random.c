@@ -65,6 +65,58 @@ fpfd32_random(fpfd32_ptr dest)
   fpfd32_impl_compress(dest, &impl);
 }
 
+void
+fpfd64_random(fpfd64_ptr dest)
+{
+  fpfd64_impl_t impl;
+  long bits = 0, bits_left = 0;
+  unsigned int i;
+
+  do {
+    for (i = 0; i < sizeof(dest->data); ++i) {
+      if (bits_left <= UCHAR_MAX) {
+        bits = fpfd_rand();
+        bits_left = FPFD_RAND_MAX;
+      }
+
+      dest->data[i] = bits;
+      bits >>= CHAR_BIT;
+      bits_left >>= CHAR_BIT;
+    }
+
+    fpfd64_impl_expand(&impl, dest);
+    impl.fields.exp = fpfd_rand() % 16;
+    impl.fields.sign = 1;
+  } while (impl.fields.special != FPFD_NUMBER);
+  fpfd64_impl_compress(dest, &impl);
+}
+
+void
+fpfd128_random(fpfd128_ptr dest)
+{
+  fpfd128_impl_t impl;
+  long bits = 0, bits_left = 0;
+  unsigned int i;
+
+  do {
+    for (i = 0; i < sizeof(dest->data); ++i) {
+      if (bits_left <= UCHAR_MAX) {
+        bits = fpfd_rand();
+        bits_left = FPFD_RAND_MAX;
+      }
+
+      dest->data[i] = bits;
+      bits >>= CHAR_BIT;
+      bits_left >>= CHAR_BIT;
+    }
+
+    fpfd128_impl_expand(&impl, dest);
+    impl.fields.exp = fpfd_rand() % 34;
+    impl.fields.sign = 1;
+  } while (impl.fields.special != FPFD_NUMBER);
+  fpfd128_impl_compress(dest, &impl);
+}
+
 /* This local rand() implementation taken from POSIX.1-2001 */
 
 static unsigned long next = 1;
