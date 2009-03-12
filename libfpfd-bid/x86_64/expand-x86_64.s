@@ -129,8 +129,8 @@ fpfd64_impl_expand:
         shrq $50, %rdx
         andl $0x1FFF, %edx      /* Get the combination field */
         movl %edx, %eax
-        andl $0x1700, %eax
-        cmpl $0x1700, %eax
+        andl $0x1800, %eax
+        cmpl $0x1800, %eax
         je .L64_c2ii            /* If the combination field begins with 11,
                                    follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
@@ -231,8 +231,8 @@ fpfd128_impl_expand:
         shrq $50, %rdx
         andl $0x1FFFF, %edx     /* Get the combination field */
         movl %edx, %eax
-        andl $0x17000, %eax
-        cmpl $0x17000, %eax
+        andl $0x18000, %eax
+        cmpl $0x18000, %eax
         je .L128_c2ii           /* If the combination field begins with 11,
                                    follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
