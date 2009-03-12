@@ -53,7 +53,7 @@ fpfd32_impl_div:
         negl %edx
         andl $0x3C, %ecx
         andl $0x1C, %edx
-        shlq %cl, %r10          /* Shift lhs left to the 7th digit */
+        shlq %cl, %r10          /* Shift lhs left to the 8th digit */
         shrl $2, %ecx
         subl %ecx, %r13d        /* Correct the exponent */
         movl %edx, %ecx
@@ -65,22 +65,33 @@ fpfd32_impl_div:
         movq %r10, %rax
         movl %r11d, %ebx
         xorl %ecx, %ecx
-        shrq $16, %rax
+        shrq $20, %rax
         shrl $20, %ebx
-        cmpl $0x10000, %eax
-        jb .Lgoodnumerator
-        /* Numerator is too large for estimation; guess 99 */
-        movb $0x99, %cl
-        jmp .Lcheckestimate
-.Lgoodnumerator:
+        cmpl $0x1000, %eax
+        jb .Lsmallnumerator
         movb %bl, %cl
+        shrb $4, %cl
         movb %ah, %ch
-        movb (%r8,%rcx), %cl    /* Use fpfd_bcddiv to find the quotient of the
-                                   first two digits of lhs and rhs, an estimate
-                                   of the next quotient digit */
+        movb (%r8,%rcx), %cl
+        cmpb $0x10, %cl
+        jb .Lfirstestimate
+        movb $0x9, %cl
+        jmp .Lfirstestimate
+.Lsmallnumerator:
+        movw %ax, %cx
+        shlw $4, %cx
+        movb %bl, %cl
+        shrb $4, %cl
+        movb (%r8,%rcx), %cl
+        cmpb $0x10, %cl
+        jb .Lcheckestimate
+        movw %ax, %cx
+        shlw $4, %cx
+        movb %bl, %cl
+        movb (%r8,%rcx), %cl
+.Lfirstestimate:
         xorl %edx, %edx
         shlb $4, %cl
-        shrw $4, %ax
 .Lfindestimate:
         movb %cl, %dl
         addb $1, %dl
@@ -89,7 +100,9 @@ fpfd32_impl_div:
         cmpw %ax, %dx
         ja .Lcheckestimate
         addb $1, %cl
-        cmpb $9, %cl
+        movb %cl, %bh
+        andb $0x0F, %bh
+        cmpb $9, %bh
         je .Lcheckestimate
         cmpw %ax, %dx
         jb .Lfindestimate
@@ -135,7 +148,7 @@ fpfd32_impl_div:
         leal (%edx,%edx,2), %edx
         subl %edx, %eax
         /* Add ebx*1000000 to rax */
-        shll $24, %ebx
+        shlq $24, %rbx
         movq $0x0666666666666666, %rcx
         addq %rcx, %rax
         movq %rax, %rdx
@@ -149,8 +162,8 @@ fpfd32_impl_div:
         leaq (%rdx,%rdx,2), %rdx
         subq %rdx, %rax
         /* See if the product is greater than lhs */
-        cmpq %rax, %r10
-        jae .Lrem
+        cmpq %r10, %rax
+        jb .Lrem
 .Lfixestimate:
         movb %sil, %dl
         subb $1, %sil
