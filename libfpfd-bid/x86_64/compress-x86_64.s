@@ -151,12 +151,12 @@ fpfd64_impl_compress:
 fpfd128_impl_compress:
         movq (%rsi), %r8
         movq 8(%rsi), %rax      /* Get the coefficient */
-        movl 36(%rsi), %ecx
+        movl 40(%rsi), %ecx
         subl $1, %ecx
         negl %ecx
         shlq $62, %rcx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
-        movl 40(%rsi), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
+        movl 44(%rsi), %edx     /* Handle zeros, sNaN, qNaN, and infinities */
         testl %edx, %edx
         jz .L128_zero
         cmpl $2, %edx
@@ -165,7 +165,7 @@ fpfd128_impl_compress:
         je .L128_qNaN
         cmpl $4, %edx
         je .L128_inf
-        movl 32(%rsi), %edx
+        movl 36(%rsi), %edx
         addl $6176, %edx        /* Get the biased exponent */
         movq $0x2000000000000, %r9
         testq %r9, %rax
