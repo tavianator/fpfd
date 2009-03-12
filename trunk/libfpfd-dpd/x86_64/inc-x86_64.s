@@ -18,44 +18,29 @@
  * <http://www.gnu.org/licenses/>.                                       *
  *************************************************************************/
 
-/* void fpfd32_impl_inc(fpfd32_impl_t *dest); */
-
 /*
  * Increment the mantissa, in case we need to round. dest must be normalized.
- * To increment the mantissa, we add one to the BCD value, then check for
- * overflow in a loop. If (M & 0xA) == 0xA, then the least significant digit
- * is 0xA (or 0xB, 0xE, or 0xF, which can never happen). In that case, we add
- * 0x6 to M, and check for a carry in the second digit by (M & 0xA0) == 0xA0,
- * if so add 0x60, etc.
+ * See impl_addsub for an explanation of the bit tricks involved.
  */
 
         .text
+/* void fpfd32_impl_inc(fpfd32_impl_t *dest); */
 .globl fpfd32_impl_inc
         .type fpfd32_impl_inc, @function
 fpfd32_impl_inc:
         movl (%rdi), %eax
-        addl $1, %eax           /* Increment the mantissa */
+        addl $0x06666666, %eax
         movl %eax, %edx
-        andl $0xA, %edx
-        cmpl $0xA, %edx         /* Test for overflow (LSD == 10) */
-        je .Lcarryinit
+        addl $0x1, %eax
+        xorl %eax, %edx
+        notl %edx
+        andl $0x11111110, %edx
+        shrl $3, %edx
+        leal (%edx,%edx,2), %edx
+        subl %edx, %eax
+        testl $0x10000000, %eax
+        jnz .Lrollover
         movl %eax, (%rdi)
-        ret
-.Lcarryinit:
-        movl $6, %ecx
-.Lcarry:
-        /* eax = mantissa, edx = 0xA << n, ecx = 0x6 << n */
-        addl %ecx, %eax         /* Add 0x6 to the digit for a decimal carry */
-        movl %eax, %esi
-        shll $4, %edx
-        shll $4, %ecx           /* Shift our mask and carry */
-        cmpl $0x60000000, %ecx
-        je .Lrollover           /* If we carry past 7 digits, we've rolled
-                                   over */
-        andl %edx, %esi
-        cmpl %edx, %esi         /* Test for carry (digit == 10) */
-        je .Lcarry
-        movl %eax, (%rdi)       /* Store the mantissa */
         ret
 .Lrollover:
         cmpl $90, 8(%rdi)
