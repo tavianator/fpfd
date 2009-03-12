@@ -102,7 +102,7 @@ fpfd32_impl_scale:
         movq $0x199999999999999A, %rdx
         mulq %rdx               /* Divide by 10 */
         addl $1, %esi           /* Correct the exponent again */
-        leal (%edx,%edx,4), %eax
+        leal (%rdx,%rdx,4), %eax
         shll %eax
         subl %ecx, %eax
         negl %eax               /* Calculate the remainder */
