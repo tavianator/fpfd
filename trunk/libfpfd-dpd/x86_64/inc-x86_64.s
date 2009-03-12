@@ -36,7 +36,7 @@ fpfd32_impl_inc:
         notl %edx
         andl $0x11111110, %edx
         shrl $3, %edx
-        leal (%edx,%edx,2), %edx
+        leal (%rdx,%rdx,2), %edx
         subl %edx, %eax
         testl $0x10000000, %eax
         jnz .Lrollover

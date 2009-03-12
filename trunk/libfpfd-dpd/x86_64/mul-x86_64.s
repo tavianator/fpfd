@@ -82,7 +82,7 @@ fpfd32_impl_mul:
         notl %ecx
         andl $0x1111000, %ecx
         shrl $3, %ecx
-        leal (%ecx,%ecx,2), %ecx
+        leal (%rcx,%rcx,2), %ecx
         subl %ecx, %esi
         /* Add r10*100 to rsi */
         shll $8, %r10d
@@ -94,7 +94,7 @@ fpfd32_impl_mul:
         notl %ecx
         andl $0x11111000, %ecx
         shrl $3, %ecx
-        leal (%ecx,%ecx,2), %ecx
+        leal (%rcx,%rcx,2), %ecx
         subl %ecx, %esi
         /* Add r11*10000 to rsi */
         shll $16, %r11d
@@ -106,7 +106,7 @@ fpfd32_impl_mul:
         notl %ecx
         andl $0x11111000, %ecx
         shrl $3, %ecx
-        leal (%ecx,%ecx,2), %ecx
+        leal (%rcx,%rcx,2), %ecx
         subl %ecx, %esi
         /* Get the next batch of digits */
         xorl %ecx, %ecx

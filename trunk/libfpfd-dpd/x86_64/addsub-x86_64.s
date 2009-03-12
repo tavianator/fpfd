@@ -72,7 +72,7 @@ fpfd32_impl_addsub:
         movl %eax, -8(%rsp)     /* Store lhs->fields.exp, the resultant
                                    exponent, on the stack */
         movq (%r10), %rax       /* Put lhs->mant in rax */
-        leal (,%r8d,4), %ecx    /* cl = 4*r8 */
+        leal (,%r8,4), %ecx     /* cl = 4*r8 */
         shlq %cl, %rax          /* Shift rax all the way to the left */
         testl %esi, %esi
         jnz .Lsubshift          /* If esi == 0, we are adding digits. If not, we
@@ -82,13 +82,13 @@ fpfd32_impl_addsub:
         movq (%r11), %rdx       /* Put rhs->mant in rdx */
         js .Laddshr             /* If r9d is negative, we shift right; otherwise
                                    we shift left */
-        leal (,%r9d,4), %ecx    /* cl = 4*r9 */
+        leal (,%r9,4), %ecx     /* cl = 4*r9 */
         shlq %cl, %rdx          /* Shift rdx to line up the digits */
         xorq %r9, %r9           /* r9 is the remainder from rhs */
         jmp .Ladd               /* Perform the addition of digits */
 .Laddshr:
         negl %r9d
-        leal (,%r9d,4), %ecx    /* cl = -4*r9 */
+        leal (,%r9,4), %ecx     /* cl = -4*r9 */
         cmpl $16, %r9d          /* Check if r9 >= 16 */
         movq $0, %r9            /* r9 is the remainder from rhs (mov doesn't
                                    touch the flags) */
@@ -163,13 +163,13 @@ fpfd32_impl_addsub:
         movq (%r11), %rdx       /* Put rhs->mant in rdx */
         js .Lsubshr             /* If r9d is negative, we shift right; otherwise
                                    we shift left */
-        leal (,%r9d,4), %ecx    /* cl = 4*r9 */
+        leal (,%r9,4), %ecx     /* cl = 4*r9 */
         shlq %cl, %rdx          /* Shift rdx to line up the digits */
         xorq %r9, %r9           /* r9 is the remainder from rhs */
         jmp .Lsub               /* Perform the subtraction of digits */
 .Lsubshr:
         negl %r9d
-        leal (,%r9d,4), %ecx    /* cl = -4*r9 */
+        leal (,%r9,4), %ecx     /* cl = -4*r9 */
         cmpl $16, %r9d          /* Check if r9 >= 16 */
         movq $0, %r9            /* r9 is the remainder from rhs (mov doesn't
                                    touch the flags) */

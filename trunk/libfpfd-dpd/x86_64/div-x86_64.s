@@ -133,7 +133,7 @@ fpfd32_impl_div:
         notl %r12d
         andl $0x11111110, %r12d
         shrl $3, %r12d
-        leal (%r12d,%r12d,2), %r12d
+        leal (%r12,%r12,2), %r12d
         subl %r12d, %eax
         /* Add ecx*10000 to eax */
         shll $16, %ecx
@@ -145,7 +145,7 @@ fpfd32_impl_div:
         notl %edx
         andl $0x11111110, %edx
         shrl $3, %edx
-        leal (%edx,%edx,2), %edx
+        leal (%rdx,%rdx,2), %rdx
         subl %edx, %eax
         /* Add ebx*1000000 to rax */
         shlq $24, %rbx
@@ -170,7 +170,7 @@ fpfd32_impl_div:
         xorb %sil, %dl
         andb $0x10, %dl
         shrb $3, %dl
-        leal (%edx,%edx,2), %edx
+        leal (%rdx,%rdx,2), %edx
         subb %dl, %sil
         movq %rax, %rdx
         subq %r11, %rax
