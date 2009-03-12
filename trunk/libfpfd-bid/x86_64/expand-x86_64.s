@@ -226,7 +226,7 @@ fpfd128_impl_expand:
         andl $0x2, %edx
         negl %edx
         incl %edx
-        movl %edx, 36(%rdi)     /* Map the sign bit from (1, 0) to (-1, +1) */
+        movl %edx, 40(%rdi)     /* Map the sign bit from (1, 0) to (-1, +1) */
         movq %rcx, %rdx
         shrq $50, %rdx
         andl $0x1FFFF, %edx     /* Get the combination field */
@@ -237,7 +237,7 @@ fpfd128_impl_expand:
                                    follow 754-2008, S3.5.2, c.2.ii */
         shrl $3, %edx
         subl $6176, %edx
-        movl %edx, 32(%rdi)      /* Subtract bias and store exponent */
+        movl %edx, 36(%rdi)      /* Subtract bias and store exponent */
         movq $0x0001FFFFFFFFFFFF, %rdx
         andq %rdx, %rcx
         testq %rcx, %rcx
@@ -249,8 +249,9 @@ fpfd128_impl_expand:
         movq %r8, (%rdi)
         movq %rcx, 8(%rdi)      /* Return concatenated significand */
         movq $0, 16(%rdi)
-        movq $0, 24(%rdi)       /* Set the high-order significand bits to 0 */
-        movl $1, 40(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        movq $0, 24(%rdi)
+        movl $0, 32(%rdi)       /* Set the high-order significand bits to 0 */
+        movl $1, 44(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
 .L128_c2ii:
         movl %edx, %eax
@@ -265,7 +266,7 @@ fpfd128_impl_expand:
         shrl %edx
         andl $0x3FFF, %edx
         subl $6176, %edx
-        movl %edx, 32(%rdi)      /* Subtract bias and store exponent */
+        movl %edx, 36(%rdi)      /* Subtract bias and store exponent */
         movq $0x00007FFFFFFFFFFF, %rdx
         andq %rdx, %rcx
         movq $0x0002000000000000, %rdx
@@ -283,8 +284,9 @@ fpfd128_impl_expand:
         movq %r8, (%rdi)
         movq %rcx, 8(%rdi)      /* Return concatenated significand */
         movq $0, 16(%rdi)
-        movq $0, 24(%rdi)       /* Set the high-order significand bits to 0 */
-        movl $1, 40(%rdi)       /* Set the special flag to FPFD_NUMBER */
+        movq $0, 24(%rdi)
+        movl $0, 32(%rdi)       /* Set the high-order significand bits to 0 */
+        movl $1, 44(%rdi)       /* Set the special flag to FPFD_NUMBER */
         ret
 .L128_zero:  
         movq $0, (%rdi)
@@ -292,10 +294,11 @@ fpfd128_impl_expand:
         movq $0, 16(%rdi)
         movq $0, 24(%rdi)
         movl $0, 32(%rdi)
-        movl $0, 40(%rdi)       /* Set the special flag to FPFD_ZERO */
+        movl $0, 36(%rdi)
+        movl $0, 44(%rdi)       /* Set the special flag to FPFD_ZERO */
         ret
 .L128_sNaN:
-        movl $2, 24(%rdi)       /* Set the special flag to FPFD_SNAN */
+        movl $2, 44(%rdi)       /* Set the special flag to FPFD_SNAN */
         movq $0x00003FFFFFFFFFFF, %rdx
         andq %rdx, %rcx
         movq $0x314DC6448D93, %rdx
@@ -307,8 +310,9 @@ fpfd128_impl_expand:
         movq $0x38C15B0A00000000, %rdx
         cmpq %rdx, %r8
         jae .L128_NaNzero
+        jmp .L128_NaNnottoobig
 .L128_qNaN:
-        movl $3, 16(%rdi)       /* Set the special flag to FPFD_QNAN */
+        movl $3, 44(%rdi)       /* Set the special flag to FPFD_QNAN */
         movq $0x00003FFFFFFFFFFF, %rdx
         andq %rdx, %rcx
         movq $0x314DC6448D93, %rdx
@@ -320,26 +324,30 @@ fpfd128_impl_expand:
         movq $0x38C15B0A00000000, %rdx
         cmpq %rdx, %r8
         jae .L128_NaNzero
+        jmp .L128_NaNnottoobig
 .L128_NaNnottoobig:
         movq %r8, (%rdi)
         movq %rcx, 8(%rdi)
         movq $0, 16(%rdi)
-        movq $0, 24(%rdi)       /* Set the high-order payload bits to zero */
-        movl $0, 32(%rdi)       /* Set the exponent to zero */
+        movq $0, 24(%rdi)
+        movl $0, 32(%rdi)       /* Set the high-order payload bits to zero */
+        movl $0, 36(%rdi)       /* Set the exponent to zero */
         ret
 .L128_NaNzero:
         movq $0, (%rdi)
         movq $0, 8(%rdi)
         movq $0, 16(%rdi)
-        movq $0, 24(%rdi)       /* Set the payload to zero */
-        movl $0, 32(%rdi)       /* Set the exponent to zero */
+        movq $0, 24(%rdi)
+        movl $0, 32(%rdi)       /* Set the payload to zero */
+        movl $0, 36(%rdi)       /* Set the exponent to zero */
         ret
 .L128_inf:
         movq $0, (%rdi)
         movq $0, 8(%rdi)
         movq $0, 16(%rdi)
-        movq $0, 24(%rdi)       /* Set the payload to zero */
-        movl $0, 32(%rdi)       /* Set the exponent to zero */
-        movl $4, 40(%rdi)       /* Set the special flag to FPFD_INF */
+        movq $0, 24(%rdi)
+        movl $0, 32(%rdi)       /* Set the payload to zero */
+        movl $0, 36(%rdi)       /* Set the exponent to zero */
+        movl $4, 44(%rdi)       /* Set the special flag to FPFD_INF */
         ret
         .size fpfd128_impl_expand, .-fpfd128_impl_expand

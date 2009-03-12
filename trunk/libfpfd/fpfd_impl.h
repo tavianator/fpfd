@@ -81,7 +81,7 @@ typedef struct {
 } fpfd64_impl_t;
 
 typedef struct {
-  unsigned char mant[32];
+  unsigned char mant[36];
   fpfd_impl_t fields;
 } fpfd128_impl_t;
 
