@@ -1,3 +1,9 @@
+Version 0.1.0 (March 12, 2008, Revision 343)
+
+        The x86_64 target is now complete!  This release will be used for
+        the Team Canada application project report benchmark results.
+        Unfortunately, x86 didn't make it; perhaps it will by ISEF.
+
 Version 0.0.6 (March 7, 2009, Revision 321)
 
         DPD multiplication has been implemented for the x86_64 target, and DPD
