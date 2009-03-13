@@ -59,7 +59,10 @@ fpfd_bench(unsigned int trials)
   fpfd128_bench_impl_expand(trials);
 
   fpfd32_bench_impl_addsub(trials);
+
   fpfd32_bench_impl_mul(trials);
+  fpfd64_bench_impl_mul(trials);
+
   fpfd32_bench_impl_div(trials);
   fpfd32_bench_impl_inc(trials);
   fpfd32_bench_impl_scale(trials);
@@ -105,6 +108,10 @@ fpfd_bench_results()
 
   file = fopen("fpfd32_impl_mul.dat", "w");
   write_ticks("fpfd32_impl_mul", file);
+  fclose(file);
+
+  file = fopen("fpfd64_impl_mul.dat", "w");
+  write_ticks("fpfd64_impl_mul", file);
   fclose(file);
 
   file = fopen("fpfd32_impl_div.dat", "w");
