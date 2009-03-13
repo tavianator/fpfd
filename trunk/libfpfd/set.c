@@ -45,6 +45,12 @@ fpfd32_set_ui(fpfd32_ptr dest, unsigned long src, fpfd_rnd_t rnd,
   return 0;
 }
 
+void
+fpfd64_impl_mul(fpfd64_impl_t *dest,
+                const fpfd64_impl_t *lhs, const fpfd64_impl_t *rhs)
+{
+}
+
 /* --- END HACKS --- */
 
 void

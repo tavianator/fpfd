@@ -47,3 +47,32 @@ fpfd32_bench_impl_mul(unsigned int trials)
     record_ticks("fpfd32_impl_mul", ticks2 - ticks1);
   }
 }
+
+void
+fpfd64_bench_impl_mul(unsigned int trials)
+{
+  fpfd64_t lhs, rhs;
+  fpfd64_impl_t impl, lhs_impl, rhs_impl;
+  long ticks1, ticks2;
+  unsigned int i, j;
+
+  for (i = 0; i < trials; ++i) {
+    fpfd64_random(lhs);
+    fpfd64_random(rhs);
+    fpfd64_impl_expand(&lhs_impl, lhs);
+    fpfd64_impl_expand(&rhs_impl, rhs);
+
+    /* Warm up cache */
+    fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl);
+
+    /* Perform the benchmark */
+    ticks1 = ticks();
+    BENCH_LOOP(j) {
+      NO_UNROLL();
+      fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl);
+    }
+    ticks2 = ticks();
+
+    record_ticks("fpfd64_impl_mul", ticks2 - ticks1);
+  }
+}

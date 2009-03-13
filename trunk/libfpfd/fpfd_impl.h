@@ -121,6 +121,9 @@ unsigned int fpfd32_impl_addsub(fpfd32_impl_t *dest, int sign,
                                 const fpfd32_impl_t *rhs);
 void fpfd32_impl_mul(fpfd32_impl_t *dest,
                      const fpfd32_impl_t *lhs, const fpfd32_impl_t *rhs);
+void fpfd64_impl_mul(fpfd64_impl_t *dest,
+                     const fpfd64_impl_t *lhs, const fpfd64_impl_t *rhs);
+
 unsigned int fpfd32_impl_div(fpfd32_impl_t *dest, const fpfd32_impl_t *lhs,
                              const fpfd32_impl_t *rhs);
 
