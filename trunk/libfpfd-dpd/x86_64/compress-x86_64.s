@@ -61,24 +61,24 @@ fpfd32_impl_compress:
         testl $0x20000000, %eax
         jnz .L32_1i             /* Test for a big leading digit (8 or 9) */
         movl %edx, %esi
-        andl $0xC0, %esi        /* Get the trailing exponent bits */
-        andl $0x3F, %edx        /* Get the leading exponent bits */
+        andl $0x3F, %edx        /* Get the trailing exponent bits */
+        andl $0xC0, %esi        /* Get the leading exponent bits */
         shll $20, %edx
         shll $23, %esi
-        orl %esi, %eax          /* The trailing exponent bits */
-        orl %edx, %eax          /* The leading exponent bits*/
+        orl %edx, %eax          /* The trailing exponent bits */
+        orl %esi, %eax          /* The leading exponent bits */
         orl %ecx, %eax          /* The sign bit */
         movl %eax, (%rdi)       /* Store the result in dest */
         ret
 .L32_1i:
         andl $0x4FFFFFF, %eax   /* Mask off the highest bit of the big digit */
         movl %edx, %esi
-        andl $0xC0, %esi        /* Get the trailing exponent bits */
-        andl $0x3F, %edx        /* Get the leading exponent bits */
+        andl $0x3F, %edx        /* Get the trailing exponent bits */
+        andl $0xC0, %esi        /* Get the leading exponent bits */
         shll $20, %edx
         shll $21, %esi
-        orl %esi, %eax          /* The trailing exponent bits */
-        orl %edx, %eax          /* The leading exponent bits*/
+        orl %edx, %eax          /* The trailing exponent bits */
+        orl %esi, %eax          /* The leading exponent bits */
         orl $0x60000000, %eax   /* Indicate a big leading digit */
         orl %ecx, %eax          /* The sign bit */
         movl %eax, (%rdi)       /* Store the result in dest */
@@ -166,60 +166,63 @@ fpfd64_impl_compress:
         je .L64_sNaN
         cmpl $3, %r9d
         je .L64_qNaN
-        movl 8(%rsi), %edx      /* Put src->fields.exp in edx */
+        movl 16(%rsi), %edx     /* Put src->fields.exp in edx */
         addl $398, %edx         /* Add the bias */
-        /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-        testl $0x20000000, %eax
+        movq $0x0002000000000000, %r8
+        testq %r8, %rax
         jnz .L64_1i             /* Test for a big leading digit (8 or 9) */
         movl %edx, %esi
-        andl $0xC0, %esi        /* Get the trailing exponent bits */
-        andl $0x3F, %edx        /* Get the leading exponent bits */
-        shll $20, %edx
-        shll $23, %esi
-        orl %esi, %eax          /* The trailing exponent bits */
-        orl %edx, %eax          /* The leading exponent bits*/
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        andl $0xFF, %edx        /* Get the trailing exponent bits */
+        andl $0x300, %esi       /* Get the leading exponent bits */
+        shlq $50, %rdx
+        shlq $53, %rsi
+        orq %rdx, %rax          /* The trailing exponent bits */
+        orq %rsi, %rax          /* The leading exponent bits */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
 .L64_1i:
-        andl $0x4FFFFFF, %eax   /* Mask off the highest bit of the big digit */
+        movq $0x04FFFFFFFFFFFFFF, %r8
+        andq $0x4FFFFFF, %rax   /* Mask off the highest bit of the big digit */
         movl %edx, %esi
-        andl $0xC0, %esi        /* Get the trailing exponent bits */
-        andl $0x3F, %edx        /* Get the leading exponent bits */
-        shll $20, %edx
-        shll $21, %esi
-        orl %esi, %eax          /* The trailing exponent bits */
-        orl %edx, %eax          /* The leading exponent bits*/
-        orl $0x60000000, %eax   /* Indicate a big leading digit */
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        andl $0xFF, %edx        /* Get the trailing exponent bits */
+        andl $0x300, %esi       /* Get the leading exponent bits */
+        orl $0xC00, %esi        /* Indicate a big leading digit */
+        shlq $50, %rdx
+        shlq $51, %rsi
+        orq %rsi, %rax          /* The trailing exponent bits */
+        orq %rdx, %rax          /* The leading exponent bits */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
 .L64_zero:
         movl $1, %ecx
-        subl 12(%rsi), %ecx
-        shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
+        subl 20(%rsi), %ecx
+        shlq $62, %rcx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
-        movl $0x22500000, %eax  /* A zero mantissa and exponent */
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        movq $0x2250000000000000, %rax  /* A zero mantissa and exponent */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
 .L64_sNaN:
-        orl $0x7E000000, %eax   /* Indicate a signalling NaN */
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        movq $0x7E00000000000000, %r8
+        orq %r8, %rax           /* Indicate a signalling NaN */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
 .L64_qNaN:
-        orl $0x7C000000, %eax   /* Indicate a quiet NaN */
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        movq $0x7C00000000000000, %r8
+        orq %r8, %rax           /* Indicate a quiet NaN */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
 .L64_inf:   
         movl $1, %ecx
         subl 12(%rsi), %ecx
-        shll $30, %ecx          /* Map the sign bit from (-1, +1) to (1, 0), and
+        shlq $62, %rcx          /* Map the sign bit from (-1, +1) to (1, 0), and
                                    shift it to the MSB */
-        movl $0x78000000, %eax  /* An infinity, with zero payload */
-        orl %ecx, %eax          /* The sign bit */
-        movl %eax, (%rdi)       /* Store the result in dest */
+        movq $0x7800000000000000, %rax  /* An infinity, with zero payload */
+        orq %rcx, %rax          /* The sign bit */
+        movq %rax, (%rdi)       /* Store the result in dest */
         ret
         .size fpfd64_impl_compress, .-fpfd64_impl_compress
