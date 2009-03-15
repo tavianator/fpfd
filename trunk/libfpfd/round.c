@@ -77,7 +77,11 @@ fpfd32_impl_round2(fpfd32_impl_t *dest,
                    unsigned int rem1, unsigned int rem2,
                    fpfd_rnd_t rnd, fpfd_flags_t *flags)
 {
-  if (((rem2 & 0xF) == 0 || (rem2 & 0xF) == 5) && (rem1 & 0xF) != 0) ++rem2;
+  if (rem2 & 0x20) {
+    rem2 = rem1;
+  } else if (((rem2 & 0xF) == 0 || (rem2 & 0xF) == 5) && (rem1 & 0xF) != 0) {
+    ++rem2;
+  }
   return fpfd32_impl_round(dest, rem2, rnd, flags);
 }
 
@@ -133,6 +137,7 @@ fpfd_round(fpfd_impl_t *fields, unsigned int rem, fpfd_rnd_t rnd,
 
       switch (rnd) {
       case FPFD_RNDN:
+        printf("%u\n", rem);
         if (rem < 5) {
           action = FPFD_RSIGN;
         } else if (rem == 5) {

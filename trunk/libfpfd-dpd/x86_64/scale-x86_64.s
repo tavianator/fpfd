@@ -38,6 +38,7 @@ fpfd32_impl_scale:
         shlq %cl, %rdx          /* Shift rdx all the way to the left */
         shrl $2, %ecx
         subl $9, %ecx
+        movl %ecx, %r8d
         negl %ecx
         addl 8(%rdi), %ecx      /* Add (32 + 4 - ecx)/4 to the exponent */
         cmpl $90, %ecx
@@ -53,9 +54,13 @@ fpfd32_impl_scale:
         shrq $36, %rdx          /* Shift rdx.rax to the 28th bit */
         movq %rdx, (%rdi)       /* Set dest->mant to the scaled mantissa */
         movq %rax, %rcx
-        movq $0x0FFFFFFFFFFFFFFF, %rdx
-        andq %rdx, %rcx         /* Mask off the most significant nibble */
+        shlq $4, %rcx           /* Slide off the most significant nibble */
         shrq $60, %rax
+        testl %r8d, %r8d
+        jnz .Lchanged
+        movl $0x20, %eax
+        ret
+.Lchanged:
         testl %eax, %eax
         jz .Lspecial
         cmpl $5, %eax

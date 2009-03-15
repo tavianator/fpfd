@@ -143,6 +143,7 @@ fpfd32_impl_scale:
         shll %cl, %eax          /* Shift eax all the way to the left */
         shrl $2, %ecx
         subl $1, %ecx
+        movl %ecx, %ebx
         negl %ecx
         addl 8(%esi), %ecx      /* Add (4 - ecx)/4 to the exponent */
         cmpl $90, %ecx
@@ -161,6 +162,13 @@ fpfd32_impl_scale:
         movl $0, 4(%esi)        /* Set dest->mant to the scaled mantissa */
         movl %edx, %eax
         shrl $28, %eax
+        testl %ebx, %ebx
+        jnz .LchangedLSW
+        movl $0x20, %eax
+        popl %esi
+        popl %ebx
+        ret
+.LchangedLSW:
         popl %esi
         popl %ebx
         ret
