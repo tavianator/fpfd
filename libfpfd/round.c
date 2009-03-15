@@ -137,7 +137,6 @@ fpfd_round(fpfd_impl_t *fields, unsigned int rem, fpfd_rnd_t rnd,
 
       switch (rnd) {
       case FPFD_RNDN:
-        printf("%u\n", rem);
         if (rem < 5) {
           action = FPFD_RSIGN;
         } else if (rem == 5) {
