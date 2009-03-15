@@ -36,7 +36,7 @@ fpfd32_impl_scale:
         cmpq $10000000, %rax
         jae .Lover              /* The mantissa is too big */
         movq %rax, %rdx
-        xorl %eax, %eax
+        movl $0x20, %eax
         movl 8(%rdi), %esi
         jmp .Lnorm
 .Lunder:
@@ -171,7 +171,7 @@ fpfd32_impl_scale:
         cmpl $5, %eax
         jne .Lsubnormret
 .Lspecial5:
-        testl %r8d, %r8d
+        testl $0x1F, %r8d
         jz .Lsubnormret
         addl $1, %eax
 .Lsubnormret:
@@ -220,7 +220,7 @@ fpfd32_impl_scale:
         je .Lspecial8
         ret
 .Lspecial8:
-        testl %r8d, %r8d
+        testl $0x1F, %r8d
         jz .Lspecial9
         addl $1, %eax
 .Lspecial9:

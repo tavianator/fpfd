@@ -59,12 +59,12 @@ main()
 
   fpfd_impl_set_esf(&impl, 0, -1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x1000000));
-  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, -1, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, -1, FPFD_NUMBER, 0x20);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x1000000));
 
   fpfd_impl_set_esf(&impl, 0, 1, FPFD_NUMBER);
   fpfd32_impl_set_manually(&impl32, UINT32_C(0), UINT32_C(0x9999999));
-  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, 1, FPFD_NUMBER, 0);
+  fpfd_impl_assert_oresfv(impl_scale, &impl, 0, 1, FPFD_NUMBER, 0x20);
   fpfd32_impl_assert_mant(&impl32, UINT32_C(0), UINT32_C(0x9999999));
 
   /*
