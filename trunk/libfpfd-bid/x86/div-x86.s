@@ -34,9 +34,10 @@ fpfd32_impl_div:
         pushl %esi
         pushl %edi
         pushl %ebp      /* Callee-save registers */
-        movl 20(%esp), %ebx
-        movl 24(%esp), %esi
-        movl 28(%esp), %edi     /* Put dest, lhs and rhs in ebx, esi and edi */
+        subl $4, %esp
+        movl 24(%esp), %ebx
+        movl 28(%esp), %esi
+        movl 32(%esp), %edi     /* Put dest, lhs and rhs in ebx, esi and edi */
         movl 12(%esi), %ecx
         xorl 12(%edi), %ecx     /* XOR the signs: 1 (...0001) XOR -1 (...1111)
                                    gives -2 (...1110), x XOR x gives 0 */
@@ -44,11 +45,13 @@ fpfd32_impl_div:
         movl %ecx, 12(%ebx)     /* Store the sign in dest->fields.sign */
         movl 8(%esi), %ecx
         subl 8(%edi), %ecx      /* Subtract the exponents */
-        movl %ecx, 8(%ebx)      /* Store the exponent in dest->fields.exp */
+        movl %ecx, (%esp)       /* Store the exponent on the stack */
         movl (%esi), %eax
         movl (%edi), %ecx
         xorl %edx, %edx
         divl %ecx
+        movl %eax, %ebx
+        xorl %edi, %edi
         cmpl $1000000, %eax
         jae .Ldone
         movl $10000000, %ebp
@@ -63,7 +66,7 @@ fpfd32_impl_div:
         addl %eax, %ebx
         adcl $0, %edi           /* Add the scaled remainder to the mantissa */
         movl %ebx, %eax
-        subl $7, 8(%ecx)        /* Correct the exponent */
+        subl $7, (%esp)         /* Correct the exponent */
         testl %edi, %edi
         jnz .Ldone
         cmpl $1000000, %eax
@@ -72,14 +75,17 @@ fpfd32_impl_div:
         movl $10, %eax
         mull %edx
         divl %ecx
-        movl 20(%esp), %ecx     /* Put dest in ebx */
+        movl 24(%esp), %ecx     /* Put dest in ebx */
         movl %ebx, (%ecx)
         movl %edi, 4(%ecx)      /* Store the mantissa */
+        movl (%esp), %ebx
+        movl %ebx, 8(%ecx)      /* Store the exponent */
         movl $1, 16(%ecx)       /* Set the special flag to FPFD_NUMBER */
         testl %eax, %eax
         jz .Lspecial
         cmpl $5, %eax
         je .Lspecial
+        addl $4, %esp
         popl %ebp
         popl %edi
         popl %esi
@@ -90,6 +96,7 @@ fpfd32_impl_div:
         jz .Lspecial1
         addl $1, %eax
 .Lspecial1:
+        addl $4, %esp
         popl %ebp
         popl %edi
         popl %esi
