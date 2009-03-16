@@ -35,27 +35,34 @@ fpfd32_impl_div:
                                    gives -2 (...1110), x XOR x gives 0 */
         addl $1, %ecx           /* Add one to go from (-2, 0) to (-1, 1) */
         movl %ecx, 12(%rdi)     /* Store the sign in dest->fields.sign */
-        movl 8(%rsi), %ecx
-        subl 8(%rdx), %ecx      /* Subtract the exponents */
-        subl $7, %ecx           /* We multiply the quotient by 10000000 to
-                                   ensure full precision */
-        movl %ecx, 8(%rdi)      /* Store the exponent in dest->fields.exp */
+        movl 8(%rsi), %r11d
+        subl 8(%rdx), %r11d     /* Subtract the exponents */
         movl (%rsi), %eax
         movl (%rdx), %ecx
         xorl %edx, %edx
         divl %ecx               /* Divide the mantissas */
+        movl %eax, %r10d
+        cmpl $1000000, %eax
+        jae .Ldone
+        movl $10000000, %r9d
+.Ldivloop:
         movl %edx, %r8d         /* Store the remainder for later */
-        movl $10000000, %r9d    /* Multiply the quotient by 10000000 */
-        mulq %r9
+        mulq %r9                /* Multiply the quotient by 10**7 */
         movq %rax, %r10
         movl %r8d, %eax
         mull %r9d               /* Multiply the remainder by 10000000 */
         divl %ecx               /* Divide by the denominator */
         addq %rax, %r10         /* Add the scaled remainder to the mantissa */
-        movq %r10, (%rdi)       /* Store the mantissa */
+        movq %r10, %rax
+        subl $7, %r11d          /* Correct the exponent */
+        cmpq $1000000, %r10
+        jb .Ldivloop
+.Ldone:
         movl $10, %eax
         mull %edx
-        divl %ecx
+        divl %ecx               /* Get the first digit of the remainder */
+        movq %r10, (%rdi)       /* Store the mantissa */
+        movl %r11d, 8(%rdi)     /* Store the exponent */
         movl $1, 16(%rdi)       /* Set the special flag to FPFD_NUMBER */
         testl %eax, %eax
         jz .Lspecial
