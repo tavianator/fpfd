@@ -27,7 +27,8 @@ Running `make bench' will run FPFD's benchmarking suite, which produces cycle
 counts for FPFD's internal and user-facing routines.  If your site has gnuplot
 installed, you may run
 
-$ ./bench/plot.sh bench/dpd/fpfd32_add.dat
+$ ./bench/plot.sh bench/dpd/fpfd32_add.dat     # Display the results
+$ ./bench/plot.sh bench/dpd/fpfd32_add.dat png # Make a png file of the results
 
 or similar to view the results.  The results are stored in
 bench/<encoding>/<routine name>.dat.  FPFD also benchmarks some basic

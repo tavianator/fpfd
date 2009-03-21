@@ -1,3 +1,11 @@
+Version 0.1.1 (March 12, 2008, Revision 349)
+
+        This version will be used for CYSF benchmarks.  Since 0.1.0, the main
+        changes are bugfixes: a general rounding bug of values unchanged by
+        impl_scale, and a BID division precision bug.  As well, plot.sh has been
+        improved to generate png files if a second argument consisting of "png"
+        is present.
+
 Version 0.1.0 (March 12, 2008, Revision 343)
 
         The x86_64 target is now complete!  This release will be used for
