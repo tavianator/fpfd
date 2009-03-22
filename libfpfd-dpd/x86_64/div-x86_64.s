@@ -62,6 +62,15 @@ fpfd32_impl_div:
         addl %ecx, %r13d        /* Correct the exponent */
         xorl %esi, %esi
 .Ldiv:
+        /*
+         * We divide in a loop, finding two digits at a time.  We first make an
+         * estimate of the two digits guaranteed to not be too small.  Then,
+         * find the product of rhs and the estimate, and compare it to lhs.  If
+         * it is larger than lhs, subtract rhs from the product, and 1 from the
+         * estimate, in a loop, until the product is less than or equal to lhs.
+         * Then, subtract the product from lhs, shift lhs two digits left, and
+         * find the next two digits.
+         */
         movq %r10, %rax
         movl %r11d, %ebx
         xorl %ecx, %ecx
@@ -69,48 +78,62 @@ fpfd32_impl_div:
         shrl $20, %ebx
         cmpl $0x1000, %eax
         jb .Lsmallnumerator
+        /* lhs is more than one digit larger than rhs */
         movb %bl, %cl
         shrb $4, %cl
         movb %ah, %ch
-        movb (%r8,%rcx), %cl
+        movb (%r8,%rcx), %cl    /* Use 2x2 fpfd_bcddiv to estimate first digit
+                                   of estimate */
         cmpb $0x10, %cl
         jb .Lfirstestimate
-        movb $0x9, %cl
+        movb $0x9, %cl          /* If our estimate was >= 10, use 9.  An
+                                   estimate >= would give us an impossible three
+                                   digit final estimate. */
         jmp .Lfirstestimate
 .Lsmallnumerator:
+        /* lhs is at most one digit larger than rhs */
         movw %ax, %cx
         shlw $4, %cx
         movb %bl, %cl
         shrb $4, %cl
-        movb (%r8,%rcx), %cl
+        movb (%r8,%rcx), %cl    /* Use 2x1 fpfd_bcddiv find estimate */
         cmpb $0x10, %cl
-        jb .Lcheckestimate
+        jb .Lcheckestimate      /* If our estimate was < 10, it is good */
         movw %ax, %cx
         shlw $4, %cx
         movb %bl, %cl
-        movb (%r8,%rcx), %cl
+        movb (%r8,%rcx), %cl    /* Otherwise, use a 2x2 fpfd_bcddiv to find
+                                   first digit of estimate */
 .Lfirstestimate:
         xorl %edx, %edx
-        shlb $4, %cl
+        shlb $4, %cl            /* Shift one-digit estimate left, and find the
+                                   correct ones digit in a loop */
 .Lfindestimate:
         movb %cl, %dl
-        addb $1, %dl
+        addb $1, %dl            /* Try the estimate + 1 */
         movb %bl, %dh
-        movw (%r9,%rdx,2), %dx
-        cmpw %ax, %dx
-        ja .Lcheckestimate
+        movw (%r9,%rdx,2), %dx  /* Use fpfd_bcdmul to find the product of the
+                                   estimate + 1 and the higest 2 digits of
+                                   rhs */
+        cmpw %ax, %dx           /* Compare this product to the highest 3 or 4
+                                   digits of lhs */
+        ja .Lcheckestimate      /* If it's bigger, then our estimate without the
+                                   added 1 was good */
         addb $1, %cl
         movb %cl, %bh
         andb $0x0F, %bh
-        cmpb $9, %bh
+        cmpb $9, %bh            /* If our ones digit is 9, we must be done */
         je .Lcheckestimate
         cmpw %ax, %dx
-        jb .Lfindestimate
+        jb .Lfindestimate       /* We're done if ax == dx */
 .Lcheckestimate:
+        /* Now we find the product of rhs and the estimate, and compare it
+           to lhs */
         shlq $8, %rsi
-        movb %cl, %sil
+        movb %cl, %sil          /* Store the estimate as the next two quotient
+                                   digits */
         xorl %eax, %eax
-        xorl %edx, %edx
+        xorl %edx, %edx         /* Zero some registers */
         movl %r11d, %ebx
         movb %bl, %ch
         movb %cl, %dl
@@ -171,7 +194,7 @@ fpfd32_impl_div:
         andb $0x10, %dl
         shrb $3, %dl
         leal (%rdx,%rdx,2), %edx
-        subb %dl, %sil
+        subb %dl, %sil           /* Subtract 1 from the estimate */
         movq %rax, %rdx
         subq %r11, %rax
         xorq %rax, %rdx
@@ -179,9 +202,9 @@ fpfd32_impl_div:
         andq %rcx, %rdx
         shrq $3, %rdx
         leaq (%rdx,%rdx,2), %rdx
-        subq %rdx, %rax
+        subq %rdx, %rax         /* Subtract rhs from the product */
         cmpq %rax, %r10
-        jb .Lfixestimate
+        jb .Lfixestimate        /* If we're still too large, try again */
 .Lrem:
         movq %r10, %rdx
         subq %rax, %r10
@@ -190,10 +213,10 @@ fpfd32_impl_div:
         andq %rcx, %rdx
         shrq $3, %rdx
         leaq (%rdx,%rdx,2), %rdx
-        subq %rdx, %r10
-        shlq $8, %r10
+        subq %rdx, %r10         /* Subtract the product from lhs */
+        shlq $8, %r10           /* Shift lhs two digits left */
         cmpq $0x10000000, %rsi
-        jae .Ldone
+        jae .Ldone              /* If we have enough precision, we're done */
         subl $2, %r13d          /* Correct the exponent */
         jmp .Ldiv
 .Ldone:
@@ -213,7 +236,7 @@ fpfd32_impl_div:
         popq %rbx
         ret
 .Lspecial:
-        testl %r10d, %r10d
+        testl %r10d, %r10d      /* If lhs != 0, we have a remainder */
         jz .Lspecial1
         addl $1, %eax
 .Lspecial1:
