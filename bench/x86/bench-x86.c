@@ -1,9 +1,9 @@
 /*************************************************************************
  * Copyright (C) 2008 Tavian Barnes <tavianator@gmail.com>               *
  *                                                                       *
- * This file is part of The FPFD Library Benchmark The.                *
+ * This file is part of The FPFD Library Benchmark Suite.                *
  *                                                                       *
- * Suite FPFD Library Benchmark Suite is free software; you can            *
+ * The FPFD Library Benchmark Suite is free software; you can            *
  * redistribute it and/or modify it under the terms of the GNU General   *
  * Public License as published by the Free Software Foundation; either   *
  * version 3 of the License, or (at your option) any later version.      *
