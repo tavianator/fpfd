@@ -23,5 +23,5 @@
  * Benchmark important instructions.
  */
 
-void x86_bench_mul(unsigned int trials);
-void x86_bench_div(unsigned int trials);
+void x86_bench_mul(sandglass_t *sandglass, unsigned int trials);
+void x86_bench_div(sandglass_t *sandglass, unsigned int trials);

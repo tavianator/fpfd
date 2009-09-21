@@ -20,13 +20,6 @@
 EXTRA_LTLIBRARIES        = libfpfd-bench.la
 libfpfd_bench_la_SOURCES = bench.h htable.c random.c x.c
 
-if X86
-  libfpfd_bench_la_SOURCES += x86/ticks-x86.s
-endif
-if X86_64
-  libfpfd_bench_la_SOURCES += x86_64/ticks-x86_64.s
-endif
-
 EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
 
 if BENCH_GCC
@@ -36,10 +29,10 @@ endif
 benchmark_arch_LDADD = ./libfpfd-bench.la -lm
 
 if X86
-  benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/div-x86.c x86/mul-x86.c
+  benchmark_arch_SOURCES = x86/bench-x86.h x86/bench-x86.c x86/div-x86.c x86/mul-x86.c x86/uncertainty-x86.c
 endif
 if X86_64
-  benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c
+  benchmark_arch_SOURCES = x86_64/bench-x86_64.h x86_64/bench-x86_64.c x86_64/div-x86_64.c x86_64/mul-x86_64.c x86_64/uncertainty-x86_64.c
 endif
 
 benchmark_dpd_SOURCES = bench-fpfd.h bench-fpfd.c impl_expand.c impl_addsub.c impl_mul.c impl_div.c impl_inc.c impl_scale.c impl_compress.c add.c sub.c mul.c div.c fma.c

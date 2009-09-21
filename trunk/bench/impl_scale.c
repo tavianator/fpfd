@@ -17,45 +17,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-fpfd.h"
 
 void
-fpfd32_bench_impl_scale(unsigned int trials)
+fpfd32_bench_impl_scale(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_t lhs, rhs;
-  fpfd32_impl_t impl, lhs_impl, rhs_impl;
-  long ticks1, ticks2, ticks3;
-  unsigned int i, j;
+  fpfd32_impl_t impl, impl_backup, lhs_impl, rhs_impl;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
     fpfd32_random(rhs);
     fpfd32_impl_expand(&lhs_impl, lhs);
     fpfd32_impl_expand(&rhs_impl, rhs);
-
-    /* Warm up cache */
     fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
-    fpfd32_impl_scale(&impl);
+    impl_backup = impl;
 
-    /* Perform the benchmark */
-
-    ticks1 = ticks();
-
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
-    }
-
-    ticks2 = ticks();
-
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
+    sandglass_bench(sandglass, {
+      impl = impl_backup;
       fpfd32_impl_scale(&impl);
-    }
-
-    ticks3 = ticks();
-
-    record_ticks("fpfd32_impl_scale", (ticks3 - ticks2) - (ticks2 - ticks1));
+    });
+    record_ticks("fpfd32_impl_scale", sandglass->grains);
   }
 }

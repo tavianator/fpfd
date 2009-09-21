@@ -17,23 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-/*
- * Return the time stamp counter, and serialize the instruction
- */
+#include "bench-x86.h"
 
-        .text
-/* long ticks(); */
-.globl ticks
-        .type ticks, @function
-ticks:
-        movq %rbx, %rdi         /* Callee-save register, clobbered by cpuid */
-        cpuid                   /* Serialize */
-        rdtsc                   /* Read time stamp counter */
-        shlq $32, %rdx
-        orq %rdx, %rax
-        movq %rax, %rsi
-        cpuid                   /* Serialize again */
-        movq %rsi, %rax
-        movq %rdi, %rbx
-        ret
-        .size ticks, .-ticks
+void
+x86_bench_uncertainty(sandglass_t *sandglass, unsigned int trials)
+{
+  unsigned int i;
+
+  for (i = 0; i < trials; ++i) {
+    sandglass_bench(sandglass, { });
+    record_ticks("uncertainty", sandglass->grains);
+  }
+}

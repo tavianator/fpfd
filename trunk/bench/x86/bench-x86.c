@@ -18,43 +18,46 @@
  *************************************************************************/
 
 #include "bench-x86.h"
-#include <stdio.h>  /* For fprintf, fopen */
+#include <stdio.h>  /* For fprintf, xfopen */
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */
 
-static void x86_bench(unsigned int trials);
+static void x86_bench(sandglass_t *sandglass, unsigned int trials);
 static void x86_bench_results();
 
 int
 main(int argc, char **argv)
 {
-  /* Should be enough to get consistent tick counts every time */
   unsigned int trials;
+  sandglass_t sandglass;
+  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_REALTICKS };
 
   if (argc != 2) {
     fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
+  /* Read the number of trials from the command line */
   sscanf(argv[1], "%u", &trials);
 
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
-    exit(EXIT_FAILURE);
-  }
+  /* Initialize our timer */
+  xsandglass_create(&sandglass, &attr, &attr);
 
-  x86_bench(trials);
+  /* Create our hash table */
+  xhcreate(40);
+
+  x86_bench(&sandglass, trials);
   x86_bench_results();
 
   return EXIT_SUCCESS;
 }
 
 void
-x86_bench(unsigned int trials)
+x86_bench(sandglass_t *sandglass, unsigned int trials)
 {
-  x86_bench_mul(trials);
-  x86_bench_div(trials);
+  x86_bench_mul(sandglass, trials);
+  x86_bench_div(sandglass, trials);
+  x86_bench_uncertainty(sandglass, trials);
 }
 
 void
@@ -62,31 +65,39 @@ x86_bench_results()
 {
   FILE *file;
 
-  file = fopen("x86-mulb.dat", "w");
+  file = xfopen("x86-mulb.dat", "w");
   write_ticks("mulb", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-mulw.dat", "w");
+  file = xfopen("x86-mulw.dat", "w");
   write_ticks("mulw", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-mull.dat", "w");
+  file = xfopen("x86-mull.dat", "w");
   write_ticks("mull", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-divb.dat", "w");
+  file = xfopen("x86-mulq.dat", "w");
+  write_ticks("mulq", file);
+  xfclose(file);
+
+  file = xfopen("x86-divb.dat", "w");
   write_ticks("divb", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-divw.dat", "w");
+  file = xfopen("x86-divw.dat", "w");
   write_ticks("divw", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-divl.dat", "w");
+  file = xfopen("x86-divl.dat", "w");
   write_ticks("divl", file);
-  fclose(file);
+  xfclose(file);
 
-  file = fopen("x86-overhead.dat", "w");
-  write_ticks("overhead", file);
-  fclose(file);
+  file = xfopen("x86-divq.dat", "w");
+  write_ticks("divq", file);
+  xfclose(file);
+
+  file = xfopen("x86-uncertainty.dat", "w");
+  write_ticks("uncertainty", file);
+  xfclose(file);
 }

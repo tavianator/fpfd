@@ -23,21 +23,21 @@
  * These routines benchmark GCC's internal _Decimal* type arithmetic.
  */
 
-void gcc32_bench_add(unsigned int trials);
-void gcc64_bench_add(unsigned int trials);
-void gcc128_bench_add(unsigned int trials);
+void gcc32_bench_add(sandglass_t *sandglass, unsigned int trials);
+void gcc64_bench_add(sandglass_t *sandglass, unsigned int trials);
+void gcc128_bench_add(sandglass_t *sandglass, unsigned int trials);
 
-void gcc32_bench_sub(unsigned int trials);
-void gcc64_bench_sub(unsigned int trials);
-void gcc128_bench_sub(unsigned int trials);
+void gcc32_bench_sub(sandglass_t *sandglass, unsigned int trials);
+void gcc64_bench_sub(sandglass_t *sandglass, unsigned int trials);
+void gcc128_bench_sub(sandglass_t *sandglass, unsigned int trials);
 
-void gcc32_bench_mul(unsigned int trials);
-void gcc64_bench_mul(unsigned int trials);
-void gcc128_bench_mul(unsigned int trials);
+void gcc32_bench_mul(sandglass_t *sandglass, unsigned int trials);
+void gcc64_bench_mul(sandglass_t *sandglass, unsigned int trials);
+void gcc128_bench_mul(sandglass_t *sandglass, unsigned int trials);
 
-void gcc32_bench_div(unsigned int trials);
-void gcc64_bench_div(unsigned int trials);
-void gcc128_bench_div(unsigned int trials);
+void gcc32_bench_div(sandglass_t *sandglass, unsigned int trials);
+void gcc64_bench_div(sandglass_t *sandglass, unsigned int trials);
+void gcc128_bench_div(sandglass_t *sandglass, unsigned int trials);
 
 /* For casting between fpfd*_t and _Decimal* */
 

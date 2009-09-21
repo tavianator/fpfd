@@ -20,115 +20,79 @@
 #include "bench-gcc.h"
 
 void
-gcc32_bench_sub(unsigned int trials)
+gcc32_bench_sub(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs.fpfd);
     fpfd32_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_subsd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_subsd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_subsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_subsd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_subsd3", ticks2 - ticks1);
+      record_ticks("__dpd_subsd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_subsd3", ticks2 - ticks1);
+      record_ticks("__bid_subsd3", sandglass->grains);
     }
   }
 }
 
 void
-gcc64_bench_sub(unsigned int trials)
+gcc64_bench_sub(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd64_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd64_random(lhs.fpfd);
     fpfd64_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_subdd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_subdd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_subdd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_subdd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_subdd3", ticks2 - ticks1);
+      record_ticks("__dpd_subdd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_subdd3", ticks2 - ticks1);
+      record_ticks("__bid_subdd3", sandglass->grains);
     }
   }
 }
 
 void
-gcc128_bench_sub(unsigned int trials)
+gcc128_bench_sub(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd128_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd128_random(lhs.fpfd);
     fpfd128_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_subtd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_subtd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_subtd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_subtd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_subtd3", ticks2 - ticks1);
+      record_ticks("__dpd_subtd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_subtd3", ticks2 - ticks1);
+      record_ticks("__bid_subtd3", sandglass->grains);
     }
   }
 }

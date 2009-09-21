@@ -17,53 +17,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-x86.h"
 
 void
-x86_bench_div(unsigned int trials)
+x86_bench_div(sandglass_t *sandglass, unsigned int trials)
 {
-  unsigned int i, j;
-  long ticks1, ticks2;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     /* divb */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
+    sandglass_bench(sandglass, {
       __asm__ volatile ("movw $0xFDFF, %%ax\n\t"
                         "divb %%al"
                         :
                         :
                         : "%ax");
-    }
-    ticks2 = ticks();
-    /* The mov takes one cycle */
-    record_ticks("divb", ticks2 - ticks1 - j);
+    });
+    /* The mov takes 1 cycle */
+    record_ticks("divb", sandglass->grains - 1);
 
     /* divw */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
+    sandglass_bench(sandglass, {
       __asm__ volatile ("movw $0xFFFD, %%dx\n\t"
                         "movw $0xFFFF, %%ax\n\t"
                         "divw %%ax"
                         :
                         :
                         : "%ax", "%dx");
-    }
-    ticks2 = ticks();
+    });
     /* The two mov's take 2 cycles */
-    record_ticks("divw", ticks2 - ticks1 - (2 * j));
+    record_ticks("divw", sandglass->grains - 2);
 
     /* divl */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
+    sandglass_bench(sandglass, {
       __asm__ volatile ("movl $0xFFFFFFFD, %%edx\n\t"
                         "movl $0xFFFFFFFF, %%eax\n\t"
                         "divl %%eax"
                         :
                         :
                         : "%eax", "%edx");
-    }
-    ticks2 = ticks();
-    record_ticks("divl", ticks2 - ticks1 - (2 * j));
+    });
+    record_ticks("divl", sandglass->grains - 2);
   }
 }

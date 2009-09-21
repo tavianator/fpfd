@@ -81,6 +81,10 @@ AM_CONDITIONAL([BENCH_GCC], [test "$bench_gcc" != "no"])
 AM_CONDITIONAL([GCC_DPD], [test "$bench_gcc" = "dpd"])
 AM_CONDITIONAL([GCC_BID], [test "$bench_gcc" = "bid"])
 
+AC_CHECK_LIB([sandglass], [sandglass_create],
+             [],
+             [AC_MSG_WARN([libsandglass not found - benchmarking suite will not work correctly])])
+
 dnl Generate Makefiles
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile

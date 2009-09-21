@@ -22,61 +22,64 @@
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */
 
-static void fpfd_bench(unsigned int trials);
+static void fpfd_bench(sandglass_t *sandglass, unsigned int trials);
 static void fpfd_bench_results();
 
 int
 main(int argc, char **argv)
 {
   unsigned int trials;
+  sandglass_t sandglass;
+  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_REALTICKS };
 
   if (argc != 2) {
     fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
+  /* Read the number of trials from the command line */
   sscanf(argv[1], "%u", &trials);
 
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
-    exit(EXIT_FAILURE);
-  }
+  /* Initialize our timer */
+  xsandglass_create(&sandglass, &attr, &attr);
 
-  fpfd_bench(trials);
+  /* Create our hash table */
+  xhcreate(40);
+
+  fpfd_bench(&sandglass, trials);
   fpfd_bench_results();
 
   return EXIT_SUCCESS;
 }
 
 void
-fpfd_bench(unsigned int trials)
+fpfd_bench(sandglass_t *sandglass, unsigned int trials)
 {
   /* Implementation functions */
 
-  fpfd32_bench_impl_expand(trials);
-  fpfd64_bench_impl_expand(trials);
-  fpfd128_bench_impl_expand(trials);
+  fpfd32_bench_impl_expand(sandglass, trials);
+  fpfd64_bench_impl_expand(sandglass, trials);
+  fpfd128_bench_impl_expand(sandglass, trials);
 
-  fpfd32_bench_impl_addsub(trials);
+  fpfd32_bench_impl_addsub(sandglass, trials);
 
-  fpfd32_bench_impl_mul(trials);
-  fpfd64_bench_impl_mul(trials);
+  fpfd32_bench_impl_mul(sandglass, trials);
+  fpfd64_bench_impl_mul(sandglass, trials);
 
-  fpfd32_bench_impl_div(trials);
-  fpfd32_bench_impl_inc(trials);
-  fpfd32_bench_impl_scale(trials);
+  fpfd32_bench_impl_div(sandglass, trials);
+  fpfd32_bench_impl_inc(sandglass, trials);
+  fpfd32_bench_impl_scale(sandglass, trials);
 
-  fpfd32_bench_impl_compress(trials);
-  fpfd64_bench_impl_compress(trials);
-  fpfd128_bench_impl_compress(trials);
+  fpfd32_bench_impl_compress(sandglass, trials);
+  fpfd64_bench_impl_compress(sandglass, trials);
+  fpfd128_bench_impl_compress(sandglass, trials);
 
   /* Public functions */
-  fpfd32_bench_add(trials);
-  fpfd32_bench_sub(trials);
-  fpfd32_bench_mul(trials);
-  fpfd32_bench_div(trials);
-  fpfd32_bench_fma(trials);
+  fpfd32_bench_add(sandglass, trials);
+  fpfd32_bench_sub(sandglass, trials);
+  fpfd32_bench_mul(sandglass, trials);
+  fpfd32_bench_div(sandglass, trials);
+  fpfd32_bench_fma(sandglass, trials);
 }
 
 void
