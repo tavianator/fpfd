@@ -22,51 +22,54 @@
 #include <stdlib.h> /* For exit, EXIT_*   */
 #include <search.h> /* For hcreate        */
 
-static void gcc_bench(unsigned int trials);
+static void gcc_bench(sandglass_t *sandglass, unsigned int trials);
 static void gcc_bench_results();
 
 int
 main(int argc, char **argv)
 {
   unsigned int trials;
+  sandglass_t sandglass;
+  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_REALTICKS };
 
   if (argc != 2) {
     fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
+  /* Read the number of trials from the command line */
   sscanf(argv[1], "%u", &trials);
 
-  /* The number of table enteries. */
-  if (!hcreate(40)) {
-    perror("hcreate");
-    exit(EXIT_FAILURE);
-  }
+  /* Initialize our timer */
+  xsandglass_create(&sandglass, &attr, &attr);
 
-  gcc_bench(trials);
+  /* Create our hash table */
+  xhcreate(40);
+
+  gcc_bench(&sandglass, trials);
   gcc_bench_results();
 
   return EXIT_SUCCESS;
 }
 
 void
-gcc_bench(unsigned int trials)
+gcc_bench(sandglass_t *sandglass, unsigned int trials)
 {
-  gcc32_bench_add(trials);
-  gcc64_bench_add(trials);
-  gcc128_bench_add(trials);
+  gcc32_bench_add(sandglass, trials);
+  gcc64_bench_add(sandglass, trials);
+  gcc128_bench_add(sandglass, trials);
 
-  gcc32_bench_sub(trials);
-  gcc64_bench_sub(trials);
-  gcc128_bench_sub(trials);
+  gcc32_bench_sub(sandglass, trials);
+  gcc64_bench_sub(sandglass, trials);
+  gcc128_bench_sub(sandglass, trials);
 
-  gcc32_bench_mul(trials);
-  gcc64_bench_mul(trials);
-  gcc128_bench_mul(trials);
+  gcc32_bench_mul(sandglass, trials);
+  gcc64_bench_mul(sandglass, trials);
+  gcc128_bench_mul(sandglass, trials);
 
-  gcc32_bench_div(trials);
-  gcc64_bench_div(trials);
-  gcc128_bench_div(trials);
+  gcc32_bench_div(sandglass, trials);
+  gcc64_bench_div(sandglass, trials);
+  gcc128_bench_div(sandglass, trials);
 }
 
 void

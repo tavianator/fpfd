@@ -17,17 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "../libfpfd/fpfd.h"
 #include "../libfpfd/fpfd_impl.h"
+#include "../libfpfd/fpfd.h"
+#include <sandglass.h>
 #include <search.h> /* For ENTRY, ACTION */
 #include <stddef.h> /* For size_t        */
 #include <stdio.h>  /* For FILE          */
-
-/* Use this to loop bench_loop times in a consistent manner */
-#define BENCH_LOOP(i) for (i = 0; i < bench_loops; ++i)
-
-/* Use this to prevent the loop from being unrolled */
-#define NO_UNROLL() __asm__ volatile ("")
+#include <stdlib.h> /* For EXIT_FAILURE  */
 
 /*
  * This type stores a list of tick counts from trials.
@@ -50,19 +46,12 @@ void *xrealloc(void *ptr, size_t size);
 FILE *xfopen(const char *path, const char *mode);
 void xfclose(FILE *fp);
 
+void xhcreate(size_t size);
 ENTRY *xhsearch(ENTRY item, ACTION action);
 
-/*
- * Gets the number of clock ticks since some time. On systems with a time-stamp
- * counter, this is an extremely high-resolution timer, accurate to one clock
- * tick, or sometimes, one FSB tick.
- */
-long ticks();
-
-/*
- * The number of times to call a function in a loop between calls to ticks().
- */
-extern unsigned int bench_loops;
+void xsandglass_create(sandglass_t *sandglass,
+                       const sandglass_attributes_t *min,
+                       const sandglass_attributes_t *max);
 
 /*
  * Functions which deal with the hash table.

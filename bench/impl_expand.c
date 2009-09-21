@@ -17,82 +17,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-fpfd.h"
 
 void
-fpfd32_bench_impl_expand(unsigned int trials)
+fpfd32_bench_impl_expand(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_t fp;
   fpfd32_impl_t impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(fp);
 
-    /* Warm up cache */
-    fpfd32_impl_expand(&impl, fp);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_impl_expand(&impl, fp);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd32_impl_expand", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd32_impl_expand(&impl, fp));
+    record_ticks("fpfd32_impl_expand", sandglass->grains);
   }
 }
 
 void
-fpfd64_bench_impl_expand(unsigned int trials)
+fpfd64_bench_impl_expand(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd64_t fp;
   fpfd64_impl_t impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd64_random(fp);
 
-    /* Warm up cache */
-    fpfd64_impl_expand(&impl, fp);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd64_impl_expand(&impl, fp);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd64_impl_expand", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd64_impl_expand(&impl, fp));
+    record_ticks("fpfd64_impl_expand", sandglass->grains);
   }
 }
 
 void
-fpfd128_bench_impl_expand(unsigned int trials)
+fpfd128_bench_impl_expand(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd128_t fp;
   fpfd128_impl_t impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd128_random(fp);
 
-    /* Warm up cache */
-    fpfd128_impl_expand(&impl, fp);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd128_impl_expand(&impl, fp);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd128_impl_expand", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd128_impl_expand(&impl, fp));
+    record_ticks("fpfd128_impl_expand", sandglass->grains);
   }
 }

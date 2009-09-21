@@ -17,15 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-fpfd.h"
 
 void
-fpfd32_bench_impl_mul(unsigned int trials)
+fpfd32_bench_impl_mul(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_t lhs, rhs;
   fpfd32_impl_t impl, lhs_impl, rhs_impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs);
@@ -33,28 +32,17 @@ fpfd32_bench_impl_mul(unsigned int trials)
     fpfd32_impl_expand(&lhs_impl, lhs);
     fpfd32_impl_expand(&rhs_impl, rhs);
 
-    /* Warm up cache */
-    fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd32_impl_mul", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl));
+    record_ticks("fpfd32_impl_mul", sandglass->grains);
   }
 }
 
 void
-fpfd64_bench_impl_mul(unsigned int trials)
+fpfd64_bench_impl_mul(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd64_t lhs, rhs;
   fpfd64_impl_t impl, lhs_impl, rhs_impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd64_random(lhs);
@@ -62,17 +50,7 @@ fpfd64_bench_impl_mul(unsigned int trials)
     fpfd64_impl_expand(&lhs_impl, lhs);
     fpfd64_impl_expand(&rhs_impl, rhs);
 
-    /* Warm up cache */
-    fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd64_impl_mul", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl));
+    record_ticks("fpfd64_impl_mul", sandglass->grains);
   }
 }

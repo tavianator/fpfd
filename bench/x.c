@@ -71,6 +71,15 @@ xfclose(FILE *fp)
   }
 }
 
+void
+xhcreate(size_t size)
+{
+  if (hcreate(size) == 0) {
+    perror("hcreate");
+    exit(EXIT_FAILURE);
+  }
+}
+
 ENTRY *
 xhsearch(ENTRY item, ACTION action)
 {
@@ -82,6 +91,16 @@ xhsearch(ENTRY item, ACTION action)
   }
 
   return ptr;
+}
+
+void xsandglass_create(sandglass_t *sandglass,
+                       const sandglass_attributes_t *min,
+                       const sandglass_attributes_t *max)
+{
+  if (sandglass_create(sandglass, min, max) != 0) {
+    perror("sandglass_create");
+    xdie();
+  }
 }
 
 static void

@@ -17,31 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-#include "bench.h"
+#include "bench-fpfd.h"
 
 void
-fpfd32_bench_impl_inc(unsigned int trials)
+fpfd32_bench_impl_inc(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_t fp;
   fpfd32_impl_t impl;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(fp);
     fpfd32_impl_expand(&impl, fp);
 
-    /* Warm up cache */
-    fpfd32_impl_inc(&impl);
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
-      fpfd32_impl_inc(&impl);
-    }
-    ticks2 = ticks();
-
-    record_ticks("fpfd32_impl_inc", ticks2 - ticks1);
+    sandglass_bench(sandglass, fpfd32_impl_inc(&impl));
+    record_ticks("fpfd32_impl_inc", sandglass->grains);
   }
 }

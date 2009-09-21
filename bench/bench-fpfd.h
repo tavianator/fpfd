@@ -25,25 +25,25 @@
  * table, with strings describing the routine being profiled as the key.
  */
 
-void fpfd32_bench_impl_expand(unsigned int trials);
-void fpfd64_bench_impl_expand(unsigned int trials);
-void fpfd128_bench_impl_expand(unsigned int trials);
+void fpfd32_bench_impl_expand(sandglass_t *sandglass, unsigned int trials);
+void fpfd64_bench_impl_expand(sandglass_t *sandglass, unsigned int trials);
+void fpfd128_bench_impl_expand(sandglass_t *sandglass, unsigned int trials);
 
-void fpfd32_bench_impl_addsub(unsigned int trials);
+void fpfd32_bench_impl_addsub(sandglass_t *sandglass, unsigned int trials);
 
-void fpfd32_bench_impl_mul(unsigned int trials);
-void fpfd64_bench_impl_mul(unsigned int trials);
+void fpfd32_bench_impl_mul(sandglass_t *sandglass, unsigned int trials);
+void fpfd64_bench_impl_mul(sandglass_t *sandglass, unsigned int trials);
 
-void fpfd32_bench_impl_div(unsigned int trials);
-void fpfd32_bench_impl_scale(unsigned int trials);
-void fpfd32_bench_impl_inc(unsigned int trials);
+void fpfd32_bench_impl_div(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_impl_scale(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_impl_inc(sandglass_t *sandglass, unsigned int trials);
 
-void fpfd32_bench_impl_compress(unsigned int trials);
-void fpfd64_bench_impl_compress(unsigned int trials);
-void fpfd128_bench_impl_compress(unsigned int trials);
+void fpfd32_bench_impl_compress(sandglass_t *sandglass, unsigned int trials);
+void fpfd64_bench_impl_compress(sandglass_t *sandglass, unsigned int trials);
+void fpfd128_bench_impl_compress(sandglass_t *sandglass, unsigned int trials);
 
-void fpfd32_bench_add(unsigned int trials);
-void fpfd32_bench_sub(unsigned int trials);
-void fpfd32_bench_mul(unsigned int trials);
-void fpfd32_bench_div(unsigned int trials);
-void fpfd32_bench_fma(unsigned int trials);
+void fpfd32_bench_add(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_sub(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_mul(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_div(sandglass_t *sandglass, unsigned int trials);
+void fpfd32_bench_fma(sandglass_t *sandglass, unsigned int trials);

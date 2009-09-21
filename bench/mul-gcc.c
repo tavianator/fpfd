@@ -20,115 +20,79 @@
 #include "bench-gcc.h"
 
 void
-gcc32_bench_mul(unsigned int trials)
+gcc32_bench_mul(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd32_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd32_random(lhs.fpfd);
     fpfd32_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_mulsd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_mulsd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_mulsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_mulsd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_mulsd3", ticks2 - ticks1);
+      record_ticks("__dpd_mulsd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_mulsd3", ticks2 - ticks1);
+      record_ticks("__bid_mulsd3", sandglass->grains);
     }
   }
 }
 
 void
-gcc64_bench_mul(unsigned int trials)
+gcc64_bench_mul(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd64_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd64_random(lhs.fpfd);
     fpfd64_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_muldd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_muldd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_muldd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_muldd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_muldd3", ticks2 - ticks1);
+      record_ticks("__dpd_muldd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_muldd3", ticks2 - ticks1);
+      record_ticks("__bid_muldd3", sandglass->grains);
     }
   }
 }
 
 void
-gcc128_bench_mul(unsigned int trials)
+gcc128_bench_mul(sandglass_t *sandglass, unsigned int trials)
 {
   fpfd128_union_t fp, lhs, rhs;
-  long ticks1, ticks2;
-  unsigned int i, j;
+  unsigned int i;
 
   for (i = 0; i < trials; ++i) {
     fpfd128_random(lhs.fpfd);
     fpfd128_random(rhs.fpfd);
 
-    /* Warm up cache */
-#if GCC_DPD
-    fp.dec = __dpd_multd3(lhs.dec, rhs.dec);
-#elif GCC_BID
-    fp.dec = __bid_multd3(lhs.dec, rhs.dec);
-#endif
-
-    /* Perform the benchmark */
-    ticks1 = ticks();
-    BENCH_LOOP(j) {
-      NO_UNROLL();
+    sandglass_bench(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_multd3(lhs.dec, rhs.dec);
 #elif GCC_BID
       fp.dec = __bid_multd3(lhs.dec, rhs.dec);
 #endif
-    }
-    ticks2 = ticks();
+    });
 
     if (GCC_DPD) {
-      record_ticks("__dpd_multd3", ticks2 - ticks1);
+      record_ticks("__dpd_multd3", sandglass->grains);
     } else if (GCC_BID) {
-      record_ticks("__bid_multd3", ticks2 - ticks1);
+      record_ticks("__bid_multd3", sandglass->grains);
     }
   }
 }
