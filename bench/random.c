@@ -22,7 +22,7 @@
 #include <limits.h> /* For UCHAR_MAX */
 
 /* A local rand() implementation */
-static unsigned int FPFD_RAND_MAX = 32767;
+static const unsigned int FPFD_RAND_MAX = 32767;
 static unsigned int fpfd_rand();
 static void fpfd_srand(unsigned int seed);
 
@@ -57,7 +57,7 @@ fpfd32_random(fpfd32_ptr dest)
      * Addition and subtraction only really do stuff when the exponents are
      * close enough; otherwise, we benchmark mostly no-ops.
      */
-    impl.fields.exp = fpfd_rand() % 7;
+    impl.fields.exp = fpfd_rand()%7;
 
     /* Ensure that fpfd_add performs an addition, and fpfd_sub a subtraction. */
     impl.fields.sign = 1;
@@ -85,7 +85,7 @@ fpfd64_random(fpfd64_ptr dest)
     }
 
     fpfd64_impl_expand(&impl, dest);
-    impl.fields.exp = fpfd_rand() % 16;
+    impl.fields.exp = fpfd_rand()%16;
     impl.fields.sign = 1;
   } while (impl.fields.special != FPFD_NUMBER);
   fpfd64_impl_compress(dest, &impl);
@@ -111,7 +111,7 @@ fpfd128_random(fpfd128_ptr dest)
     }
 
     fpfd128_impl_expand(&impl, dest);
-    impl.fields.exp = fpfd_rand() % 34;
+    impl.fields.exp = fpfd_rand()%34;
     impl.fields.sign = 1;
   } while (impl.fields.special != FPFD_NUMBER);
   fpfd128_impl_compress(dest, &impl);
@@ -126,7 +126,7 @@ static unsigned int
 fpfd_rand()
 {
   next = next*1103515245 + 12345;
-  return (unsigned int)(next/65536) % 32768;
+  return (unsigned int)(next/65536)%32768;
 }
 
 static void
