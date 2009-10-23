@@ -30,7 +30,7 @@ fpfd32_bench_sub(sandglass_t *sandglass, unsigned int trials)
     fpfd32_random(lhs);
     fpfd32_random(rhs);
 
-    sandglass_bench(sandglass, fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags));
+    sandglass_bench_fine(sandglass, fpfd32_sub(fp, lhs, rhs, FPFD_RNDN, &flags));
     record_ticks("fpfd32_sub", sandglass->grains);
   }
 }

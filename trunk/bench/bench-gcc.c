@@ -30,7 +30,7 @@ main(int argc, char **argv)
 {
   unsigned int trials;
   sandglass_t sandglass;
-  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_REALTICKS };
+  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_CPUTIME };
 
   if (argc != 2) {
     fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);

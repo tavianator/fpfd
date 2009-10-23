@@ -26,7 +26,7 @@ x86_64_bench_div(sandglass_t *sandglass, unsigned int trials)
 
   for (i = 0; i < trials; ++i) {
     /* divb */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("movw $0xFDFF, %%ax\n\t"
                         "divb %%al"
                         :
@@ -37,7 +37,7 @@ x86_64_bench_div(sandglass_t *sandglass, unsigned int trials)
     record_ticks("divb", sandglass->grains - 1);
 
     /* divw */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("movw $0xFFFD, %%dx\n\t"
                         "movw $0xFFFF, %%ax\n\t"
                         "divw %%ax"
@@ -49,7 +49,7 @@ x86_64_bench_div(sandglass_t *sandglass, unsigned int trials)
     record_ticks("divw", sandglass->grains - 2);
 
     /* divl */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("movl $0xFFFFFFFD, %%edx\n\t"
                         "movl $0xFFFFFFFF, %%eax\n\t"
                         "divl %%eax"
@@ -60,7 +60,7 @@ x86_64_bench_div(sandglass_t *sandglass, unsigned int trials)
     record_ticks("divl", sandglass->grains - 2);
 
     /* divq */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("movq $0xFFFFFFFFFFFFFFFD, %%rdx\n\t"
                         "movq $0xFFFFFFFFFFFFFFFF, %%rax\n\t"
                         "divq %%rax"

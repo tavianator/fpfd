@@ -30,7 +30,7 @@ fpfd32_bench_impl_inc(sandglass_t *sandglass, unsigned int trials)
     fpfd32_random(fp);
     fpfd32_impl_expand(&impl, fp);
 
-    sandglass_bench(sandglass, fpfd32_impl_inc(&impl));
+    sandglass_bench_fine(sandglass, fpfd32_impl_inc(&impl));
     record_ticks("fpfd32_impl_inc", sandglass->grains);
   }
 }

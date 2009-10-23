@@ -26,7 +26,7 @@ x86_bench_mul(sandglass_t *sandglass, unsigned int trials)
 
   for (i = 0; i < trials; ++i) {
     /* mulb */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("mulb %%dl"
                         :
                         :
@@ -35,7 +35,7 @@ x86_bench_mul(sandglass_t *sandglass, unsigned int trials)
     record_ticks("mulb", sandglass->grains);
 
     /* mulw */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("mulw %%dx"
                         :
                         :
@@ -44,7 +44,7 @@ x86_bench_mul(sandglass_t *sandglass, unsigned int trials)
     record_ticks("mulw", sandglass->grains);
 
     /* mull */
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       __asm__ volatile ("mull %%edx"
                         :
                         :

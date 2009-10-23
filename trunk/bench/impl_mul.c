@@ -32,7 +32,7 @@ fpfd32_bench_impl_mul(sandglass_t *sandglass, unsigned int trials)
     fpfd32_impl_expand(&lhs_impl, lhs);
     fpfd32_impl_expand(&rhs_impl, rhs);
 
-    sandglass_bench(sandglass, fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl));
+    sandglass_bench_fine(sandglass, fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl));
     record_ticks("fpfd32_impl_mul", sandglass->grains);
   }
 }
@@ -50,7 +50,7 @@ fpfd64_bench_impl_mul(sandglass_t *sandglass, unsigned int trials)
     fpfd64_impl_expand(&lhs_impl, lhs);
     fpfd64_impl_expand(&rhs_impl, rhs);
 
-    sandglass_bench(sandglass, fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl));
+    sandglass_bench_fine(sandglass, fpfd64_impl_mul(&impl, &lhs_impl, &rhs_impl));
     record_ticks("fpfd64_impl_mul", sandglass->grains);
   }
 }
