@@ -25,7 +25,7 @@ x86_64_bench_uncertainty(sandglass_t *sandglass, unsigned int trials)
   unsigned int i;
 
   for (i = 0; i < trials; ++i) {
-    sandglass_bench(sandglass, { });
+    sandglass_bench_fine(sandglass, { });
     record_ticks("uncertainty", sandglass->grains);
   }
 }

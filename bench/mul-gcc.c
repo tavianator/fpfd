@@ -29,7 +29,7 @@ gcc32_bench_mul(sandglass_t *sandglass, unsigned int trials)
     fpfd32_random(lhs.fpfd);
     fpfd32_random(rhs.fpfd);
 
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_mulsd3(lhs.dec, rhs.dec);
 #elif GCC_BID
@@ -55,7 +55,7 @@ gcc64_bench_mul(sandglass_t *sandglass, unsigned int trials)
     fpfd64_random(lhs.fpfd);
     fpfd64_random(rhs.fpfd);
 
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_muldd3(lhs.dec, rhs.dec);
 #elif GCC_BID
@@ -81,7 +81,7 @@ gcc128_bench_mul(sandglass_t *sandglass, unsigned int trials)
     fpfd128_random(lhs.fpfd);
     fpfd128_random(rhs.fpfd);
 
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
 #if GCC_DPD
       fp.dec = __dpd_multd3(lhs.dec, rhs.dec);
 #elif GCC_BID

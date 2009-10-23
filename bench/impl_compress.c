@@ -30,7 +30,7 @@ fpfd32_bench_impl_compress(sandglass_t *sandglass, unsigned int trials)
     fpfd32_random(fp);
     fpfd32_impl_expand(&impl, fp);
 
-    sandglass_bench(sandglass, fpfd32_impl_compress(fp, &impl));
+    sandglass_bench_fine(sandglass, fpfd32_impl_compress(fp, &impl));
     record_ticks("fpfd32_impl_compress", sandglass->grains);
   }
 }
@@ -46,7 +46,7 @@ fpfd64_bench_impl_compress(sandglass_t *sandglass, unsigned int trials)
     fpfd64_random(fp);
     fpfd64_impl_expand(&impl, fp);
 
-    sandglass_bench(sandglass, fpfd64_impl_compress(fp, &impl));
+    sandglass_bench_fine(sandglass, fpfd64_impl_compress(fp, &impl));
     record_ticks("fpfd64_impl_compress", sandglass->grains);
   }
 }
@@ -62,7 +62,7 @@ fpfd128_bench_impl_compress(sandglass_t *sandglass, unsigned int trials)
     fpfd128_random(fp);
     fpfd128_impl_expand(&impl, fp);
 
-    sandglass_bench(sandglass, fpfd128_impl_compress(fp, &impl));
+    sandglass_bench_fine(sandglass, fpfd128_impl_compress(fp, &impl));
     record_ticks("fpfd128_impl_compress", sandglass->grains);
   }
 }

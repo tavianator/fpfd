@@ -34,7 +34,7 @@ fpfd32_bench_impl_scale(sandglass_t *sandglass, unsigned int trials)
     fpfd32_impl_mul(&impl, &lhs_impl, &rhs_impl);
     impl_backup = impl;
 
-    sandglass_bench(sandglass, {
+    sandglass_bench_fine(sandglass, {
       impl = impl_backup;
       fpfd32_impl_scale(&impl);
     });

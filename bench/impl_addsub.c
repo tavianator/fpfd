@@ -33,12 +33,12 @@ fpfd32_bench_impl_addsub(sandglass_t *sandglass, unsigned int trials)
     fpfd32_impl_expand(&rhs_impl, rhs);
 
     /* Benchmark addition */
-    sandglass_bench(sandglass,
+    sandglass_bench_fine(sandglass,
                     fpfd32_impl_addsub(&impl, 1, &lhs_impl, &rhs_impl));
     record_ticks("fpfd32_impl_add", sandglass->grains);
 
     /* Benchmark subtraction */
-    sandglass_bench(sandglass,
+    sandglass_bench_fine(sandglass,
                     fpfd32_impl_addsub(&impl, -1, &lhs_impl, &rhs_impl));
     record_ticks("fpfd32_impl_sub", sandglass->grains);
   }

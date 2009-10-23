@@ -25,3 +25,4 @@
 
 void x86_bench_mul(sandglass_t *sandglass, unsigned int trials);
 void x86_bench_div(sandglass_t *sandglass, unsigned int trials);
+void x86_bench_uncertainty(sandglass_t *sandglass, unsigned int trials);

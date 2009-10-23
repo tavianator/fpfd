@@ -31,7 +31,7 @@ fpfd32_bench_fma(sandglass_t *sandglass, unsigned int trials)
     fpfd32_random(b);
     fpfd32_random(c);
 
-    sandglass_bench(sandglass, fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags));
+    sandglass_bench_fine(sandglass, fpfd32_fma(fp, a, b, c, FPFD_RNDN, &flags));
     record_ticks("fpfd32_fma", sandglass->grains);
   }
 }
