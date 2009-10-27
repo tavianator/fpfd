@@ -24,6 +24,7 @@ Makefile.in
 # Test executables
 /tests/*-dpd
 /tests/*-bid
+/tests/*.log
 
 # Benchmarking executables and results
 /bench/arch
