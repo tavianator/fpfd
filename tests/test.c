@@ -446,11 +446,11 @@ fpfd32_impl_dump(FILE *file, const fpfd32_impl_t *impl)
   uint32_t l, h; /* Low and high 32 bits of fp.mant */
 
   if (htonl(1) != 1) { /* Little-endian */
-    l = *((uint32_t *)impl->mant);
-    h = *(((uint32_t *)impl->mant) + 1);
+    memcpy(&l, impl->mant, sizeof(l));
+    memcpy(&h, ((uint32_t *)impl->mant) + 1, sizeof(l));
   } else {             /* Big-endian    */
-    l = *(((uint32_t *)impl->mant) + 1);
-    h = *((uint32_t *)impl->mant);
+    memcpy(&l, ((uint32_t *)impl->mant) + 1, sizeof(l));
+    memcpy(&h, impl->mant, sizeof(l));
   }
 
   fprintf(file, "{\n"
