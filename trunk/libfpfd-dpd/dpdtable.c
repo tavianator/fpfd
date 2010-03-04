@@ -96,7 +96,7 @@ int main() {
     bcd2dpd(dpd, bcd);
     printf("        .value 0b000000");
     for (j = 0; j < 10; ++j) {
-      printf("%hhu", dpd[j]);
+      printf("%u", dpd[j]);
     }
     printf("\n");
   }
@@ -113,7 +113,7 @@ int main() {
     dpd2bcd(bcd, dpd);
     printf("        .value 0b0000");
     for (j = 0; j < 12; ++j) {
-      printf("%hhu", bcd[j]);
+      printf("%u", bcd[j]);
     }
     printf("\n");
   }
