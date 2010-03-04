@@ -17,8 +17,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>. ##
 ###########################################################################
 
+AM_CFLAGS = $(libsandglass_CFLAGS)
+
 EXTRA_LTLIBRARIES        = libfpfd-bench.la
 libfpfd_bench_la_SOURCES = bench.h htable.c random.c x.c
+libfpfd_bench_la_LDFLAGS = $(libsandglass_LIBS)
 
 EXTRA_PROGRAMS = benchmark-arch benchmark-dpd benchmark-bid
 

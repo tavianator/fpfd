@@ -30,7 +30,6 @@ main(int argc, char **argv)
 {
   unsigned int trials;
   sandglass_t sandglass;
-  sandglass_attributes_t attr = { SANDGLASS_MONOTONIC, SANDGLASS_CPUTIME };
 
   if (argc != 2) {
     fprintf(stderr, "Wrong number of arguments: %d; should be 1.\n", argc - 1);
@@ -41,7 +40,7 @@ main(int argc, char **argv)
   sscanf(argv[1], "%u", &trials);
 
   /* Initialize our timer */
-  xsandglass_create(&sandglass, &attr, &attr);
+  xsandglass_init(&sandglass);
 
   /* Create our hash table */
   xhcreate(40);
