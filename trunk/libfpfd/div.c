@@ -19,6 +19,7 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
+#include <assert.h>
 
 static fpfd_action_t fpfd_div_action(fpfd_impl_t *rop,
                                      fpfd_impl_t *op1, fpfd_impl_t *op2,
@@ -81,11 +82,16 @@ fpfd_div_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         action = FPFD_RET;
         if (flags) *flags |= FPFD_INVALID;
         break;
+
       case FPFD_NUMBER:
       case FPFD_INF:
         rop->sign = fpfd_div_sign(op1, op2);
         rop->special = FPFD_ZERO;
         action = FPFD_RET;
+        break;
+
+      default:
+        assert(0);
         break;
       }
       break;
@@ -98,6 +104,7 @@ fpfd_div_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         action = FPFD_RET;
         if (flags) *flags |= FPFD_DIVBYZERO;
         break;
+
       case FPFD_NUMBER:
         action = FPFD_OPERATE;
         break;
@@ -105,6 +112,10 @@ fpfd_div_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         rop->sign = fpfd_div_sign(op1, op2);
         rop->special = FPFD_ZERO;
         action = FPFD_RET;
+        break;
+
+      default:
+        assert(0);
         break;
       }
       break;
@@ -117,12 +128,21 @@ fpfd_div_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         rop->special = FPFD_INF;
         action = FPFD_RET;
         break;
+
       case FPFD_INF:
         rop->special = FPFD_QNAN;
         action = FPFD_RET;
         if (flags) *flags |= FPFD_INVALID;
         break;
+
+      default:
+        assert(0);
+        break;
       }
+      break;
+
+    default:
+      assert(0);
       break;
     }
   }
