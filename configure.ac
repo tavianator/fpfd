@@ -15,7 +15,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ(2.64)
+AC_PREREQ(2.65)
 AC_INIT(The FPFD Library, 0.1.1, tavianator@gmail.com, fpfd)
 AM_INIT_AUTOMAKE([parallel-tests])
 
@@ -81,9 +81,12 @@ AM_CONDITIONAL([BENCH_GCC], [test "$bench_gcc" != "no"])
 AM_CONDITIONAL([GCC_DPD], [test "$bench_gcc" = "dpd"])
 AM_CONDITIONAL([GCC_BID], [test "$bench_gcc" = "bid"])
 
-AC_CHECK_LIB([sandglass], [sandglass_create],
-             [],
-             [AC_MSG_WARN([libsandglass not found - benchmarking suite will not work correctly])])
+dnl Timing library for benchmarks
+PKG_CHECK_MODULES([libsandglass], [libsandglass >= 0.2],
+                  [],
+                  [AC_MSG_WARN([libsandglass not found - benchmarking suite will not work])])
+AC_SUBST(libsandglass_CFLAGS)
+AC_SUBST(libsandglass_LIBS)
 
 dnl Generate Makefiles
 AC_CONFIG_MACRO_DIR([m4])

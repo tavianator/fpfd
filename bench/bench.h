@@ -49,9 +49,7 @@ void xfclose(FILE *fp);
 void xhcreate(size_t size);
 ENTRY *xhsearch(ENTRY item, ACTION action);
 
-void xsandglass_create(sandglass_t *sandglass,
-                       const sandglass_attributes_t *min,
-                       const sandglass_attributes_t *max);
+void xsandglass_init(sandglass_t *sandglass);
 
 /*
  * Functions which deal with the hash table.

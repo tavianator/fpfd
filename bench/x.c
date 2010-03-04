@@ -93,12 +93,11 @@ xhsearch(ENTRY item, ACTION action)
   return ptr;
 }
 
-void xsandglass_create(sandglass_t *sandglass,
-                       const sandglass_attributes_t *min,
-                       const sandglass_attributes_t *max)
+void
+xsandglass_init(sandglass_t *sandglass)
 {
-  if (sandglass_create(sandglass, min, max) != 0) {
-    perror("sandglass_create");
+  if (sandglass_init_monotonic(sandglass, SANDGLASS_CPUTIME) != 0) {
+    perror("sandglass_init_monotonic");
     xdie();
   }
 }
