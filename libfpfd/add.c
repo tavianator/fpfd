@@ -19,6 +19,7 @@
  *************************************************************************/
 
 #include "fpfd_impl.h"
+#include <assert.h>
 
 static fpfd_action_t fpfd_add_action(fpfd_impl_t *rop,
                                      fpfd_impl_t *op1, fpfd_impl_t *op2,
@@ -77,9 +78,14 @@ fpfd_add_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
         rop->special = FPFD_ZERO;
         action = FPFD_RET;
         break;
+
       case FPFD_NUMBER:
       case FPFD_INF:
         action = FPFD_RHS;
+        break;
+
+      default:
+        assert(0);
         break;
       }
       break;
@@ -89,11 +95,17 @@ fpfd_add_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
       case FPFD_ZERO:
         action = FPFD_LHS;
         break;
+
       case FPFD_NUMBER:
         action = FPFD_OPERATE;
         break;
+
       case FPFD_INF:
         action = FPFD_RHS;
+        break;
+
+      default:
+        assert(0);
         break;
       }
       break;
@@ -104,6 +116,7 @@ fpfd_add_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
       case FPFD_NUMBER:
         action = FPFD_LHS;
         break;
+
       case FPFD_INF:
         if (op1->sign == op2->sign) {
           action = FPFD_LHS;
@@ -113,7 +126,15 @@ fpfd_add_action(fpfd_impl_t *rop, fpfd_impl_t *op1, fpfd_impl_t *op2,
           if (flags) *flags |= FPFD_INVALID;
         }
         break;
+
+      default:
+        assert(0);
+        break;
       }
+      break;
+
+    default:
+      assert(0);
       break;
     }
   }
