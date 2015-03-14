@@ -10,6 +10,7 @@
 /ltmain.sh
 /m4
 /missing
+/test-driver
 Makefile
 Makefile.in
 
@@ -21,10 +22,11 @@ Makefile.in
 /libfpfd-dpd/*table
 /libfpfd-dpd/*/*table*.s
 
-# Test executables
+# Files created by `make check'
 /tests/*-dpd
 /tests/*-bid
 /tests/*.log
+/tests/*.trs
 
 # Benchmarking executables and results
 /bench/arch
@@ -40,3 +42,4 @@ Makefile.in
 # Files and folders created by compilation
 .deps/
 *.[oa]
+*.dirstamp

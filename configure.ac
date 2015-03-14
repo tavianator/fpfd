@@ -15,9 +15,10 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ(2.65)
+AC_PREREQ(2.68)
 AC_INIT(The FPFD Library, 0.1.1, tavianator@gmail.com, fpfd)
-AM_INIT_AUTOMAKE([parallel-tests])
+AM_INIT_AUTOMAKE([subdir-objects parallel-tests])
+AM_SILENT_RULES([yes])
 
 dnl Programs
 AC_PROG_CC
@@ -57,9 +58,9 @@ bench_gcc=no
 
 if test "$enable_gcc_override" = "no"; then
   AC_MSG_CHECKING([for the DPD encoding for _Decimal* types])
-  AC_LINK_IFELSE(AC_LANG_PROGRAM(
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [ _Decimal32 __dpd_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
-    [ _Decimal32 res = __dpd_addsd3(1.0df, 2.0df); ]),
+    [ _Decimal32 res = __dpd_addsd3(1.0df, 2.0df); ])],
                  [bench_gcc=dpd
                   AC_DEFINE([GCC_DPD], [1])
                   AC_MSG_RESULT([yes])],
@@ -67,9 +68,9 @@ if test "$enable_gcc_override" = "no"; then
                   AC_MSG_RESULT([no])])
 
   AC_MSG_CHECKING([for the BID encoding for _Decimal* types])
-  AC_LINK_IFELSE(AC_LANG_PROGRAM(
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [ _Decimal32 __bid_addsd3(_Decimal32 lhs, _Decimal32 rhs); ],
-    [ _Decimal32 res = __bid_addsd3(1.0df, 2.0df); ]),
+    [ _Decimal32 res = __bid_addsd3(1.0df, 2.0df); ])],
                  [bench_gcc=bid
                   AC_DEFINE([GCC_BID], [1])
                   AC_MSG_RESULT([yes])],
